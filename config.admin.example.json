@@ -1,0 +1,61 @@
+{
+  "instance_name": "DayDayUp 网关",
+  "listen": "127.0.0.1:8080",
+  "default_provider": "workbuddy",
+  "default_realm": "intl",
+  "default_group": "default",
+  "gateway_key_env": "GATEWAY_API_KEY",
+  "admin_key_env": "GATEWAY_ADMIN_KEY",
+  "account_store_file": "data/accounts.enc",
+  "account_store_key_env": "GATEWAY_ACCOUNT_STORE_KEY",
+  "session_store_dir": "data/sessions",
+  "session_store_key_env": "GATEWAY_SESSION_STORE_KEY",
+  "state_file": "data/state.json",
+  "request_timeout_seconds": 300,
+  "refresh_interval_seconds": 60,
+  "max_request_bytes": 33554432,
+  "max_attempts": 3,
+  "max_waiting_requests": 128,
+  "accounts": [],
+  "agent_store_file": "data/agents.json",
+  "agents": {
+    "enabled": true,
+    "write_mode": "auto",
+    "gateway_url": "http://127.0.0.1:8080"
+  },
+  "bridges": {
+    "messages": false,
+    "responses": false
+  },
+  "pricing": {
+    "deepseek-v4.1-flash": {
+      "input": 2.0,
+      "output": 8.0,
+      "cache_read": 0.5
+    }
+  },
+  "routing": "round_robin",
+  "middleware": {
+    "model_map": {
+      "fast": "deepseek-v4.1-flash"
+    },
+    "system_prompt": [
+      {
+        "match_agent": "claude-code",
+        "text": "你是 Claude Code 接入网关后的助手。"
+      }
+    ],
+    "think_tags": {
+      "strip": true
+    }
+  },
+  "prewarm": {
+    "enabled": false,
+    "hour": 4,
+    "timeout": 30
+  },
+  "intent": {
+    "enabled": false
+  },
+  "db_file": "data/gateway.db"
+}

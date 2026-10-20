@@ -1,0 +1,30 @@
+{
+  "source": "isolated local HTTP mock; no real model calls or upstream billing",
+  "status": "passed",
+  "attempt_statuses": [
+    429,
+    200
+  ],
+  "retry_after": "120",
+  "limit_tokens": "600000",
+  "reset_tokens": "1m",
+  "cached_input_tokens": 80,
+  "uncached_input_tokens": 20,
+  "request_output_limits": {
+    "max_completion_tokens": 32768
+  },
+  "payload_unchanged": true,
+  "attempt_start_times_present": true,
+  "unknown_cache_is_null": true,
+  "validation": {
+    "new_rate_limit_diagnostic_tests": "passed",
+    "gateway_race_tests": "passed",
+    "session_archive_race_tests": "passed",
+    "go_vet_all": "passed",
+    "full_race_suite": "failed in existing internal/redact matching and restoration tests; no gateway dependency on this module"
+  },
+  "test_compatibility_fixes": [
+    "Removed an unused local variable in internal/redact/redact_test.go",
+    "Replaced testing.T.Context usage with context.Background to honor the declared Go 1.23 minimum"
+  ]
+}

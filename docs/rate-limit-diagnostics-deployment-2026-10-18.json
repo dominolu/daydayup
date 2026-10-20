@@ -1,0 +1,43 @@
+{
+  "updated_at": "2026-10-18T15:42:57.631791+08:00",
+  "previous_pid": 57349,
+  "pid": 69307,
+  "previous_version": "0.5.2",
+  "version": "0.5.3",
+  "rate_limit_diagnostics": true,
+  "health": "ok",
+  "accounts": 3,
+  "active_and_queued_requests_at_restart": 0,
+  "protected_configuration_and_credentials_unchanged": true,
+  "backup_binary": "/Users/dominolu/dev/daydaynew/bin/gateway.before-rate-logs-20261018-154255",
+  "log_file": "/Users/dominolu/dev/daydaynew/data/gateway.log",
+  "validation": {
+    "targeted_local_mock_tests": "passed",
+    "gateway_and_session_race_tests": "passed",
+    "go_vet_all": "passed",
+    "binary_local_mock_smoke": "passed",
+    "full_race_suite": "failed: existing internal/redact matching/restoration tests; module not imported by the running gateway"
+  },
+  "natural_traffic_verification": {
+    "new_format_attempts_observed": 5,
+    "statuses": [
+      429,
+      429,
+      200,
+      429,
+      429
+    ],
+    "header_observations": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    "output_limit_observed": true,
+    "reported_cache_observed": true,
+    "unknown_cache_is_null": true,
+    "health_after_launcher_exit": "ok",
+    "new_model_requests_for_verification": 0
+  }
+}

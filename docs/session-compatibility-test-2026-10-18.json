@@ -1,0 +1,29 @@
+{
+  "version": "0.4.0",
+  "checks": {
+    "go_test_race_all": "passed",
+    "go_vet": "passed",
+    "javascript_syntax": "passed",
+    "dsh_tool_continuation_after_restart": "passed",
+    "actual_archived_dsh_history_and_tool_id_match": "passed",
+    "actual_dsh_archives_modified": false,
+    "unrelated_or_ambiguous_history_not_merged": "passed",
+    "codex_thread_preferred_over_cache_affinity": "passed",
+    "codex_opaque_state_account_pinning": "passed",
+    "native_header_sources_and_auth": "passed",
+    "ui_client_search_and_evidence": "passed",
+    "ui_mobile_576px_no_page_overflow": "passed",
+    "codex_state_owner_after_stateless_account_switch_and_restart": "passed"
+  },
+  "upstream_generated_requests": 0,
+  "client_apps_executed": [],
+  "note": "通过本地模拟上游与已有 DSH 加密归档离线验证；未宣称逐一运行所有客户端。",
+  "real_gateway_identity_probe": {
+    "session_id": "opencode:compatibility-selfcheck-20261018-102012",
+    "source": "header:x-opencode-session",
+    "client_requests": 2,
+    "sessions": 1,
+    "upstream_attempts": 0
+  },
+  "old_dsh_archives_preserved": true
+}

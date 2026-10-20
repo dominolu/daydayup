@@ -1,0 +1,897 @@
+{
+  "started_at": "2026-10-17T22:32:42.488511+08:00",
+  "upstream": "https://token.sensenova.cn",
+  "checks": [
+    {
+      "name": "direct-model-discovery",
+      "outcome": "pass",
+      "status": 200,
+      "models": [
+        "deepseek-v4-flash",
+        "glm-5.2",
+        "sensenova-6.8-flash-lite",
+        "sensenova-u1.5-lite",
+        "kimi-k3",
+        "deepseek-flash",
+        "deepseek-v4.1-flash"
+      ],
+      "elapsed_seconds": 0.114
+    },
+    {
+      "name": "gateway-startup",
+      "outcome": "pass"
+    },
+    {
+      "name": "proxied-model-discovery",
+      "outcome": "pass",
+      "status": 200,
+      "count": 7
+    },
+    {
+      "name": "auth-isolation:/v1/models",
+      "outcome": "pass",
+      "status": 401
+    },
+    {
+      "name": "auth-isolation:/admin/v1/accounts",
+      "outcome": "pass",
+      "status": 401
+    },
+    {
+      "name": "auth-isolation:/metrics",
+      "outcome": "pass",
+      "status": 401
+    },
+    {
+      "name": "chat:sensenova-6.8-flash-lite",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "chat:deepseek-flash",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "chat:deepseek-v4-flash",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "chat:deepseek-v4.1-flash",
+      "outcome": "blocked",
+      "status": 403,
+      "elapsed_seconds": 0.03,
+      "usage": null,
+      "error": {
+        "error": {
+          "message": "model is not available in the current token plan",
+          "type": "permission_denied_error",
+          "code": "7"
+        }
+      }
+    },
+    {
+      "name": "chat:glm-5.2",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "chat:kimi-k3",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "chat-sse",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "responses",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "responses-sse",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "messages",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "messages-sse",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "explicit-provider-route",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "tool-calling",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "vision-data-url",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "image-generation:sensenova-u1.5-lite",
+      "outcome": "skip",
+      "reason": "not selected by --only"
+    },
+    {
+      "name": "image-edit-json",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 15.041,
+      "usage": {
+        "input_tokens": 8699,
+        "output_tokens": 4096,
+        "total_tokens": 12795
+      }
+    },
+    {
+      "name": "upstream-validation-error",
+      "outcome": "pass",
+      "status": 400,
+      "response": {
+        "error": {
+          "message": "required model",
+          "type": "invalid_request_error",
+          "code": "3"
+        }
+      }
+    },
+    {
+      "name": "usage-reconciliation",
+      "outcome": "pass",
+      "expected_tokens": 12795,
+      "expected_requests": 3,
+      "expected_unknown_usage": 2,
+      "actual": {
+        "requests": 3,
+        "failures": 2,
+        "requests_without_usage": 2,
+        "input_tokens": 8699,
+        "output_tokens": 4096,
+        "total_tokens": 12795,
+        "cached_input_tokens": 0,
+        "last_status": 400,
+        "last_request": "2026-10-17T22:32:57.895297+08:00"
+      }
+    },
+    {
+      "name": "quota-unknown-is-explicit",
+      "outcome": "pass",
+      "quota_status": "unsupported"
+    },
+    {
+      "name": "observed-permission-filter",
+      "outcome": "pass",
+      "excluded_models": [
+        "deepseek-v4.1-flash"
+      ],
+      "advertised_models": [
+        "deepseek-flash",
+        "deepseek-v4-flash",
+        "glm-5.2",
+        "kimi-k3",
+        "sensenova-6.8-flash-lite",
+        "sensenova-u1.5-lite"
+      ]
+    },
+    {
+      "name": "provider-discovery",
+      "outcome": "pass"
+    },
+    {
+      "name": "invalid-quota-rejected",
+      "outcome": "pass",
+      "status": 400
+    },
+    {
+      "name": "quota-snapshot-and-metrics",
+      "outcome": "pass",
+      "source": "integration-test-synthetic; not official balance"
+    },
+    {
+      "name": "quota-snapshot-clear",
+      "outcome": "pass"
+    },
+    {
+      "name": "prometheus",
+      "outcome": "pass",
+      "status": 200
+    },
+    {
+      "name": "account-disable",
+      "outcome": "pass"
+    },
+    {
+      "name": "disabled-account-is-not-used",
+      "outcome": "pass",
+      "status": 503
+    },
+    {
+      "name": "account-enable",
+      "outcome": "pass"
+    },
+    {
+      "name": "graceful-shutdown",
+      "outcome": "pass",
+      "exit_code": 0
+    },
+    {
+      "name": "persistent-accounting",
+      "outcome": "pass",
+      "total_tokens": 12795
+    }
+  ],
+  "limitations": [
+    "Only one real account supplied: independent multi-account rotation remains covered by mock tests.",
+    "No documented official API-key balance endpoint; no fabricated remaining quota."
+  ],
+  "generated_images_downloaded": false,
+  "models": [
+    {
+      "id": "deepseek-v4-flash",
+      "hugging_face_id": "",
+      "name": "deepseek-v4-flash",
+      "created": 1777392000,
+      "input_modalities": [
+        "text"
+      ],
+      "output_modalities": [
+        "text"
+      ],
+      "quantization": "fp8",
+      "context_length": 1048576,
+      "max_output_length": 65536,
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "image": "0",
+        "request": "0",
+        "input_cache_read": "0"
+      },
+      "supported_sampling_parameters": [
+        "temperature",
+        "stop"
+      ],
+      "supported_features": [
+        "tools",
+        "json_mode",
+        "reasoning"
+      ],
+      "description": "DeepSeek V4 Flash is a high-performance conversational model by DeepSeek, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+      "openrouter": {
+        "slug": "sensenova/deepseek-v4-flash"
+      },
+      "datacenters": [
+        {
+          "country_code": "CN"
+        }
+      ],
+      "businesses": [
+        "tokenplan",
+        "metered"
+      ]
+    },
+    {
+      "id": "glm-5.2",
+      "hugging_face_id": "",
+      "name": "glm-5.2",
+      "created": 1777392000,
+      "input_modalities": [
+        "text"
+      ],
+      "output_modalities": [
+        "text"
+      ],
+      "quantization": "fp8",
+      "context_length": 1048576,
+      "max_output_length": 131072,
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "image": "0",
+        "request": "0",
+        "input_cache_read": "0"
+      },
+      "supported_sampling_parameters": [
+        "temperature",
+        "stop"
+      ],
+      "supported_features": [
+        "tools",
+        "json_mode",
+        "reasoning"
+      ],
+      "description": "GLM-5.2 is the flagship model for the era of long-horizon tasks. It supports a truly usable 1M context window, with practical tests showing it can handle project-level engineering contexts. Long-sequence task execution is more stable, adherence to engineering standards is more reliable, and success rates in development scenarios are further improved. A single task can complete the entire development pipeline—from requirements to deployable multi-platform deliverables.",
+      "openrouter": {
+        "slug": "sensenova/glm-5.2"
+      },
+      "datacenters": [
+        {
+          "country_code": "CN"
+        }
+      ],
+      "businesses": [
+        "tokenplan",
+        "metered"
+      ]
+    },
+    {
+      "id": "sensenova-6.8-flash-lite",
+      "hugging_face_id": "",
+      "name": "sensenova-6.8-flash-lite",
+      "created": 1777392000,
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "output_modalities": [
+        "text"
+      ],
+      "quantization": "fp8",
+      "context_length": 262144,
+      "max_output_length": 65536,
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "image": "0",
+        "request": "0",
+        "input_cache_read": "0"
+      },
+      "supported_sampling_parameters": [
+        "temperature",
+        "stop"
+      ],
+      "supported_features": [
+        "tools",
+        "json_mode",
+        "reasoning"
+      ],
+      "description": "SenseNova 6.8 Flash-Lite is a lightweight multimodal agent model designed for real-world workflows, supporting text conversation and image input understanding.",
+      "openrouter": {
+        "slug": "sensenova/sensenova-6.8-flash-lite"
+      },
+      "datacenters": [
+        {
+          "country_code": "CN"
+        }
+      ],
+      "businesses": [
+        "tokenplan",
+        "metered"
+      ]
+    },
+    {
+      "id": "sensenova-u1.5-lite",
+      "hugging_face_id": "",
+      "name": "sensenova-u1.5-lite",
+      "created": 1777392000,
+      "input_modalities": [
+        "text"
+      ],
+      "output_modalities": [
+        "image"
+      ],
+      "quantization": "fp8",
+      "context_length": 262144,
+      "max_output_length": 65536,
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "image": "0",
+        "request": "0",
+        "input_cache_read": "0"
+      },
+      "supported_sampling_parameters": [
+        "temperature",
+        "stop"
+      ],
+      "supported_features": [
+        "tools",
+        "json_mode",
+        "reasoning"
+      ],
+      "description": "SenseNova U1.5 Lite is an accelerated version based on SenseNova U1.5, specialized for infographics generation.",
+      "openrouter": {
+        "slug": "sensenova/sensenova-u1.5-lite"
+      },
+      "datacenters": [
+        {
+          "country_code": "CN"
+        }
+      ],
+      "businesses": [
+        "tokenplan",
+        "metered"
+      ]
+    },
+    {
+      "id": "kimi-k3",
+      "hugging_face_id": "",
+      "name": "kimi-k3",
+      "created": 1777392000,
+      "input_modalities": [
+        "text"
+      ],
+      "output_modalities": [
+        "text"
+      ],
+      "quantization": "fp8",
+      "context_length": 1048576,
+      "max_output_length": 65536,
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "image": "0",
+        "request": "0",
+        "input_cache_read": "0"
+      },
+      "supported_sampling_parameters": [
+        "temperature",
+        "stop"
+      ],
+      "supported_features": [
+        "tools",
+        "json_mode",
+        "reasoning"
+      ],
+      "description": "Kimi K3 is a high-performance conversational model by Kimi, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+      "openrouter": {
+        "slug": "sensenova/kimi-k3"
+      },
+      "datacenters": [
+        {
+          "country_code": "CN"
+        }
+      ],
+      "businesses": [
+        "tokenplan",
+        "metered"
+      ]
+    },
+    {
+      "id": "deepseek-flash",
+      "hugging_face_id": "",
+      "name": "deepseek-flash",
+      "created": 1777392000,
+      "input_modalities": [
+        "text"
+      ],
+      "output_modalities": [
+        "text"
+      ],
+      "quantization": "fp8",
+      "context_length": 1048576,
+      "max_output_length": 65536,
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "image": "0",
+        "request": "0",
+        "input_cache_read": "0"
+      },
+      "supported_sampling_parameters": [
+        "temperature",
+        "stop"
+      ],
+      "supported_features": [
+        "tools",
+        "json_mode",
+        "reasoning"
+      ],
+      "description": "DeepSeek Flash is a high-performance conversational model by DeepSeek, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+      "openrouter": {
+        "slug": "sensenova/deepseek-flash"
+      },
+      "datacenters": [
+        {
+          "country_code": "CN"
+        }
+      ],
+      "businesses": [
+        "tokenplan",
+        "metered"
+      ]
+    },
+    {
+      "id": "deepseek-v4.1-flash",
+      "hugging_face_id": "",
+      "name": "deepseek-v4.1-flash",
+      "created": 1777392000,
+      "input_modalities": [
+        "text"
+      ],
+      "output_modalities": [
+        "text"
+      ],
+      "quantization": "fp8",
+      "context_length": 1048576,
+      "max_output_length": 65536,
+      "pricing": {
+        "prompt": "0",
+        "completion": "0",
+        "image": "0",
+        "request": "0",
+        "input_cache_read": "0"
+      },
+      "supported_sampling_parameters": [
+        "temperature",
+        "stop"
+      ],
+      "supported_features": [
+        "tools",
+        "json_mode",
+        "reasoning"
+      ],
+      "description": "DeepSeek V4.1 Flash is a high-performance conversational model by DeepSeek, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+      "openrouter": {
+        "slug": "sensenova/deepseek-v4.1-flash"
+      },
+      "datacenters": [
+        {
+          "country_code": "CN"
+        }
+      ],
+      "businesses": [
+        "tokenplan",
+        "metered"
+      ]
+    }
+  ],
+  "account_state": {
+    "id": "sense-live",
+    "provider": "sensenova",
+    "enabled": true,
+    "credential_status": "valid",
+    "in_flight": 0,
+    "max_in_flight": 4,
+    "cooldown_until": "0001-01-01T00:00:00Z",
+    "unavailable_models": {
+      "deepseek-v4.1-flash": "2026-10-17T22:47:42.847566+08:00"
+    },
+    "models": [
+      {
+        "businesses": [
+          "tokenplan",
+          "metered"
+        ],
+        "context_length": 1048576,
+        "created": 1777392000,
+        "datacenters": [
+          {
+            "country_code": "CN"
+          }
+        ],
+        "description": "DeepSeek V4 Flash is a high-performance conversational model by DeepSeek, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+        "hugging_face_id": "",
+        "id": "deepseek-v4-flash",
+        "input_modalities": [
+          "text"
+        ],
+        "max_output_length": 65536,
+        "name": "deepseek-v4-flash",
+        "openrouter": {
+          "slug": "sensenova/deepseek-v4-flash"
+        },
+        "output_modalities": [
+          "text"
+        ],
+        "pricing": {
+          "completion": "0",
+          "image": "0",
+          "input_cache_read": "0",
+          "prompt": "0",
+          "request": "0"
+        },
+        "quantization": "fp8",
+        "supported_features": [
+          "tools",
+          "json_mode",
+          "reasoning"
+        ],
+        "supported_sampling_parameters": [
+          "temperature",
+          "stop"
+        ]
+      },
+      {
+        "businesses": [
+          "tokenplan",
+          "metered"
+        ],
+        "context_length": 1048576,
+        "created": 1777392000,
+        "datacenters": [
+          {
+            "country_code": "CN"
+          }
+        ],
+        "description": "GLM-5.2 is the flagship model for the era of long-horizon tasks. It supports a truly usable 1M context window, with practical tests showing it can handle project-level engineering contexts. Long-sequence task execution is more stable, adherence to engineering standards is more reliable, and success rates in development scenarios are further improved. A single task can complete the entire development pipeline—from requirements to deployable multi-platform deliverables.",
+        "hugging_face_id": "",
+        "id": "glm-5.2",
+        "input_modalities": [
+          "text"
+        ],
+        "max_output_length": 131072,
+        "name": "glm-5.2",
+        "openrouter": {
+          "slug": "sensenova/glm-5.2"
+        },
+        "output_modalities": [
+          "text"
+        ],
+        "pricing": {
+          "completion": "0",
+          "image": "0",
+          "input_cache_read": "0",
+          "prompt": "0",
+          "request": "0"
+        },
+        "quantization": "fp8",
+        "supported_features": [
+          "tools",
+          "json_mode",
+          "reasoning"
+        ],
+        "supported_sampling_parameters": [
+          "temperature",
+          "stop"
+        ]
+      },
+      {
+        "businesses": [
+          "tokenplan",
+          "metered"
+        ],
+        "context_length": 262144,
+        "created": 1777392000,
+        "datacenters": [
+          {
+            "country_code": "CN"
+          }
+        ],
+        "description": "SenseNova 6.8 Flash-Lite is a lightweight multimodal agent model designed for real-world workflows, supporting text conversation and image input understanding.",
+        "hugging_face_id": "",
+        "id": "sensenova-6.8-flash-lite",
+        "input_modalities": [
+          "text",
+          "image"
+        ],
+        "max_output_length": 65536,
+        "name": "sensenova-6.8-flash-lite",
+        "openrouter": {
+          "slug": "sensenova/sensenova-6.8-flash-lite"
+        },
+        "output_modalities": [
+          "text"
+        ],
+        "pricing": {
+          "completion": "0",
+          "image": "0",
+          "input_cache_read": "0",
+          "prompt": "0",
+          "request": "0"
+        },
+        "quantization": "fp8",
+        "supported_features": [
+          "tools",
+          "json_mode",
+          "reasoning"
+        ],
+        "supported_sampling_parameters": [
+          "temperature",
+          "stop"
+        ]
+      },
+      {
+        "businesses": [
+          "tokenplan",
+          "metered"
+        ],
+        "context_length": 262144,
+        "created": 1777392000,
+        "datacenters": [
+          {
+            "country_code": "CN"
+          }
+        ],
+        "description": "SenseNova U1.5 Lite is an accelerated version based on SenseNova U1.5, specialized for infographics generation.",
+        "hugging_face_id": "",
+        "id": "sensenova-u1.5-lite",
+        "input_modalities": [
+          "text"
+        ],
+        "max_output_length": 65536,
+        "name": "sensenova-u1.5-lite",
+        "openrouter": {
+          "slug": "sensenova/sensenova-u1.5-lite"
+        },
+        "output_modalities": [
+          "image"
+        ],
+        "pricing": {
+          "completion": "0",
+          "image": "0",
+          "input_cache_read": "0",
+          "prompt": "0",
+          "request": "0"
+        },
+        "quantization": "fp8",
+        "supported_features": [
+          "tools",
+          "json_mode",
+          "reasoning"
+        ],
+        "supported_sampling_parameters": [
+          "temperature",
+          "stop"
+        ]
+      },
+      {
+        "businesses": [
+          "tokenplan",
+          "metered"
+        ],
+        "context_length": 1048576,
+        "created": 1777392000,
+        "datacenters": [
+          {
+            "country_code": "CN"
+          }
+        ],
+        "description": "Kimi K3 is a high-performance conversational model by Kimi, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+        "hugging_face_id": "",
+        "id": "kimi-k3",
+        "input_modalities": [
+          "text"
+        ],
+        "max_output_length": 65536,
+        "name": "kimi-k3",
+        "openrouter": {
+          "slug": "sensenova/kimi-k3"
+        },
+        "output_modalities": [
+          "text"
+        ],
+        "pricing": {
+          "completion": "0",
+          "image": "0",
+          "input_cache_read": "0",
+          "prompt": "0",
+          "request": "0"
+        },
+        "quantization": "fp8",
+        "supported_features": [
+          "tools",
+          "json_mode",
+          "reasoning"
+        ],
+        "supported_sampling_parameters": [
+          "temperature",
+          "stop"
+        ]
+      },
+      {
+        "businesses": [
+          "tokenplan",
+          "metered"
+        ],
+        "context_length": 1048576,
+        "created": 1777392000,
+        "datacenters": [
+          {
+            "country_code": "CN"
+          }
+        ],
+        "description": "DeepSeek Flash is a high-performance conversational model by DeepSeek, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+        "hugging_face_id": "",
+        "id": "deepseek-flash",
+        "input_modalities": [
+          "text"
+        ],
+        "max_output_length": 65536,
+        "name": "deepseek-flash",
+        "openrouter": {
+          "slug": "sensenova/deepseek-flash"
+        },
+        "output_modalities": [
+          "text"
+        ],
+        "pricing": {
+          "completion": "0",
+          "image": "0",
+          "input_cache_read": "0",
+          "prompt": "0",
+          "request": "0"
+        },
+        "quantization": "fp8",
+        "supported_features": [
+          "tools",
+          "json_mode",
+          "reasoning"
+        ],
+        "supported_sampling_parameters": [
+          "temperature",
+          "stop"
+        ]
+      },
+      {
+        "businesses": [
+          "tokenplan",
+          "metered"
+        ],
+        "context_length": 1048576,
+        "created": 1777392000,
+        "datacenters": [
+          {
+            "country_code": "CN"
+          }
+        ],
+        "description": "DeepSeek V4.1 Flash is a high-performance conversational model by DeepSeek, supporting thinking/non-thinking modes, 1M context window, and tool calling.",
+        "hugging_face_id": "",
+        "id": "deepseek-v4.1-flash",
+        "input_modalities": [
+          "text"
+        ],
+        "max_output_length": 65536,
+        "name": "deepseek-v4.1-flash",
+        "openrouter": {
+          "slug": "sensenova/deepseek-v4.1-flash"
+        },
+        "output_modalities": [
+          "text"
+        ],
+        "pricing": {
+          "completion": "0",
+          "image": "0",
+          "input_cache_read": "0",
+          "prompt": "0",
+          "request": "0"
+        },
+        "quantization": "fp8",
+        "supported_features": [
+          "tools",
+          "json_mode",
+          "reasoning"
+        ],
+        "supported_sampling_parameters": [
+          "temperature",
+          "stop"
+        ]
+      }
+    ],
+    "models_checked_at": "2026-10-17T22:32:42.81448+08:00",
+    "quota_status": "unsupported",
+    "quota": null,
+    "stats": {
+      "requests": 3,
+      "failures": 2,
+      "requests_without_usage": 2,
+      "input_tokens": 8699,
+      "output_tokens": 4096,
+      "total_tokens": 12795,
+      "cached_input_tokens": 0,
+      "last_status": 400,
+      "last_request": "2026-10-17T22:32:57.895297+08:00"
+    }
+  },
+  "finished_at": "2026-10-17T22:32:57.976880+08:00",
+  "summary": {
+    "pass": 21,
+    "fail": 0,
+    "blocked": 1,
+    "skip": 14
+  }
+}

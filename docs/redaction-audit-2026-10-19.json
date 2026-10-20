@@ -1,0 +1,140 @@
+{
+  "date": "2026-10-19",
+  "scope": [
+    "request masking",
+    "JSON and embedded tool arguments",
+    "Chat Completions / Responses / Messages SSE",
+    "durable mappings",
+    "runtime rule updates"
+  ],
+  "fixed_issue_groups": [
+    {
+      "area": "request integrity",
+      "fix": "Decode strings and embedded arguments; preserve model/session/conversation/tool identifiers, JSON schemas and opaque media while masking actual tool inputs, including same-named fields; support gzip and form decoding."
+    },
+    {
+      "area": "stream boundaries",
+      "fix": "Restore tokens split at every character, including the first brace; flush literal text tails without dropping data."
+    },
+    {
+      "area": "channel isolation",
+      "fix": "Separate choices, tool call indices, Responses output/content indices and Anthropic content blocks; handle completion snapshots independently."
+    },
+    {
+      "area": "tool arguments",
+      "fix": "Buffer each tool argument document until its completion boundary, then restore JSON with proper escaping; reject unknown/incomplete tokens before completion is forwarded."
+    },
+    {
+      "area": "SSE framing",
+      "fix": "Handle multiline data events and CRLF; preserve exact JSON numbers; detect short writes and bound event/tool buffers."
+    },
+    {
+      "area": "literal examples",
+      "fix": "Wrap unknown input token examples as literal mappings, preserve known tokens on repeated masking, and allow safe reproduction in source code."
+    },
+    {
+      "area": "HTTP responses",
+      "fix": "Remove obsolete Content-Length/checksum headers; decode gzip and restore plain text; abort unreadable or over-limit responses without silent truncation."
+    },
+    {
+      "area": "mapping durability",
+      "fix": "Persist mappings before forwarding, checkpoint periodically and on shutdown, retain dirty state on save failure, serialize saves, preserve TTL timestamps and reject corrupt stores/keys."
+    },
+    {
+      "area": "mapping capacity",
+      "fix": "Reject new mappings at capacity instead of evicting live tokens needed by in-flight responses; prevent suffix reuse."
+    },
+    {
+      "area": "rule updates",
+      "fix": "Synchronize live configuration and rules, atomically save validated rules to the original config file, retain old live rules if saving fails."
+    },
+    {
+      "area": "rule coverage",
+      "fix": "Recognize sk- style keys, limit PEM matching to each individual block, and observe dangerous arguments in non-streaming responses."
+    }
+  ],
+  "verification": {
+    "new_regression_tests": 38,
+    "race_suite": "passed: go test -race ./... (final revision)",
+    "fuzz_executions": 107428,
+    "fuzz_runs_seconds": [
+      20,
+      10
+    ],
+    "fuzz_result": "passed",
+    "vet": "passed: go vet ./...",
+    "build": "passed: go build -trimpath -o bin/gateway.next ./cmd/gateway (final revision deployed)",
+    "live": [
+      {
+        "mode": "json",
+        "status": 200,
+        "model": "deepseek-v4-flash",
+        "request_id": "a1fadd2817407499aea76863",
+        "email_restored": true,
+        "no_placeholder_in_client_content": true,
+        "masked_spans": 1
+      },
+      {
+        "mode": "sse",
+        "status": 200,
+        "model": "deepseek-v4-flash",
+        "request_id": "f4ce0ed1c4c8fe21fb57a650",
+        "email_restored": true,
+        "no_placeholder_in_client_content": true,
+        "terminal_event": true,
+        "masked_spans": 1
+      },
+      {
+        "mode": "tool-json",
+        "status": 200,
+        "request_id": "7180ddc31ad9af00770a0969",
+        "tool_name_preserved": true,
+        "arguments_valid_json": true,
+        "email_restored": true,
+        "quotes_slashes_newlines_preserved": true,
+        "no_placeholder_in_client_arguments": true,
+        "finish_reason": "stop"
+      },
+      {
+        "mode": "tool-sse",
+        "status": 200,
+        "request_id": "bd272c4c9d238688291aea17",
+        "tool_name_preserved": true,
+        "arguments_valid_json": true,
+        "email_restored": true,
+        "quotes_slashes_newlines_preserved": true,
+        "no_placeholder_in_client_arguments": true,
+        "finish_reason": "tool_calls",
+        "terminal_event": true
+      }
+    ],
+    "restart": {
+      "ciphertext_authentication": "passed",
+      "synthetic_email_mapping_persisted": true,
+      "mappings": 17,
+      "synthetic_email_token_hash": "e07942e041efe7a1a5689c5bc3d1af1760bcb07dce69a5bccf4d9e68fa7947bd",
+      "store_permissions": "600",
+      "key_permissions": "600",
+      "live_engine_loaded_mappings": 17,
+      "token_unchanged_after_restart": true
+    }
+  },
+  "notes": [
+    "One combined run had an existing cooldown-pacing timing assertion fail while fuzzing ran concurrently; a full run without concurrent fuzzing passed."
+  ],
+  "boundaries": [
+    "Multipart/binary bodies and opaque image/audio/file data are passed through; media contents are not text-redacted.",
+    "Unknown or expired tokens in executable tool arguments abort completion instead of guessing an original.",
+    "Responses/events/tool buffers above max_restore_buffer abort rather than return truncated or unrestored success.",
+    "Dangerous-tool guard remains observe-only; it records findings rather than blocking commands."
+  ],
+  "running_service": {
+    "status": "updated and healthy",
+    "pid": 78774,
+    "binary_sha256": "dcc06d4c1dbbf2bed8c49fd38f2575f04f7d9f4302deefc9e3526337e0a21557",
+    "redaction_enabled": true,
+    "rollback_binary": "bin/gateway.before-redaction-audit-final-20261019",
+    "accounts_config_and_keys_preserved": true
+  },
+  "completed_at": "2026-10-19T10:23:30.182434+08:00"
+}

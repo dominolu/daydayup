@@ -1,0 +1,61 @@
+{
+  "version": "0.5.1",
+  "source": "isolated local HTTP mock; no real upstream billing",
+  "validation": {
+    "go_test_race_all": "passed",
+    "go_vet": "passed",
+    "javascript_syntax": "passed",
+    "single_account_repeated_429": "passed",
+    "shared_recovery_concurrency_and_pacing": "passed",
+    "deadline_and_client_cancellation": "passed",
+    "bounded_queue": "passed",
+    "stateful_same_account_retry": "passed",
+    "sse_after_wait_preserved": "passed",
+    "ui_wait_and_attempts_visible": "passed",
+    "browser_console_errors": 0
+  },
+  "binary_smoke": {
+    "status": 200,
+    "client_requests": 1,
+    "upstream_attempts": 2,
+    "attempt_statuses": [
+      429,
+      200
+    ],
+    "elapsed_ms": 1047,
+    "pool_wait_ms": 1000,
+    "pool_waits": 1,
+    "sessions": 1,
+    "total_tokens": 120
+  },
+  "running_service": {
+    "pid": 43420,
+    "version": "0.5.1",
+    "health": "ok",
+    "pool_waiting": true,
+    "request_timeout_seconds": 300,
+    "max_waiting_requests": 128,
+    "credentials_and_encryption_keys_preserved": true
+  },
+  "real_upstream_smoke": {
+    "source": "real SenseNova upstream through updated local gateway",
+    "model": "deepseek-v4-flash",
+    "status": 200,
+    "elapsed_ms": 1494,
+    "usage": {
+      "prompt_tokens": 86,
+      "completion_tokens": 16,
+      "total_tokens": 102,
+      "completion_tokens_details": {
+        "reasoning_tokens": 16
+      },
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "attempt_statuses": [
+      200
+    ],
+    "pool_wait_ms": 0
+  }
+}

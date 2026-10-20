@@ -1,0 +1,399 @@
+{
+  "date": "2026-10-17",
+  "sources": [
+    {
+      "file": "live-test-2026-10-17.json",
+      "sha256": "7a5df1fc8acd39ac9cdb572945d543d163de2a33cb89028eabd6303ce8a97279"
+    },
+    {
+      "file": "live-test-2026-10-17-image-edit.json",
+      "sha256": "1ac8e63d592c829d8afa3f03a50d0920a980cf4b02044ff49313471a882955aa"
+    }
+  ],
+  "summary": {
+    "pass": 32,
+    "fail": 0,
+    "blocked": 4
+  },
+  "checks": [
+    {
+      "name": "direct-model-discovery",
+      "outcome": "pass",
+      "status": 200,
+      "models": [
+        "deepseek-v4-flash",
+        "glm-5.2",
+        "sensenova-6.8-flash-lite",
+        "sensenova-u1.5-lite",
+        "kimi-k3",
+        "deepseek-flash",
+        "deepseek-v4.1-flash"
+      ],
+      "elapsed_seconds": 0.114,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "gateway-startup",
+      "outcome": "pass",
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "proxied-model-discovery",
+      "outcome": "pass",
+      "status": 200,
+      "count": 7,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "auth-isolation:/v1/models",
+      "outcome": "pass",
+      "status": 401,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "auth-isolation:/admin/v1/accounts",
+      "outcome": "pass",
+      "status": 401,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "auth-isolation:/metrics",
+      "outcome": "pass",
+      "status": 401,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "chat:sensenova-6.8-flash-lite",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 4.091,
+      "usage": {
+        "input_tokens": 87,
+        "output_tokens": 32,
+        "total_tokens": 119
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "chat:deepseek-flash",
+      "outcome": "blocked",
+      "status": 429,
+      "elapsed_seconds": 0.22,
+      "usage": null,
+      "error": {
+        "error": {
+          "message": "inference exceeds tpm/rpm limit",
+          "type": "rate_limit_error",
+          "code": "RateLimitExceeded.EndpointTPMExceeded"
+        }
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "chat:deepseek-v4-flash",
+      "outcome": "blocked",
+      "status": 429,
+      "elapsed_seconds": 0.079,
+      "usage": null,
+      "error": {
+        "error": {
+          "message": "inference exceeds tpm/rpm limit",
+          "type": "rate_limit_error",
+          "code": "insufficient_quota"
+        }
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "chat:deepseek-v4.1-flash",
+      "outcome": "blocked",
+      "status": 403,
+      "elapsed_seconds": 0.03,
+      "usage": null,
+      "error": {
+        "error": {
+          "message": "model is not available in the current token plan",
+          "type": "permission_denied_error",
+          "code": "7"
+        }
+      },
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "chat:glm-5.2",
+      "outcome": "blocked",
+      "status": 429,
+      "elapsed_seconds": 0.177,
+      "usage": null,
+      "error": {
+        "error": {
+          "message": "inference exceeds tpm/rpm limit",
+          "type": "rate_limit_error",
+          "code": "insufficient_quota"
+        }
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "chat:kimi-k3",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 3.488,
+      "usage": {
+        "input_tokens": 23,
+        "output_tokens": 11,
+        "total_tokens": 34
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "chat-sse",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 3.902,
+      "usage": {
+        "input_tokens": 87,
+        "output_tokens": 16,
+        "total_tokens": 103
+      },
+      "events": 8,
+      "terminal": true,
+      "first_data_seconds": 3.779,
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "responses",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 2.059,
+      "usage": {
+        "input_tokens": 61,
+        "output_tokens": 2,
+        "total_tokens": 63
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "responses-sse",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 1.639,
+      "usage": {
+        "input_tokens": 61,
+        "output_tokens": 2,
+        "total_tokens": 63
+      },
+      "events": 9,
+      "terminal": true,
+      "first_data_seconds": 1.612,
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "messages",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 2.126,
+      "usage": {
+        "input_tokens": 87,
+        "output_tokens": 32,
+        "total_tokens": 119
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "messages-sse",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 1.381,
+      "usage": {
+        "input_tokens": 87,
+        "output_tokens": 16,
+        "total_tokens": 103
+      },
+      "events": 12,
+      "terminal": true,
+      "first_data_seconds": 1.192,
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "explicit-provider-route",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 1.9,
+      "usage": {
+        "input_tokens": 83,
+        "output_tokens": 8,
+        "total_tokens": 91
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "tool-calling",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 10.691,
+      "usage": {
+        "input_tokens": 354,
+        "output_tokens": 44,
+        "total_tokens": 398
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "vision-data-url",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 13.502,
+      "usage": {
+        "input_tokens": 156,
+        "output_tokens": 32,
+        "total_tokens": 188
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "image-generation:sensenova-u1.5-lite",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 12.517,
+      "usage": {
+        "input_tokens": 504,
+        "output_tokens": 4096,
+        "total_tokens": 4600
+      },
+      "source_report": "live-test-2026-10-17.json"
+    },
+    {
+      "name": "image-edit-json",
+      "outcome": "pass",
+      "status": 200,
+      "elapsed_seconds": 15.041,
+      "usage": {
+        "input_tokens": 8699,
+        "output_tokens": 4096,
+        "total_tokens": 12795
+      },
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "upstream-validation-error",
+      "outcome": "pass",
+      "status": 400,
+      "response": {
+        "error": {
+          "message": "required model",
+          "type": "invalid_request_error",
+          "code": "3"
+        }
+      },
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "usage-reconciliation",
+      "outcome": "pass",
+      "expected_tokens": 12795,
+      "expected_requests": 3,
+      "expected_unknown_usage": 2,
+      "actual": {
+        "requests": 3,
+        "failures": 2,
+        "requests_without_usage": 2,
+        "input_tokens": 8699,
+        "output_tokens": 4096,
+        "total_tokens": 12795,
+        "cached_input_tokens": 0,
+        "last_status": 400,
+        "last_request": "2026-10-17T22:32:57.895297+08:00"
+      },
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "quota-unknown-is-explicit",
+      "outcome": "pass",
+      "quota_status": "unsupported",
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "prometheus",
+      "outcome": "pass",
+      "status": 200,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "account-disable",
+      "outcome": "pass",
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "disabled-account-is-not-used",
+      "outcome": "pass",
+      "status": 503,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "account-enable",
+      "outcome": "pass",
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "graceful-shutdown",
+      "outcome": "pass",
+      "exit_code": 0,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "persistent-accounting",
+      "outcome": "pass",
+      "total_tokens": 12795,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "observed-permission-filter",
+      "outcome": "pass",
+      "excluded_models": [
+        "deepseek-v4.1-flash"
+      ],
+      "advertised_models": [
+        "deepseek-flash",
+        "deepseek-v4-flash",
+        "glm-5.2",
+        "kimi-k3",
+        "sensenova-6.8-flash-lite",
+        "sensenova-u1.5-lite"
+      ],
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "provider-discovery",
+      "outcome": "pass",
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "invalid-quota-rejected",
+      "outcome": "pass",
+      "status": 400,
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "quota-snapshot-and-metrics",
+      "outcome": "pass",
+      "source": "integration-test-synthetic; not official balance",
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    },
+    {
+      "name": "quota-snapshot-clear",
+      "outcome": "pass",
+      "source_report": "live-test-2026-10-17-image-edit.json"
+    }
+  ],
+  "limits": [
+    "One real account: independent multi-account rotation not verified with multiple real keys.",
+    "Public model catalog is not an entitlement guarantee.",
+    "Official remaining credit balance unavailable through documented API-key endpoints."
+  ],
+  "accounting": {
+    "main_round_tokens": 5881,
+    "image_edit_round_tokens": 12795,
+    "scope": "These two reports only; not total account consumption or remaining quota."
+  }
+}

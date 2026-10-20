@@ -1,0 +1,41 @@
+{
+  "version": "0.5.0",
+  "validation": {
+    "go_test_race_all": "passed",
+    "go_vet": "passed",
+    "javascript_syntax": "passed",
+    "known_dsh_opencode_claude_title_requests": "passed",
+    "generic_explicit_purpose_and_dedicated_system": "passed",
+    "json_sse_chat_messages_responses": "passed",
+    "unique_exact_human_context_association": "passed",
+    "title_before_main_and_restart": "passed",
+    "concurrent_main_and_title": "passed",
+    "atomic_title_seed_claim": "passed",
+    "ambiguous_context_not_merged": "passed",
+    "manual_names_and_newer_titles_preserved": "passed",
+    "failed_incomplete_or_invalid_title_not_applied": "passed",
+    "encrypted_title_and_name_provenance": "passed",
+    "ui_title_source_and_main_request_link": "passed",
+    "ui_mobile_576px_no_page_overflow": "passed",
+    "queued_cancelled_responses_not_adopted": "passed",
+    "unicode_line_separators_rejected": "passed",
+    "final_service_restart_name_preserved": "passed",
+    "browser_console_errors": 0
+  },
+  "simulated_example": {
+    "requests": 2,
+    "sessions": 1,
+    "total_tokens": 1120,
+    "title_tokens_included": 140
+  },
+  "note": "客户端格式依据官方源码及本机安装代码；模拟 HTTP 测试不等于运行全部智能体。真实上游测试另见 session-title-live-test-2026-10-18.json。",
+  "real_upstream": {
+    "requests": 2,
+    "session_id": "sess-12e6dcd02fd6f1645a539c294ede8b46",
+    "name": "网关自动标题关联功能自检",
+    "title_status": "applied",
+    "total_tokens": 455,
+    "title_tokens": 309,
+    "kind": "real SenseNova upstream with a DSH-format title request; not an installed-client UI test"
+  }
+}

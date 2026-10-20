@@ -1,0 +1,11 @@
+/config.json
+/config.docker.json
+/data/
+/bin/
+/.tools/
+/.gocache/
+/internal/gateway/data/
+.env
+*.test
+coverage.out
+__pycache__/

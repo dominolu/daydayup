@@ -1,0 +1,7 @@
+.git
+.env
+config.json
+config.docker.json
+data
+bin
+coverage.out

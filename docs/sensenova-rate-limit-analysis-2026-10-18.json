@@ -1,0 +1,6675 @@
+{
+  "snapshot": {
+    "file": "data/gateway.log",
+    "sha256": "e20214863f17c5b40f6d2afe438afe671629face37d2922f85df2da9f94981d4",
+    "line_count": 352,
+    "first_time": "2026-10-18T00:10:39.271574+08:00",
+    "last_time": "2026-10-18T15:28:04.084016+08:00"
+  },
+  "method": {
+    "counting": "upstream_attempt only; completion and wait events excluded; retries count as separate upstream attempts",
+    "window": "60s rolling windows by upstream start time; usage assigned to start for observation, not a claim about upstream accounting",
+    "cache": "cached input is a subset of input, never added twice; unknown usage is not counted as zero consumption",
+    "limits": "observed throughput does not identify configured TPM/RPM or token bucket capacity/refill; hidden traffic and reservation/cache rules are unknown"
+  },
+  "overall": {
+    "attempts": 152,
+    "client_requests": 88,
+    "deepseek": {
+      "attempts": 145,
+      "accepted": 75,
+      "rate_limited": 70,
+      "input_tokens": 7229421,
+      "output_tokens": 64016,
+      "total_tokens": 7293437,
+      "cached_input_tokens": 6823936,
+      "uncached_input_tokens": 405485
+    },
+    "deepseek_client_requests": 81,
+    "deepseek_requests_with_429": 45,
+    "deepseek_requests_eventual_200": 75,
+    "deepseek_429_codes": {
+      "insufficient_quota": 14,
+      "429003": 56
+    },
+    "unmatched_archive_attempts": 5
+  },
+  "groups": [
+    {
+      "model": "deepseek-v4-flash",
+      "account": "sense-dda49232",
+      "summary": {
+        "attempts": 72,
+        "accepted": 38,
+        "rate_limited": 34,
+        "input_tokens": 3093090,
+        "output_tokens": 37578,
+        "total_tokens": 3130668,
+        "cached_input_tokens": 2939904,
+        "uncached_input_tokens": 153186
+      },
+      "status_counts": {
+        "429": 34,
+        "200": 38
+      },
+      "peak_tokens_60s": {
+        "window_end": "2026-10-18T15:09:36.282+08:00",
+        "lines": [
+          280,
+          282,
+          284,
+          287
+        ],
+        "attempts": 4,
+        "accepted": 3,
+        "rate_limited": 1,
+        "input_tokens": 426682,
+        "output_tokens": 1113,
+        "total_tokens": 427795,
+        "cached_input_tokens": 420608,
+        "uncached_input_tokens": 6074
+      },
+      "peak_accepted_rpm_60s": {
+        "window_end": "2026-10-18T11:58:09.469+08:00",
+        "lines": [
+          64,
+          66,
+          68,
+          70,
+          75,
+          77,
+          85
+        ],
+        "attempts": 7,
+        "accepted": 6,
+        "rate_limited": 1,
+        "input_tokens": 176580,
+        "output_tokens": 1225,
+        "total_tokens": 177805,
+        "cached_input_tokens": 122368,
+        "uncached_input_tokens": 54212
+      },
+      "isolated429": [
+        {
+          "line": 14,
+          "start": "2026-10-18T00:12:33.448+08:00",
+          "request_id": "f5007ed823227886d69c5215",
+          "seconds_since_prior_attempt": null,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 21,
+          "start": "2026-10-18T00:15:21.528+08:00",
+          "request_id": "19473492efa4a05917573317",
+          "seconds_since_prior_attempt": 168.08,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 23,
+          "start": "2026-10-18T00:25:56.975+08:00",
+          "request_id": "b5d4e2d34510f8eae6d2d6d0",
+          "seconds_since_prior_attempt": 635.447,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 90,
+          "start": "2026-10-18T12:15:46.385+08:00",
+          "request_id": "d0c17fd0fbb38e3d82c611d6",
+          "seconds_since_prior_attempt": 1049.03,
+          "eventual_input_tokens": 86
+        },
+        {
+          "line": 93,
+          "start": "2026-10-18T12:17:29.757+08:00",
+          "request_id": "f762f94fac48c87791a3a8a5",
+          "seconds_since_prior_attempt": 103.372,
+          "eventual_input_tokens": 56142
+        },
+        {
+          "line": 180,
+          "start": "2026-10-18T13:47:32.236+08:00",
+          "request_id": "8de4c371912083c58c2049a3",
+          "seconds_since_prior_attempt": 3925.935,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 185,
+          "start": "2026-10-18T14:05:46.388+08:00",
+          "request_id": "cc545c0855ef8aeea62bb230",
+          "seconds_since_prior_attempt": 1094.152,
+          "eventual_input_tokens": 100841
+        },
+        {
+          "line": 219,
+          "start": "2026-10-18T14:16:09.660+08:00",
+          "request_id": "bfb09a60d6850f40a2d12193",
+          "seconds_since_prior_attempt": 60.713,
+          "eventual_input_tokens": 111467
+        },
+        {
+          "line": 240,
+          "start": "2026-10-18T14:27:48.377+08:00",
+          "request_id": "9131bcc1e8b6b4781450cc60",
+          "seconds_since_prior_attempt": 563.864,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 273,
+          "start": "2026-10-18T15:07:38.381+08:00",
+          "request_id": "3b6bab59e76492780a1afb11",
+          "seconds_since_prior_attempt": 2117.973,
+          "eventual_input_tokens": 141553
+        },
+        {
+          "line": 332,
+          "start": "2026-10-18T15:25:43.812+08:00",
+          "request_id": "cdab2f5a2fa8b48caf664dbd",
+          "seconds_since_prior_attempt": 72.54,
+          "eventual_input_tokens": 167508
+        }
+      ]
+    },
+    {
+      "model": "deepseek-v4-flash",
+      "account": "sense-e413ac65",
+      "summary": {
+        "attempts": 17,
+        "accepted": 7,
+        "rate_limited": 10,
+        "input_tokens": 1055784,
+        "output_tokens": 2503,
+        "total_tokens": 1058287,
+        "cached_input_tokens": 1039360,
+        "uncached_input_tokens": 16424
+      },
+      "status_counts": {
+        "429": 10,
+        "200": 7
+      },
+      "peak_tokens_60s": {
+        "window_end": "2026-10-18T15:10:56.198+08:00",
+        "lines": [
+          293,
+          295,
+          302,
+          304
+        ],
+        "attempts": 4,
+        "accepted": 3,
+        "rate_limited": 1,
+        "input_tokens": 434038,
+        "output_tokens": 796,
+        "total_tokens": 434834,
+        "cached_input_tokens": 430848,
+        "uncached_input_tokens": 3190
+      },
+      "peak_accepted_rpm_60s": {
+        "window_end": "2026-10-18T15:10:56.198+08:00",
+        "lines": [
+          293,
+          295,
+          302,
+          304
+        ],
+        "attempts": 4,
+        "accepted": 3,
+        "rate_limited": 1,
+        "input_tokens": 434038,
+        "output_tokens": 796,
+        "total_tokens": 434834,
+        "cached_input_tokens": 430848,
+        "uncached_input_tokens": 3190
+      },
+      "isolated429": [
+        {
+          "line": 242,
+          "start": "2026-10-18T14:27:49.299+08:00",
+          "request_id": "9131bcc1e8b6b4781450cc60",
+          "seconds_since_prior_attempt": null,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 272,
+          "start": "2026-10-18T15:07:37.758+08:00",
+          "request_id": "3b6bab59e76492780a1afb11",
+          "seconds_since_prior_attempt": 2195.116,
+          "eventual_input_tokens": 141553
+        },
+        {
+          "line": 329,
+          "start": "2026-10-18T15:24:30.564+08:00",
+          "request_id": "7e3ae9931742aea8e5d3898c",
+          "seconds_since_prior_attempt": 717.483,
+          "eventual_input_tokens": 157668
+        }
+      ]
+    },
+    {
+      "model": "deepseek-v4-flash",
+      "account": "sense-f2240d9d",
+      "summary": {
+        "attempts": 56,
+        "accepted": 30,
+        "rate_limited": 26,
+        "input_tokens": 3080547,
+        "output_tokens": 23935,
+        "total_tokens": 3104482,
+        "cached_input_tokens": 2844672,
+        "uncached_input_tokens": 235875
+      },
+      "status_counts": {
+        "200": 30,
+        "429": 26
+      },
+      "peak_tokens_60s": {
+        "window_end": "2026-10-18T12:42:49.092+08:00",
+        "lines": [
+          168,
+          170,
+          172,
+          174,
+          176,
+          178
+        ],
+        "attempts": 6,
+        "accepted": 6,
+        "rate_limited": 0,
+        "input_tokens": 562202,
+        "output_tokens": 5748,
+        "total_tokens": 567950,
+        "cached_input_tokens": 547840,
+        "uncached_input_tokens": 14362
+      },
+      "peak_accepted_rpm_60s": {
+        "window_end": "2026-10-18T12:42:27.433+08:00",
+        "lines": [
+          158,
+          160,
+          168,
+          170,
+          172,
+          174,
+          176
+        ],
+        "attempts": 7,
+        "accepted": 6,
+        "rate_limited": 1,
+        "input_tokens": 551288,
+        "output_tokens": 3726,
+        "total_tokens": 555014,
+        "cached_input_tokens": 532480,
+        "uncached_input_tokens": 18808
+      },
+      "isolated429": [
+        {
+          "line": 94,
+          "start": "2026-10-18T12:17:30.222+08:00",
+          "request_id": "f762f94fac48c87791a3a8a5",
+          "seconds_since_prior_attempt": 103.608,
+          "eventual_input_tokens": 56142
+        },
+        {
+          "line": 100,
+          "start": "2026-10-18T12:18:30.611+08:00",
+          "request_id": "f762f94fac48c87791a3a8a5",
+          "seconds_since_prior_attempt": 60.389,
+          "eventual_input_tokens": 56142
+        },
+        {
+          "line": 108,
+          "start": "2026-10-18T12:20:31.058+08:00",
+          "request_id": "b17e360c5220234bd4653c48",
+          "seconds_since_prior_attempt": 120.447,
+          "eventual_input_tokens": 56620
+        },
+        {
+          "line": 125,
+          "start": "2026-10-18T12:22:17.332+08:00",
+          "request_id": "15ab74c7d489680d530ce863",
+          "seconds_since_prior_attempt": 106.274,
+          "eventual_input_tokens": 71782
+        },
+        {
+          "line": 152,
+          "start": "2026-10-18T12:41:09.895+08:00",
+          "request_id": "27a9024f77d67b1c64b63ab2",
+          "seconds_since_prior_attempt": 1020.754,
+          "eventual_input_tokens": 85513
+        },
+        {
+          "line": 181,
+          "start": "2026-10-18T13:47:32.929+08:00",
+          "request_id": "8de4c371912083c58c2049a3",
+          "seconds_since_prior_attempt": 3883.837,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 241,
+          "start": "2026-10-18T14:27:48.841+08:00",
+          "request_id": "9131bcc1e8b6b4781450cc60",
+          "seconds_since_prior_attempt": 552.881,
+          "eventual_input_tokens": null
+        },
+        {
+          "line": 249,
+          "start": "2026-10-18T14:30:13.748+08:00",
+          "request_id": "2b306e85f9400106acfd170f",
+          "seconds_since_prior_attempt": 144.907,
+          "eventual_input_tokens": 117619
+        },
+        {
+          "line": 265,
+          "start": "2026-10-18T14:31:50.401+08:00",
+          "request_id": "4582ff31b2f564bf8a1cce31",
+          "seconds_since_prior_attempt": 65.876,
+          "eventual_input_tokens": 132808
+        },
+        {
+          "line": 274,
+          "start": "2026-10-18T15:07:39.053+08:00",
+          "request_id": "3b6bab59e76492780a1afb11",
+          "seconds_since_prior_attempt": 325.815,
+          "eventual_input_tokens": 141553
+        },
+        {
+          "line": 290,
+          "start": "2026-10-18T15:09:42.365+08:00",
+          "request_id": "f0eff5c338022305df954b01",
+          "seconds_since_prior_attempt": 123.312,
+          "eventual_input_tokens": 143444
+        },
+        {
+          "line": 299,
+          "start": "2026-10-18T15:10:43.229+08:00",
+          "request_id": "d91dd0f9b1307e603e9d669a",
+          "seconds_since_prior_attempt": 60.864,
+          "eventual_input_tokens": 144963
+        },
+        {
+          "line": 328,
+          "start": "2026-10-18T15:24:30.020+08:00",
+          "request_id": "7e3ae9931742aea8e5d3898c",
+          "seconds_since_prior_attempt": 826.791,
+          "eventual_input_tokens": 157668
+        }
+      ]
+    },
+    {
+      "model": "deepseek-v4.1-flash",
+      "account": "sense-dda49232",
+      "summary": {
+        "attempts": 2,
+        "accepted": 0,
+        "rate_limited": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 0
+      },
+      "status_counts": {
+        "403": 2
+      },
+      "peak_tokens_60s": {
+        "window_end": "2026-10-18T00:10:39.480+08:00",
+        "lines": [
+          5
+        ],
+        "attempts": 1,
+        "accepted": 0,
+        "rate_limited": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 0
+      },
+      "peak_accepted_rpm_60s": {
+        "window_end": "2026-10-18T00:10:39.480+08:00",
+        "lines": [
+          5
+        ],
+        "attempts": 1,
+        "accepted": 0,
+        "rate_limited": 0,
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "total_tokens": 0,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 0
+      },
+      "isolated429": []
+    },
+    {
+      "model": "sensenova-6.8-flash-lite",
+      "account": "sense-dda49232",
+      "summary": {
+        "attempts": 5,
+        "accepted": 5,
+        "rate_limited": 0,
+        "input_tokens": 593,
+        "output_tokens": 253,
+        "total_tokens": 846,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 593
+      },
+      "status_counts": {
+        "200": 5
+      },
+      "peak_tokens_60s": {
+        "window_end": "2026-10-18T11:04:36.333+08:00",
+        "lines": [
+          45,
+          47
+        ],
+        "attempts": 2,
+        "accepted": 2,
+        "rate_limited": 0,
+        "input_tokens": 297,
+        "output_tokens": 158,
+        "total_tokens": 455,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 297
+      },
+      "peak_accepted_rpm_60s": {
+        "window_end": "2026-10-18T09:27:59.239+08:00",
+        "lines": [
+          27,
+          29
+        ],
+        "attempts": 2,
+        "accepted": 2,
+        "rate_limited": 0,
+        "input_tokens": 198,
+        "output_tokens": 31,
+        "total_tokens": 229,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 198
+      },
+      "isolated429": []
+    }
+  ],
+  "input_size_bins": [
+    {
+      "input_range": [
+        0,
+        1000
+      ],
+      "client_requests": 3,
+      "requests_with_429": 1,
+      "attempts": 4,
+      "429_attempts": 1
+    },
+    {
+      "input_range": [
+        1000,
+        50000
+      ],
+      "client_requests": 10,
+      "requests_with_429": 2,
+      "attempts": 12,
+      "429_attempts": 2
+    },
+    {
+      "input_range": [
+        50000,
+        100000
+      ],
+      "client_requests": 24,
+      "requests_with_429": 12,
+      "attempts": 42,
+      "429_attempts": 18
+    },
+    {
+      "input_range": [
+        100000,
+        150000
+      ],
+      "client_requests": 28,
+      "requests_with_429": 18,
+      "attempts": 60,
+      "429_attempts": 32
+    },
+    {
+      "input_range": [
+        150000,
+        200000
+      ],
+      "client_requests": 10,
+      "requests_with_429": 6,
+      "attempts": 17,
+      "429_attempts": 7
+    }
+  ],
+  "requests": [
+    {
+      "id": "f5007ed823227886d69c5215",
+      "start": "2026-10-18T00:12:33.448+08:00",
+      "attempts": 1,
+      "rate_limited": 1,
+      "eventual_200": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached": null,
+      "limits": {},
+      "bytes": null,
+      "client": null,
+      "lines": [
+        14
+      ]
+    },
+    {
+      "id": "19473492efa4a05917573317",
+      "start": "2026-10-18T00:15:21.528+08:00",
+      "attempts": 1,
+      "rate_limited": 1,
+      "eventual_200": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached": null,
+      "limits": {},
+      "bytes": null,
+      "client": null,
+      "lines": [
+        21
+      ]
+    },
+    {
+      "id": "b5d4e2d34510f8eae6d2d6d0",
+      "start": "2026-10-18T00:25:56.975+08:00",
+      "attempts": 1,
+      "rate_limited": 1,
+      "eventual_200": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached": null,
+      "limits": {},
+      "bytes": null,
+      "client": null,
+      "lines": [
+        23
+      ]
+    },
+    {
+      "id": "cedf7cd6903aa06a3412264c",
+      "start": "2026-10-18T09:53:26.245+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 10096,
+      "output_tokens": 371,
+      "cached": 0,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 42245,
+      "client": null,
+      "lines": [
+        36
+      ]
+    },
+    {
+      "id": "104bcf2f1b28cd4323a31e8d",
+      "start": "2026-10-18T09:53:34.559+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 10481,
+      "output_tokens": 832,
+      "cached": 8192,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 43676,
+      "client": null,
+      "lines": [
+        38
+      ]
+    },
+    {
+      "id": "20953424e716a97c1d253b3b",
+      "start": "2026-10-18T11:34:39.116+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 9281,
+      "output_tokens": 154,
+      "cached": 8192,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 37963,
+      "client": "DSH",
+      "lines": [
+        50
+      ]
+    },
+    {
+      "id": "d59b7687cf046511141d0bd6",
+      "start": "2026-10-18T11:34:39.123+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 216,
+      "output_tokens": 302,
+      "cached": 0,
+      "limits": {
+        "max_completion_tokens": 4096
+      },
+      "bytes": 797,
+      "client": "DSH",
+      "lines": [
+        56
+      ]
+    },
+    {
+      "id": "e0169a0ddac24c81d85f8aa0",
+      "start": "2026-10-18T11:34:43.894+08:00",
+      "attempts": 1,
+      "rate_limited": 1,
+      "eventual_200": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached": null,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 45694,
+      "client": "DSH",
+      "lines": [
+        52
+      ]
+    },
+    {
+      "id": "cd76d71971888b88877e41f8",
+      "start": "2026-10-18T11:49:54.433+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 86,
+      "output_tokens": 16,
+      "cached": 0,
+      "limits": {
+        "max_tokens": 16
+      },
+      "bytes": 116,
+      "client": "Unknown",
+      "lines": [
+        62
+      ]
+    },
+    {
+      "id": "eeb52470c0b29567cd5dab1e",
+      "start": "2026-10-18T11:57:09.713+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 12125,
+      "output_tokens": 241,
+      "cached": 0,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 46030,
+      "client": "DSH",
+      "lines": [
+        64
+      ]
+    },
+    {
+      "id": "3eefae556d31d2c80eda519e",
+      "start": "2026-10-18T11:57:16.455+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 17995,
+      "output_tokens": 199,
+      "cached": 10240,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 69508,
+      "client": "DSH",
+      "lines": [
+        66
+      ]
+    },
+    {
+      "id": "59afe0f8820a26a716c352aa",
+      "start": "2026-10-18T11:57:21.502+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 23660,
+      "output_tokens": 150,
+      "cached": 17920,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 90686,
+      "client": "DSH",
+      "lines": [
+        68
+      ]
+    },
+    {
+      "id": "9b64ebaea5c69da966c056a3",
+      "start": "2026-10-18T11:57:25.593+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 27576,
+      "output_tokens": 137,
+      "cached": 23552,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 103360,
+      "client": "DSH",
+      "lines": [
+        70
+      ]
+    },
+    {
+      "id": "3ee7a38c5603ad4b0bc8f84e",
+      "start": "2026-10-18T11:57:29.573+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 37297,
+      "output_tokens": 207,
+      "cached": 0,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 135083,
+      "client": "DSH",
+      "lines": [
+        72
+      ]
+    },
+    {
+      "id": "090f24cd0aa15f6acd54b7b1",
+      "start": "2026-10-18T11:57:32.441+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 43362,
+      "output_tokens": 204,
+      "cached": 27392,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 154846,
+      "client": "DSH",
+      "lines": [
+        74,
+        75
+      ]
+    },
+    {
+      "id": "820aa16c609e72e32795273b",
+      "start": "2026-10-18T11:57:38.738+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 49770,
+      "output_tokens": 326,
+      "cached": 36864,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 177191,
+      "client": "DSH",
+      "lines": [
+        77,
+        80
+      ]
+    },
+    {
+      "id": "fabd0dee2aa722be579a3c35",
+      "start": "2026-10-18T11:58:06.729+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 51862,
+      "output_tokens": 294,
+      "cached": 43264,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 185478,
+      "client": "DSH",
+      "lines": [
+        82,
+        85
+      ]
+    },
+    {
+      "id": "24983531a7c02466b4988bff",
+      "start": "2026-10-18T11:58:17.355+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 53812,
+      "output_tokens": 2233,
+      "cached": 51712,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 192193,
+      "client": "DSH",
+      "lines": [
+        87
+      ]
+    },
+    {
+      "id": "d0c17fd0fbb38e3d82c611d6",
+      "start": "2026-10-18T12:15:46.385+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 86,
+      "output_tokens": 19,
+      "cached": 0,
+      "limits": {
+        "max_tokens": 64
+      },
+      "bytes": 175,
+      "client": "Unknown",
+      "lines": [
+        90,
+        91
+      ]
+    },
+    {
+      "id": "f762f94fac48c87791a3a8a5",
+      "start": "2026-10-18T12:17:29.757+08:00",
+      "attempts": 5,
+      "rate_limited": 4,
+      "eventual_200": true,
+      "input_tokens": 56142,
+      "output_tokens": 392,
+      "cached": 53248,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 201490,
+      "client": "DSH",
+      "lines": [
+        93,
+        94,
+        97,
+        100,
+        103
+      ]
+    },
+    {
+      "id": "b17e360c5220234bd4653c48",
+      "start": "2026-10-18T12:20:10.017+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 56620,
+      "output_tokens": 122,
+      "cached": 56064,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 203622,
+      "client": "DSH",
+      "lines": [
+        105,
+        108,
+        111
+      ]
+    },
+    {
+      "id": "f4ea12af958ba98dad1bd726",
+      "start": "2026-10-18T12:20:44.537+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 56771,
+      "output_tokens": 106,
+      "cached": 56320,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 204274,
+      "client": "DSH",
+      "lines": [
+        113
+      ]
+    },
+    {
+      "id": "6bac571041dfd07756291409",
+      "start": "2026-10-18T12:20:48.078+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 56906,
+      "output_tokens": 2007,
+      "cached": 56576,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 204905,
+      "client": "DSH",
+      "lines": [
+        115,
+        118
+      ]
+    },
+    {
+      "id": "6e360e111ecd40bae435d540",
+      "start": "2026-10-18T12:21:47.689+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 60250,
+      "output_tokens": 169,
+      "cached": 55296,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 217116,
+      "client": "DSH",
+      "lines": [
+        120
+      ]
+    },
+    {
+      "id": "f552f20dc11e183e436219d2",
+      "start": "2026-10-18T12:21:52.673+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 63159,
+      "output_tokens": 93,
+      "cached": 59392,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 227642,
+      "client": "DSH",
+      "lines": [
+        122
+      ]
+    },
+    {
+      "id": "15ab74c7d489680d530ce863",
+      "start": "2026-10-18T12:22:16.864+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 71782,
+      "output_tokens": 341,
+      "cached": 62976,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 256724,
+      "client": "DSH",
+      "lines": [
+        124,
+        125,
+        128
+      ]
+    },
+    {
+      "id": "4d8369ea22b9ac08bbf1c764",
+      "start": "2026-10-18T12:22:56.630+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 72175,
+      "output_tokens": 137,
+      "cached": 71680,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 258325,
+      "client": "DSH",
+      "lines": [
+        130
+      ]
+    },
+    {
+      "id": "1adba2ef8e7635ed8b3d7b7a",
+      "start": "2026-10-18T12:23:01.011+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 77095,
+      "output_tokens": 1557,
+      "cached": 49152,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 276329,
+      "client": "DSH",
+      "lines": [
+        132,
+        135
+      ]
+    },
+    {
+      "id": "654832daaac15aa04c17cc2d",
+      "start": "2026-10-18T12:23:31.517+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 78841,
+      "output_tokens": 167,
+      "cached": 76800,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 283282,
+      "client": "DSH",
+      "lines": [
+        137,
+        138,
+        141
+      ]
+    },
+    {
+      "id": "78613e403cb4a63481fee57d",
+      "start": "2026-10-18T12:24:04.780+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 79732,
+      "output_tokens": 152,
+      "cached": 77824,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 287538,
+      "client": "DSH",
+      "lines": [
+        143
+      ]
+    },
+    {
+      "id": "e0c3949ac6597c544398ea21",
+      "start": "2026-10-18T12:24:06.859+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 79991,
+      "output_tokens": 131,
+      "cached": 78848,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 288585,
+      "client": "DSH",
+      "lines": [
+        145
+      ]
+    },
+    {
+      "id": "c28da556a91ead66aefafd9a",
+      "start": "2026-10-18T12:24:09.141+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 80605,
+      "output_tokens": 4802,
+      "cached": 71936,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 291393,
+      "client": "DSH",
+      "lines": [
+        147,
+        150
+      ]
+    },
+    {
+      "id": "27a9024f77d67b1c64b63ab2",
+      "start": "2026-10-18T12:41:09.895+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 85513,
+      "output_tokens": 902,
+      "cached": 79872,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 310324,
+      "client": "DSH",
+      "lines": [
+        152,
+        153
+      ]
+    },
+    {
+      "id": "7b1680304a10d0074aaab510",
+      "start": "2026-10-18T12:41:25.631+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 87290,
+      "output_tokens": 270,
+      "cached": 79872,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 317298,
+      "client": "DSH",
+      "lines": [
+        155,
+        158
+      ]
+    },
+    {
+      "id": "793afee96fb6a7b5779f0a6d",
+      "start": "2026-10-18T12:41:44.349+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 89027,
+      "output_tokens": 401,
+      "cached": 85248,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 324233,
+      "client": "DSH",
+      "lines": [
+        160,
+        163
+      ]
+    },
+    {
+      "id": "1dcc9fbd453aecd10ae538c7",
+      "start": "2026-10-18T12:42:06.301+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 90791,
+      "output_tokens": 144,
+      "cached": 87040,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 330916,
+      "client": "DSH",
+      "lines": [
+        165,
+        168
+      ]
+    },
+    {
+      "id": "3f13683e53fab837209cdb9d",
+      "start": "2026-10-18T12:42:17.636+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 92018,
+      "output_tokens": 640,
+      "cached": 90112,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 335270,
+      "client": "DSH",
+      "lines": [
+        170
+      ]
+    },
+    {
+      "id": "099059ce47c3d84bdea15899",
+      "start": "2026-10-18T12:42:23.039+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 92834,
+      "output_tokens": 162,
+      "cached": 91136,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 338220,
+      "client": "DSH",
+      "lines": [
+        172
+      ]
+    },
+    {
+      "id": "0669f661ba247863d6fc35c2",
+      "start": "2026-10-18T12:42:25.688+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 93054,
+      "output_tokens": 63,
+      "cached": 92160,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 339087,
+      "client": "DSH",
+      "lines": [
+        174
+      ]
+    },
+    {
+      "id": "f30719bbd5ded209c2b473a0",
+      "start": "2026-10-18T12:42:27.433+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 95301,
+      "output_tokens": 2447,
+      "cached": 92160,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 346744,
+      "client": "DSH",
+      "lines": [
+        176
+      ]
+    },
+    {
+      "id": "6363909215467c98e8fd1431",
+      "start": "2026-10-18T12:42:49.092+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 98204,
+      "output_tokens": 2292,
+      "cached": 95232,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 358066,
+      "client": "DSH",
+      "lines": [
+        178
+      ]
+    },
+    {
+      "id": "8de4c371912083c58c2049a3",
+      "start": "2026-10-18T13:47:32.236+08:00",
+      "attempts": 2,
+      "rate_limited": 2,
+      "eventual_200": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached": null,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 367094,
+      "client": "DSH",
+      "lines": [
+        180,
+        181
+      ]
+    },
+    {
+      "id": "cc545c0855ef8aeea62bb230",
+      "start": "2026-10-18T14:05:46.388+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 100841,
+      "output_tokens": 1988,
+      "cached": 8192,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 367501,
+      "client": "DSH",
+      "lines": [
+        185,
+        186
+      ]
+    },
+    {
+      "id": "f25f0ea9de3697d717bf9e82",
+      "start": "2026-10-18T14:06:17.482+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 102964,
+      "output_tokens": 253,
+      "cached": 100608,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 376858,
+      "client": "DSH",
+      "lines": [
+        188,
+        189,
+        192
+      ]
+    },
+    {
+      "id": "a58b45d3a9e32f4e668d8cdd",
+      "start": "2026-10-18T14:06:59.964+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 103266,
+      "output_tokens": 916,
+      "cached": 102656,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 377974,
+      "client": "DSH",
+      "lines": [
+        194
+      ]
+    },
+    {
+      "id": "1e810512d3787c9aca1e1a2b",
+      "start": "2026-10-18T14:07:14.815+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 104488,
+      "output_tokens": 1223,
+      "cached": 103168,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 382730,
+      "client": "DSH",
+      "lines": [
+        196
+      ]
+    },
+    {
+      "id": "2bf1cff08325781ba8a3ca17",
+      "start": "2026-10-18T14:07:35.896+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 106142,
+      "output_tokens": 1487,
+      "cached": 104448,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 389976,
+      "client": "DSH",
+      "lines": [
+        198
+      ]
+    },
+    {
+      "id": "64969c953aa1d2eee73e54ee",
+      "start": "2026-10-18T14:13:55.698+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 107683,
+      "output_tokens": 2553,
+      "cached": 104448,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 395992,
+      "client": "DSH",
+      "lines": [
+        200
+      ]
+    },
+    {
+      "id": "7993ea0b96d8244230a4b30a",
+      "start": "2026-10-18T14:14:31.478+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 110275,
+      "output_tokens": 177,
+      "cached": 107520,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 406313,
+      "client": "DSH",
+      "lines": [
+        202,
+        203
+      ]
+    },
+    {
+      "id": "4757b91b8bafa54bab696af6",
+      "start": "2026-10-18T14:14:38.318+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 110587,
+      "output_tokens": 95,
+      "cached": 110080,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 407515,
+      "client": "DSH",
+      "lines": [
+        205,
+        208
+      ]
+    },
+    {
+      "id": "bfb09a60d6850f40a2d12193",
+      "start": "2026-10-18T14:15:06.900+08:00",
+      "attempts": 5,
+      "rate_limited": 4,
+      "eventual_200": true,
+      "input_tokens": 111467,
+      "output_tokens": 402,
+      "cached": 108544,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 410609,
+      "client": "DSH",
+      "lines": [
+        210,
+        213,
+        216,
+        219,
+        222
+      ]
+    },
+    {
+      "id": "66dd6269f5ce32f4e967f926",
+      "start": "2026-10-18T14:17:49.919+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 112340,
+      "output_tokens": 170,
+      "cached": 111360,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 413997,
+      "client": "DSH",
+      "lines": [
+        224
+      ]
+    },
+    {
+      "id": "4ad36ebc13a2878165d45aa0",
+      "start": "2026-10-18T14:17:56.075+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 114000,
+      "output_tokens": 343,
+      "cached": 112128,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 419802,
+      "client": "DSH",
+      "lines": [
+        226
+      ]
+    },
+    {
+      "id": "ff5d058491c008b684f04c05",
+      "start": "2026-10-18T14:18:05.274+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 114461,
+      "output_tokens": 97,
+      "cached": 113920,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 421546,
+      "client": "DSH",
+      "lines": [
+        228,
+        231
+      ]
+    },
+    {
+      "id": "8cc8fa87bc19622c73c6b82c",
+      "start": "2026-10-18T14:18:14.333+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 115385,
+      "output_tokens": 423,
+      "cached": 114176,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 425087,
+      "client": "DSH",
+      "lines": [
+        233
+      ]
+    },
+    {
+      "id": "9e328edb98217c6aa017bbdf",
+      "start": "2026-10-18T14:18:24.513+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 115856,
+      "output_tokens": 1599,
+      "cached": 115200,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 426820,
+      "client": "DSH",
+      "lines": [
+        235,
+        238
+      ]
+    },
+    {
+      "id": "9131bcc1e8b6b4781450cc60",
+      "start": "2026-10-18T14:27:48.377+08:00",
+      "attempts": 4,
+      "rate_limited": 4,
+      "eventual_200": false,
+      "input_tokens": null,
+      "output_tokens": null,
+      "cached": null,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 432943,
+      "client": "DSH",
+      "lines": [
+        240,
+        241,
+        242,
+        245
+      ]
+    },
+    {
+      "id": "2b306e85f9400106acfd170f",
+      "start": "2026-10-18T14:30:13.748+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 117619,
+      "output_tokens": 811,
+      "cached": 114688,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 433576,
+      "client": "DSH",
+      "lines": [
+        249,
+        250
+      ]
+    },
+    {
+      "id": "6c8d22147095b7afb1486619",
+      "start": "2026-10-18T14:30:31.979+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 120410,
+      "output_tokens": 260,
+      "cached": 117504,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 444355,
+      "client": "DSH",
+      "lines": [
+        252,
+        253
+      ]
+    },
+    {
+      "id": "cd31e9e1ca60a33333536dde",
+      "start": "2026-10-18T14:30:43.652+08:00",
+      "attempts": 4,
+      "rate_limited": 3,
+      "eventual_200": true,
+      "input_tokens": 128167,
+      "output_tokens": 2405,
+      "cached": 120320,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 476511,
+      "client": "DSH",
+      "lines": [
+        255,
+        256,
+        259,
+        262
+      ]
+    },
+    {
+      "id": "4582ff31b2f564bf8a1cce31",
+      "start": "2026-10-18T14:31:49.739+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 132808,
+      "output_tokens": 5750,
+      "cached": 126976,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 496036,
+      "client": "DSH",
+      "lines": [
+        264,
+        265,
+        268
+      ]
+    },
+    {
+      "id": "02bbe14a74c613d5a7947c64",
+      "start": "2026-10-18T15:02:13.238+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 138649,
+      "output_tokens": 2881,
+      "cached": 131072,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 519823,
+      "client": "DSH",
+      "lines": [
+        270
+      ]
+    },
+    {
+      "id": "3b6bab59e76492780a1afb11",
+      "start": "2026-10-18T15:07:37.758+08:00",
+      "attempts": 5,
+      "rate_limited": 4,
+      "eventual_200": true,
+      "input_tokens": 141553,
+      "output_tokens": 644,
+      "cached": 137216,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 531364,
+      "client": "DSH",
+      "lines": [
+        272,
+        273,
+        274,
+        277,
+        280
+      ]
+    },
+    {
+      "id": "64aca60623902163d7529313",
+      "start": "2026-10-18T15:08:51.284+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 142262,
+      "output_tokens": 332,
+      "cached": 141312,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 534197,
+      "client": "DSH",
+      "lines": [
+        282
+      ]
+    },
+    {
+      "id": "2bd016b3b4c45c99ca8e176a",
+      "start": "2026-10-18T15:09:05.444+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 142867,
+      "output_tokens": 137,
+      "cached": 142080,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 536245,
+      "client": "DSH",
+      "lines": [
+        284,
+        287
+      ]
+    },
+    {
+      "id": "f0eff5c338022305df954b01",
+      "start": "2026-10-18T15:09:41.584+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 143444,
+      "output_tokens": 124,
+      "cached": 142592,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 538430,
+      "client": "DSH",
+      "lines": [
+        289,
+        290,
+        293
+      ]
+    },
+    {
+      "id": "d91dd0f9b1307e603e9d669a",
+      "start": "2026-10-18T15:10:14.386+08:00",
+      "attempts": 4,
+      "rate_limited": 3,
+      "eventual_200": true,
+      "input_tokens": 144963,
+      "output_tokens": 533,
+      "cached": 143360,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 544614,
+      "client": "DSH",
+      "lines": [
+        295,
+        296,
+        299,
+        302
+      ]
+    },
+    {
+      "id": "20512943d0be9e7d0bb825f9",
+      "start": "2026-10-18T15:10:56.198+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 145631,
+      "output_tokens": 139,
+      "cached": 144896,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 547257,
+      "client": "DSH",
+      "lines": [
+        304
+      ]
+    },
+    {
+      "id": "89c141efa83bfaa15835e029",
+      "start": "2026-10-18T15:11:01.413+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 147477,
+      "output_tokens": 602,
+      "cached": 145408,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 553810,
+      "client": "DSH",
+      "lines": [
+        306,
+        309
+      ]
+    },
+    {
+      "id": "09cf8fb5cbe4c6b5a638da54",
+      "start": "2026-10-18T15:11:28.245+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 148328,
+      "output_tokens": 87,
+      "cached": 147456,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 557268,
+      "client": "DSH",
+      "lines": [
+        311,
+        314,
+        317
+      ]
+    },
+    {
+      "id": "4cc46a66e2513d170a038c48",
+      "start": "2026-10-18T15:12:03.432+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 149649,
+      "output_tokens": 411,
+      "cached": 148224,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 562273,
+      "client": "DSH",
+      "lines": [
+        319,
+        322
+      ]
+    },
+    {
+      "id": "aea8ec2c19d1223ff34370fc",
+      "start": "2026-10-18T15:12:43.109+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 152512,
+      "output_tokens": 1312,
+      "cached": 149504,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 570088,
+      "client": "DSH",
+      "lines": [
+        324
+      ]
+    },
+    {
+      "id": "76ed76c053b81fc7bf16bde2",
+      "start": "2026-10-18T15:13:03.617+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 154959,
+      "output_tokens": 2609,
+      "cached": 152320,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 580263,
+      "client": "DSH",
+      "lines": [
+        326
+      ]
+    },
+    {
+      "id": "7e3ae9931742aea8e5d3898c",
+      "start": "2026-10-18T15:24:30.020+08:00",
+      "attempts": 3,
+      "rate_limited": 2,
+      "eventual_200": true,
+      "input_tokens": 157668,
+      "output_tokens": 5993,
+      "cached": 153600,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 590397,
+      "client": "DSH",
+      "lines": [
+        328,
+        329,
+        330
+      ]
+    },
+    {
+      "id": "cdab2f5a2fa8b48caf664dbd",
+      "start": "2026-10-18T15:25:43.812+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 167508,
+      "output_tokens": 383,
+      "cached": 157440,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 627993,
+      "client": "DSH",
+      "lines": [
+        332,
+        333
+      ]
+    },
+    {
+      "id": "9a0d1bb659be4e9de064f637",
+      "start": "2026-10-18T15:25:55.658+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 171656,
+      "output_tokens": 103,
+      "cached": 167424,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 641627,
+      "client": "DSH",
+      "lines": [
+        335,
+        336
+      ]
+    },
+    {
+      "id": "f4aea19dfad04e53bc978e2e",
+      "start": "2026-10-18T15:26:01.364+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 174456,
+      "output_tokens": 2145,
+      "cached": 171520,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 650706,
+      "client": "DSH",
+      "lines": [
+        338,
+        341
+      ]
+    },
+    {
+      "id": "ed06e25a7f25489835a9aaf6",
+      "start": "2026-10-18T15:26:43.493+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 176761,
+      "output_tokens": 520,
+      "cached": 174336,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 659924,
+      "client": "DSH",
+      "lines": [
+        343,
+        344
+      ]
+    },
+    {
+      "id": "cc6ac709da1ee32f2dd42305",
+      "start": "2026-10-18T15:26:54.335+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 177309,
+      "output_tokens": 160,
+      "cached": 176640,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 662090,
+      "client": "DSH",
+      "lines": [
+        346
+      ]
+    },
+    {
+      "id": "1f6c4873561c82d6437b6e7f",
+      "start": "2026-10-18T15:27:43.242+08:00",
+      "attempts": 1,
+      "rate_limited": 0,
+      "eventual_200": true,
+      "input_tokens": 178382,
+      "output_tokens": 385,
+      "cached": 177152,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 665820,
+      "client": "DSH",
+      "lines": [
+        348
+      ]
+    },
+    {
+      "id": "20e3cbdd1fb2137562d7d958",
+      "start": "2026-10-18T15:27:53.501+08:00",
+      "attempts": 2,
+      "rate_limited": 1,
+      "eventual_200": true,
+      "input_tokens": 182822,
+      "output_tokens": 382,
+      "cached": 178176,
+      "limits": {
+        "max_completion_tokens": 32768
+      },
+      "bytes": 679661,
+      "client": "DSH",
+      "lines": [
+        350,
+        351
+      ]
+    }
+  ],
+  "retry_recoveries": [
+    {
+      "request_id": "2bd016b3b4c45c99ca8e176a",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-dda49232",
+      "same_account": true,
+      "gap_seconds": 30.0,
+      "input_tokens": 142867,
+      "lines": [
+        284,
+        287
+      ]
+    },
+    {
+      "request_id": "15ab74c7d489680d530ce863",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 29.651,
+      "input_tokens": 71782,
+      "lines": [
+        125,
+        128
+      ]
+    },
+    {
+      "request_id": "89c141efa83bfaa15835e029",
+      "from_account": "sense-e413ac65",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 13.836,
+      "input_tokens": 147477,
+      "lines": [
+        306,
+        309
+      ]
+    },
+    {
+      "request_id": "4757b91b8bafa54bab696af6",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 22.961,
+      "input_tokens": 110587,
+      "lines": [
+        205,
+        208
+      ]
+    },
+    {
+      "request_id": "6c8d22147095b7afb1486619",
+      "from_account": "sense-e413ac65",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 0.007,
+      "input_tokens": 120410,
+      "lines": [
+        252,
+        253
+      ]
+    },
+    {
+      "request_id": "cc545c0855ef8aeea62bb230",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 0.012,
+      "input_tokens": 100841,
+      "lines": [
+        185,
+        186
+      ]
+    },
+    {
+      "request_id": "2b306e85f9400106acfd170f",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-e413ac65",
+      "same_account": false,
+      "gap_seconds": 0.007,
+      "input_tokens": 117619,
+      "lines": [
+        249,
+        250
+      ]
+    },
+    {
+      "request_id": "1adba2ef8e7635ed8b3d7b7a",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 15.912,
+      "input_tokens": 77095,
+      "lines": [
+        132,
+        135
+      ]
+    },
+    {
+      "request_id": "ff5d058491c008b684f04c05",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 4.155,
+      "input_tokens": 114461,
+      "lines": [
+        228,
+        231
+      ]
+    },
+    {
+      "request_id": "090f24cd0aa15f6acd54b7b1",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 0.005,
+      "input_tokens": 43362,
+      "lines": [
+        74,
+        75
+      ]
+    },
+    {
+      "request_id": "bfb09a60d6850f40a2d12193",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 87.946,
+      "input_tokens": 111467,
+      "lines": [
+        219,
+        222
+      ]
+    },
+    {
+      "request_id": "c28da556a91ead66aefafd9a",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 23.012,
+      "input_tokens": 80605,
+      "lines": [
+        147,
+        150
+      ]
+    },
+    {
+      "request_id": "7b1680304a10d0074aaab510",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 14.269,
+      "input_tokens": 87290,
+      "lines": [
+        155,
+        158
+      ]
+    },
+    {
+      "request_id": "cdab2f5a2fa8b48caf664dbd",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 0.006,
+      "input_tokens": 167508,
+      "lines": [
+        332,
+        333
+      ]
+    },
+    {
+      "request_id": "4cc46a66e2513d170a038c48",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-e413ac65",
+      "same_account": false,
+      "gap_seconds": 28.969,
+      "input_tokens": 149649,
+      "lines": [
+        319,
+        322
+      ]
+    },
+    {
+      "request_id": "9a0d1bb659be4e9de064f637",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-e413ac65",
+      "same_account": false,
+      "gap_seconds": 0.006,
+      "input_tokens": 171656,
+      "lines": [
+        335,
+        336
+      ]
+    },
+    {
+      "request_id": "f762f94fac48c87791a3a8a5",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 89.591,
+      "input_tokens": 56142,
+      "lines": [
+        100,
+        103
+      ]
+    },
+    {
+      "request_id": "654832daaac15aa04c17cc2d",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 29.571,
+      "input_tokens": 78841,
+      "lines": [
+        138,
+        141
+      ]
+    },
+    {
+      "request_id": "09cf8fb5cbe4c6b5a638da54",
+      "from_account": "sense-e413ac65",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 25.97,
+      "input_tokens": 148328,
+      "lines": [
+        314,
+        317
+      ]
+    },
+    {
+      "request_id": "793afee96fb6a7b5779f0a6d",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 11.31,
+      "input_tokens": 89027,
+      "lines": [
+        160,
+        163
+      ]
+    },
+    {
+      "request_id": "cd31e9e1ca60a33333536dde",
+      "from_account": "sense-e413ac65",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 11.206,
+      "input_tokens": 128167,
+      "lines": [
+        259,
+        262
+      ]
+    },
+    {
+      "request_id": "b17e360c5220234bd4653c48",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 9.087,
+      "input_tokens": 56620,
+      "lines": [
+        108,
+        111
+      ]
+    },
+    {
+      "request_id": "ed06e25a7f25489835a9aaf6",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 0.009,
+      "input_tokens": 176761,
+      "lines": [
+        343,
+        344
+      ]
+    },
+    {
+      "request_id": "20e3cbdd1fb2137562d7d958",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-e413ac65",
+      "same_account": false,
+      "gap_seconds": 0.008,
+      "input_tokens": 182822,
+      "lines": [
+        350,
+        351
+      ]
+    },
+    {
+      "request_id": "7e3ae9931742aea8e5d3898c",
+      "from_account": "sense-e413ac65",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 0.008,
+      "input_tokens": 157668,
+      "lines": [
+        329,
+        330
+      ]
+    },
+    {
+      "request_id": "4582ff31b2f564bf8a1cce31",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 29.63,
+      "input_tokens": 132808,
+      "lines": [
+        265,
+        268
+      ]
+    },
+    {
+      "request_id": "f4aea19dfad04e53bc978e2e",
+      "from_account": "sense-e413ac65",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 12.249,
+      "input_tokens": 174456,
+      "lines": [
+        338,
+        341
+      ]
+    },
+    {
+      "request_id": "7993ea0b96d8244230a4b30a",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 0.007,
+      "input_tokens": 110275,
+      "lines": [
+        202,
+        203
+      ]
+    },
+    {
+      "request_id": "3b6bab59e76492780a1afb11",
+      "from_account": "sense-e413ac65",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 29.794,
+      "input_tokens": 141553,
+      "lines": [
+        277,
+        280
+      ]
+    },
+    {
+      "request_id": "1dcc9fbd453aecd10ae538c7",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 7.957,
+      "input_tokens": 90791,
+      "lines": [
+        165,
+        168
+      ]
+    },
+    {
+      "request_id": "fabd0dee2aa722be579a3c35",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 2.132,
+      "input_tokens": 51862,
+      "lines": [
+        82,
+        85
+      ]
+    },
+    {
+      "request_id": "f0eff5c338022305df954b01",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-e413ac65",
+      "same_account": false,
+      "gap_seconds": 26.064,
+      "input_tokens": 143444,
+      "lines": [
+        290,
+        293
+      ]
+    },
+    {
+      "request_id": "d91dd0f9b1307e603e9d669a",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-e413ac65",
+      "same_account": false,
+      "gap_seconds": 1.186,
+      "input_tokens": 144963,
+      "lines": [
+        299,
+        302
+      ]
+    },
+    {
+      "request_id": "27a9024f77d67b1c64b63ab2",
+      "from_account": "sense-f2240d9d",
+      "to_account": "sense-dda49232",
+      "same_account": false,
+      "gap_seconds": 0.009,
+      "input_tokens": 85513,
+      "lines": [
+        152,
+        153
+      ]
+    },
+    {
+      "request_id": "6bac571041dfd07756291409",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-dda49232",
+      "same_account": true,
+      "gap_seconds": 30.001,
+      "input_tokens": 56906,
+      "lines": [
+        115,
+        118
+      ]
+    },
+    {
+      "request_id": "f25f0ea9de3697d717bf9e82",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 29.381,
+      "input_tokens": 102964,
+      "lines": [
+        189,
+        192
+      ]
+    },
+    {
+      "request_id": "9e328edb98217c6aa017bbdf",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 10.978,
+      "input_tokens": 115856,
+      "lines": [
+        235,
+        238
+      ]
+    },
+    {
+      "request_id": "d0c17fd0fbb38e3d82c611d6",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 0.007,
+      "input_tokens": 86,
+      "lines": [
+        90,
+        91
+      ]
+    },
+    {
+      "request_id": "820aa16c609e72e32795273b",
+      "from_account": "sense-dda49232",
+      "to_account": "sense-f2240d9d",
+      "same_account": false,
+      "gap_seconds": 23.245,
+      "input_tokens": 49770,
+      "lines": [
+        77,
+        80
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "request_id": "0a5cb93d2e66bcd966599f79",
+      "model": "deepseek-v4.1-flash",
+      "account_id": "sense-dda49232",
+      "status": 403,
+      "attempts": 1,
+      "duration_ms": 35,
+      "retry": false,
+      "reason": "model_not_in_token_plan",
+      "error_code": "7",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 5,
+      "start": "2026-10-18T00:10:39.480+08:00",
+      "end": "2026-10-18T00:10:39.515+08:00",
+      "start_source": "log_time_minus_duration",
+      "cached_input_tokens": null,
+      "uncached_input_tokens": null,
+      "request_limits": {},
+      "request_bytes": null,
+      "client": null,
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "f5007ed823227886d69c5215",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 237,
+      "retry": false,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 14,
+      "start": "2026-10-18T00:12:33.448+08:00",
+      "end": "2026-10-18T00:12:33.685+08:00",
+      "start_source": "log_time_minus_duration",
+      "cached_input_tokens": null,
+      "uncached_input_tokens": null,
+      "request_limits": {},
+      "request_bytes": null,
+      "client": null,
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "3acccac022fd3fc97802612a",
+      "model": "deepseek-v4.1-flash",
+      "account_id": "sense-dda49232",
+      "status": 403,
+      "attempts": 1,
+      "duration_ms": 189,
+      "retry": false,
+      "reason": "model_not_in_token_plan",
+      "error_code": "7",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 17,
+      "start": "2026-10-18T00:14:35.542+08:00",
+      "end": "2026-10-18T00:14:35.731+08:00",
+      "start_source": "log_time_minus_duration",
+      "cached_input_tokens": null,
+      "uncached_input_tokens": null,
+      "request_limits": {},
+      "request_bytes": null,
+      "client": null,
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "19473492efa4a05917573317",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 80,
+      "retry": false,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 21,
+      "start": "2026-10-18T00:15:21.528+08:00",
+      "end": "2026-10-18T00:15:21.608+08:00",
+      "start_source": "log_time_minus_duration",
+      "cached_input_tokens": null,
+      "uncached_input_tokens": null,
+      "request_limits": {},
+      "request_bytes": null,
+      "client": null,
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "b5d4e2d34510f8eae6d2d6d0",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 102,
+      "retry": false,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 23,
+      "start": "2026-10-18T00:25:56.975+08:00",
+      "end": "2026-10-18T00:25:57.077+08:00",
+      "start_source": "log_time_minus_duration",
+      "cached_input_tokens": null,
+      "uncached_input_tokens": null,
+      "request_limits": {},
+      "request_bytes": null,
+      "client": null,
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "7b17f82f03752f34620b2d31",
+      "model": "sensenova-6.8-flash-lite",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 2332,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 89,
+      "output_tokens": 16,
+      "total_tokens": 105,
+      "line": 27,
+      "start": "2026-10-18T09:27:56.876+08:00",
+      "end": "2026-10-18T09:27:59.209+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 89,
+      "request_limits": {
+        "max_tokens": 16
+      },
+      "request_bytes": 149,
+      "client": null,
+      "eventual_input_tokens": 89
+    },
+    {
+      "request_id": "ea21ce1ba7a139f62dc0737c",
+      "model": "sensenova-6.8-flash-lite",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 2608,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 109,
+      "output_tokens": 15,
+      "total_tokens": 124,
+      "line": 29,
+      "start": "2026-10-18T09:27:59.239+08:00",
+      "end": "2026-10-18T09:28:01.847+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 109,
+      "request_limits": {
+        "max_tokens": 16
+      },
+      "request_bytes": 285,
+      "client": null,
+      "eventual_input_tokens": 109
+    },
+    {
+      "request_id": "4d6c643a27550bf6b657a54e",
+      "model": "sensenova-6.8-flash-lite",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 8878,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 98,
+      "output_tokens": 64,
+      "total_tokens": 162,
+      "line": 32,
+      "start": "2026-10-18T09:35:56.479+08:00",
+      "end": "2026-10-18T09:36:05.357+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 98,
+      "request_limits": {
+        "max_tokens": 64
+      },
+      "request_bytes": 221,
+      "client": null,
+      "eventual_input_tokens": 98
+    },
+    {
+      "request_id": "cedf7cd6903aa06a3412264c",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 8157,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 10096,
+      "output_tokens": 371,
+      "total_tokens": 10467,
+      "line": 36,
+      "start": "2026-10-18T09:53:26.245+08:00",
+      "end": "2026-10-18T09:53:34.403+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 10096,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 42245,
+      "client": null,
+      "eventual_input_tokens": 10096
+    },
+    {
+      "request_id": "104bcf2f1b28cd4323a31e8d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 14168,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 10481,
+      "output_tokens": 832,
+      "total_tokens": 11313,
+      "line": 38,
+      "start": "2026-10-18T09:53:34.559+08:00",
+      "end": "2026-10-18T09:53:48.728+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 8192,
+      "uncached_input_tokens": 2289,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 43676,
+      "client": null,
+      "eventual_input_tokens": 10481
+    },
+    {
+      "request_id": "d287355feb9a9f624bc71f4d",
+      "model": "sensenova-6.8-flash-lite",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 20416,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 114,
+      "output_tokens": 32,
+      "total_tokens": 146,
+      "line": 45,
+      "start": "2026-10-18T11:04:15.889+08:00",
+      "end": "2026-10-18T11:04:36.306+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 114,
+      "request_limits": {
+        "max_tokens": 32
+      },
+      "request_bytes": 202,
+      "client": "DSH",
+      "eventual_input_tokens": 114
+    },
+    {
+      "request_id": "3b790bbec1ccdbf0a551bfc9",
+      "model": "sensenova-6.8-flash-lite",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 5053,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 183,
+      "output_tokens": 126,
+      "total_tokens": 309,
+      "line": 47,
+      "start": "2026-10-18T11:04:36.333+08:00",
+      "end": "2026-10-18T11:04:41.387+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 183,
+      "request_limits": {
+        "max_tokens": 256
+      },
+      "request_bytes": 603,
+      "client": "DSH",
+      "eventual_input_tokens": 183
+    },
+    {
+      "request_id": "20953424e716a97c1d253b3b",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 3647,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 9281,
+      "output_tokens": 154,
+      "total_tokens": 9435,
+      "line": 50,
+      "start": "2026-10-18T11:34:39.116+08:00",
+      "end": "2026-10-18T11:34:42.765+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 8192,
+      "uncached_input_tokens": 1089,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 37963,
+      "client": "DSH",
+      "eventual_input_tokens": 9281
+    },
+    {
+      "request_id": "d59b7687cf046511141d0bd6",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 7243,
+      "retry": false,
+      "reason": "client_cancelled",
+      "error_code": "",
+      "usage_known": true,
+      "input_tokens": 216,
+      "output_tokens": 302,
+      "total_tokens": 518,
+      "line": 56,
+      "start": "2026-10-18T11:34:39.123+08:00",
+      "end": "2026-10-18T11:34:46.366+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 216,
+      "request_limits": {
+        "max_completion_tokens": 4096
+      },
+      "request_bytes": 797,
+      "client": "DSH",
+      "eventual_input_tokens": 216
+    },
+    {
+      "request_id": "e0169a0ddac24c81d85f8aa0",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 311,
+      "retry": false,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 52,
+      "start": "2026-10-18T11:34:43.894+08:00",
+      "end": "2026-10-18T11:34:44.205+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 45694,
+      "client": "DSH",
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "cd76d71971888b88877e41f8",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 1434,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 86,
+      "output_tokens": 16,
+      "total_tokens": 102,
+      "line": 62,
+      "start": "2026-10-18T11:49:54.433+08:00",
+      "end": "2026-10-18T11:49:55.868+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 86,
+      "request_limits": {
+        "max_tokens": 16
+      },
+      "request_bytes": 116,
+      "client": "Unknown",
+      "eventual_input_tokens": 86
+    },
+    {
+      "request_id": "eeb52470c0b29567cd5dab1e",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 6373,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 12125,
+      "output_tokens": 241,
+      "total_tokens": 12366,
+      "line": 64,
+      "start": "2026-10-18T11:57:09.713+08:00",
+      "end": "2026-10-18T11:57:16.087+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 12125,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 46030,
+      "client": "DSH",
+      "eventual_input_tokens": 12125
+    },
+    {
+      "request_id": "3eefae556d31d2c80eda519e",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 4895,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 17995,
+      "output_tokens": 199,
+      "total_tokens": 18194,
+      "line": 66,
+      "start": "2026-10-18T11:57:16.455+08:00",
+      "end": "2026-10-18T11:57:21.350+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 10240,
+      "uncached_input_tokens": 7755,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 69508,
+      "client": "DSH",
+      "eventual_input_tokens": 17995
+    },
+    {
+      "request_id": "59afe0f8820a26a716c352aa",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 4013,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 23660,
+      "output_tokens": 150,
+      "total_tokens": 23810,
+      "line": 68,
+      "start": "2026-10-18T11:57:21.502+08:00",
+      "end": "2026-10-18T11:57:25.515+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 17920,
+      "uncached_input_tokens": 5740,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 90686,
+      "client": "DSH",
+      "eventual_input_tokens": 23660
+    },
+    {
+      "request_id": "9b64ebaea5c69da966c056a3",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 3879,
+      "retry": false,
+      "reason": "client_cancelled",
+      "error_code": "",
+      "usage_known": true,
+      "input_tokens": 27576,
+      "output_tokens": 137,
+      "total_tokens": 27713,
+      "line": 70,
+      "start": "2026-10-18T11:57:25.593+08:00",
+      "end": "2026-10-18T11:57:29.473+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 23552,
+      "uncached_input_tokens": 4024,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 103360,
+      "client": "DSH",
+      "eventual_input_tokens": 27576
+    },
+    {
+      "request_id": "3ee7a38c5603ad4b0bc8f84e",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 2757,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 37297,
+      "output_tokens": 207,
+      "total_tokens": 37504,
+      "line": 72,
+      "start": "2026-10-18T11:57:29.573+08:00",
+      "end": "2026-10-18T11:57:32.330+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 37297,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 135083,
+      "client": "DSH",
+      "eventual_input_tokens": 37297
+    },
+    {
+      "request_id": "090f24cd0aa15f6acd54b7b1",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 244,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 74,
+      "start": "2026-10-18T11:57:32.441+08:00",
+      "end": "2026-10-18T11:57:32.686+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 154846,
+      "client": "DSH",
+      "eventual_input_tokens": 43362
+    },
+    {
+      "request_id": "090f24cd0aa15f6acd54b7b1",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 5936,
+      "retry": false,
+      "reason": "client_cancelled",
+      "error_code": "",
+      "usage_known": true,
+      "input_tokens": 43362,
+      "output_tokens": 204,
+      "total_tokens": 43566,
+      "line": 75,
+      "start": "2026-10-18T11:57:32.691+08:00",
+      "end": "2026-10-18T11:57:38.627+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 27392,
+      "uncached_input_tokens": 15970,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 154846,
+      "client": "DSH",
+      "eventual_input_tokens": 43362
+    },
+    {
+      "request_id": "820aa16c609e72e32795273b",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 723,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 77,
+      "start": "2026-10-18T11:57:38.738+08:00",
+      "end": "2026-10-18T11:57:39.461+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 177191,
+      "client": "DSH",
+      "eventual_input_tokens": 49770
+    },
+    {
+      "request_id": "820aa16c609e72e32795273b",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 3814,
+      "retry": false,
+      "reason": "client_cancelled",
+      "error_code": "",
+      "usage_known": true,
+      "input_tokens": 49770,
+      "output_tokens": 326,
+      "total_tokens": 50096,
+      "line": 80,
+      "start": "2026-10-18T11:58:02.706+08:00",
+      "end": "2026-10-18T11:58:06.520+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 36864,
+      "uncached_input_tokens": 12906,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 177191,
+      "client": "DSH",
+      "eventual_input_tokens": 49770
+    },
+    {
+      "request_id": "fabd0dee2aa722be579a3c35",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 607,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 82,
+      "start": "2026-10-18T11:58:06.729+08:00",
+      "end": "2026-10-18T11:58:07.337+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 185478,
+      "client": "DSH",
+      "eventual_input_tokens": 51862
+    },
+    {
+      "request_id": "fabd0dee2aa722be579a3c35",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 7752,
+      "retry": false,
+      "reason": "client_cancelled",
+      "error_code": "",
+      "usage_known": true,
+      "input_tokens": 51862,
+      "output_tokens": 294,
+      "total_tokens": 52156,
+      "line": 85,
+      "start": "2026-10-18T11:58:09.469+08:00",
+      "end": "2026-10-18T11:58:17.221+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 43264,
+      "uncached_input_tokens": 8598,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 185478,
+      "client": "DSH",
+      "eventual_input_tokens": 51862
+    },
+    {
+      "request_id": "24983531a7c02466b4988bff",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 29228,
+      "retry": false,
+      "reason": "client_cancelled",
+      "error_code": "",
+      "usage_known": true,
+      "input_tokens": 53812,
+      "output_tokens": 2233,
+      "total_tokens": 56045,
+      "line": 87,
+      "start": "2026-10-18T11:58:17.355+08:00",
+      "end": "2026-10-18T11:58:46.583+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 51712,
+      "uncached_input_tokens": 2100,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 192193,
+      "client": "DSH",
+      "eventual_input_tokens": 53812
+    },
+    {
+      "request_id": "d0c17fd0fbb38e3d82c611d6",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 222,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 90,
+      "start": "2026-10-18T12:15:46.385+08:00",
+      "end": "2026-10-18T12:15:46.607+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_tokens": 64
+      },
+      "request_bytes": 175,
+      "client": "Unknown",
+      "eventual_input_tokens": 86
+    },
+    {
+      "request_id": "d0c17fd0fbb38e3d82c611d6",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 1241,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 86,
+      "output_tokens": 19,
+      "total_tokens": 105,
+      "line": 91,
+      "start": "2026-10-18T12:15:46.614+08:00",
+      "end": "2026-10-18T12:15:47.855+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": 86,
+      "request_limits": {
+        "max_tokens": 64
+      },
+      "request_bytes": 175,
+      "client": "Unknown",
+      "eventual_input_tokens": 86
+    },
+    {
+      "request_id": "f762f94fac48c87791a3a8a5",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 455,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 93,
+      "start": "2026-10-18T12:17:29.757+08:00",
+      "end": "2026-10-18T12:17:30.215+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 201490,
+      "client": "DSH",
+      "eventual_input_tokens": 56142
+    },
+    {
+      "request_id": "f762f94fac48c87791a3a8a5",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 373,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 94,
+      "start": "2026-10-18T12:17:30.222+08:00",
+      "end": "2026-10-18T12:17:30.596+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 201490,
+      "client": "DSH",
+      "eventual_input_tokens": 56142
+    },
+    {
+      "request_id": "f762f94fac48c87791a3a8a5",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 3,
+      "duration_ms": 394,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 97,
+      "start": "2026-10-18T12:18:00.234+08:00",
+      "end": "2026-10-18T12:18:00.628+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 201490,
+      "client": "DSH",
+      "eventual_input_tokens": 56142
+    },
+    {
+      "request_id": "f762f94fac48c87791a3a8a5",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 4,
+      "duration_ms": 437,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 100,
+      "start": "2026-10-18T12:18:30.611+08:00",
+      "end": "2026-10-18T12:18:31.049+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 201490,
+      "client": "DSH",
+      "eventual_input_tokens": 56142
+    },
+    {
+      "request_id": "f762f94fac48c87791a3a8a5",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 5,
+      "duration_ms": 9268,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 56142,
+      "output_tokens": 392,
+      "total_tokens": 56534,
+      "line": 103,
+      "start": "2026-10-18T12:20:00.640+08:00",
+      "end": "2026-10-18T12:20:09.908+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 53248,
+      "uncached_input_tokens": 2894,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 201490,
+      "client": "DSH",
+      "eventual_input_tokens": 56142
+    },
+    {
+      "request_id": "b17e360c5220234bd4653c48",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 385,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 105,
+      "start": "2026-10-18T12:20:10.017+08:00",
+      "end": "2026-10-18T12:20:10.402+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 203622,
+      "client": "DSH",
+      "eventual_input_tokens": 56620
+    },
+    {
+      "request_id": "b17e360c5220234bd4653c48",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 267,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 108,
+      "start": "2026-10-18T12:20:31.058+08:00",
+      "end": "2026-10-18T12:20:31.326+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 203622,
+      "client": "DSH",
+      "eventual_input_tokens": 56620
+    },
+    {
+      "request_id": "b17e360c5220234bd4653c48",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 4048,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 56620,
+      "output_tokens": 122,
+      "total_tokens": 56742,
+      "line": 111,
+      "start": "2026-10-18T12:20:40.413+08:00",
+      "end": "2026-10-18T12:20:44.461+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 56064,
+      "uncached_input_tokens": 556,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 203622,
+      "client": "DSH",
+      "eventual_input_tokens": 56620
+    },
+    {
+      "request_id": "f4ea12af958ba98dad1bd726",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 3447,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 56771,
+      "output_tokens": 106,
+      "total_tokens": 56877,
+      "line": 113,
+      "start": "2026-10-18T12:20:44.537+08:00",
+      "end": "2026-10-18T12:20:47.985+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 56320,
+      "uncached_input_tokens": 451,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 204274,
+      "client": "DSH",
+      "eventual_input_tokens": 56771
+    },
+    {
+      "request_id": "6bac571041dfd07756291409",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 440,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 115,
+      "start": "2026-10-18T12:20:48.078+08:00",
+      "end": "2026-10-18T12:20:48.519+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 204905,
+      "client": "DSH",
+      "eventual_input_tokens": 56906
+    },
+    {
+      "request_id": "6bac571041dfd07756291409",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 26887,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 56906,
+      "output_tokens": 2007,
+      "total_tokens": 58913,
+      "line": 118,
+      "start": "2026-10-18T12:21:18.520+08:00",
+      "end": "2026-10-18T12:21:45.406+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 56576,
+      "uncached_input_tokens": 330,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 204905,
+      "client": "DSH",
+      "eventual_input_tokens": 56906
+    },
+    {
+      "request_id": "6e360e111ecd40bae435d540",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 4867,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 60250,
+      "output_tokens": 169,
+      "total_tokens": 60419,
+      "line": 120,
+      "start": "2026-10-18T12:21:47.689+08:00",
+      "end": "2026-10-18T12:21:52.557+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 55296,
+      "uncached_input_tokens": 4954,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 217116,
+      "client": "DSH",
+      "eventual_input_tokens": 60250
+    },
+    {
+      "request_id": "f552f20dc11e183e436219d2",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 24081,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 63159,
+      "output_tokens": 93,
+      "total_tokens": 63252,
+      "line": 122,
+      "start": "2026-10-18T12:21:52.673+08:00",
+      "end": "2026-10-18T12:22:16.754+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 59392,
+      "uncached_input_tokens": 3767,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 227642,
+      "client": "DSH",
+      "eventual_input_tokens": 63159
+    },
+    {
+      "request_id": "15ab74c7d489680d530ce863",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 461,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 124,
+      "start": "2026-10-18T12:22:16.864+08:00",
+      "end": "2026-10-18T12:22:17.325+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 256724,
+      "client": "DSH",
+      "eventual_input_tokens": 71782
+    },
+    {
+      "request_id": "15ab74c7d489680d530ce863",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 351,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 125,
+      "start": "2026-10-18T12:22:17.332+08:00",
+      "end": "2026-10-18T12:22:17.683+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 256724,
+      "client": "DSH",
+      "eventual_input_tokens": 71782
+    },
+    {
+      "request_id": "15ab74c7d489680d530ce863",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 9183,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 71782,
+      "output_tokens": 341,
+      "total_tokens": 72123,
+      "line": 128,
+      "start": "2026-10-18T12:22:47.334+08:00",
+      "end": "2026-10-18T12:22:56.517+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 62976,
+      "uncached_input_tokens": 8806,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 256724,
+      "client": "DSH",
+      "eventual_input_tokens": 71782
+    },
+    {
+      "request_id": "4d8369ea22b9ac08bbf1c764",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 4245,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 72175,
+      "output_tokens": 137,
+      "total_tokens": 72312,
+      "line": 130,
+      "start": "2026-10-18T12:22:56.630+08:00",
+      "end": "2026-10-18T12:23:00.876+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 71680,
+      "uncached_input_tokens": 495,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 258325,
+      "client": "DSH",
+      "eventual_input_tokens": 72175
+    },
+    {
+      "request_id": "1adba2ef8e7635ed8b3d7b7a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 770,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 132,
+      "start": "2026-10-18T12:23:01.011+08:00",
+      "end": "2026-10-18T12:23:01.782+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 276329,
+      "client": "DSH",
+      "eventual_input_tokens": 77095
+    },
+    {
+      "request_id": "1adba2ef8e7635ed8b3d7b7a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 13611,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 77095,
+      "output_tokens": 1557,
+      "total_tokens": 78652,
+      "line": 135,
+      "start": "2026-10-18T12:23:17.694+08:00",
+      "end": "2026-10-18T12:23:31.306+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 49152,
+      "uncached_input_tokens": 27943,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 276329,
+      "client": "DSH",
+      "eventual_input_tokens": 77095
+    },
+    {
+      "request_id": "654832daaac15aa04c17cc2d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 445,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 137,
+      "start": "2026-10-18T12:23:31.517+08:00",
+      "end": "2026-10-18T12:23:31.963+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 283282,
+      "client": "DSH",
+      "eventual_input_tokens": 78841
+    },
+    {
+      "request_id": "654832daaac15aa04c17cc2d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 434,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 138,
+      "start": "2026-10-18T12:23:31.970+08:00",
+      "end": "2026-10-18T12:23:32.405+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 283282,
+      "client": "DSH",
+      "eventual_input_tokens": 78841
+    },
+    {
+      "request_id": "654832daaac15aa04c17cc2d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 2676,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 78841,
+      "output_tokens": 167,
+      "total_tokens": 79008,
+      "line": 141,
+      "start": "2026-10-18T12:24:01.976+08:00",
+      "end": "2026-10-18T12:24:04.652+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 76800,
+      "uncached_input_tokens": 2041,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 283282,
+      "client": "DSH",
+      "eventual_input_tokens": 78841
+    },
+    {
+      "request_id": "78613e403cb4a63481fee57d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 1956,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 79732,
+      "output_tokens": 152,
+      "total_tokens": 79884,
+      "line": 143,
+      "start": "2026-10-18T12:24:04.780+08:00",
+      "end": "2026-10-18T12:24:06.737+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 77824,
+      "uncached_input_tokens": 1908,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 287538,
+      "client": "DSH",
+      "eventual_input_tokens": 79732
+    },
+    {
+      "request_id": "e0c3949ac6597c544398ea21",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 2165,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 79991,
+      "output_tokens": 131,
+      "total_tokens": 80122,
+      "line": 145,
+      "start": "2026-10-18T12:24:06.859+08:00",
+      "end": "2026-10-18T12:24:09.024+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 78848,
+      "uncached_input_tokens": 1143,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 288585,
+      "client": "DSH",
+      "eventual_input_tokens": 79991
+    },
+    {
+      "request_id": "c28da556a91ead66aefafd9a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 267,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 147,
+      "start": "2026-10-18T12:24:09.141+08:00",
+      "end": "2026-10-18T12:24:09.409+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 291393,
+      "client": "DSH",
+      "eventual_input_tokens": 80605
+    },
+    {
+      "request_id": "c28da556a91ead66aefafd9a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 51491,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 80605,
+      "output_tokens": 4802,
+      "total_tokens": 85407,
+      "line": 150,
+      "start": "2026-10-18T12:24:32.421+08:00",
+      "end": "2026-10-18T12:25:23.912+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 71936,
+      "uncached_input_tokens": 8669,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 291393,
+      "client": "DSH",
+      "eventual_input_tokens": 80605
+    },
+    {
+      "request_id": "27a9024f77d67b1c64b63ab2",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 385,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 152,
+      "start": "2026-10-18T12:41:09.895+08:00",
+      "end": "2026-10-18T12:41:10.287+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 310324,
+      "client": "DSH",
+      "eventual_input_tokens": 85513
+    },
+    {
+      "request_id": "27a9024f77d67b1c64b63ab2",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 15111,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 85513,
+      "output_tokens": 902,
+      "total_tokens": 86415,
+      "line": 153,
+      "start": "2026-10-18T12:41:10.296+08:00",
+      "end": "2026-10-18T12:41:25.408+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 79872,
+      "uncached_input_tokens": 5641,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 310324,
+      "client": "DSH",
+      "eventual_input_tokens": 85513
+    },
+    {
+      "request_id": "7b1680304a10d0074aaab510",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 395,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 155,
+      "start": "2026-10-18T12:41:25.631+08:00",
+      "end": "2026-10-18T12:41:26.027+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 317298,
+      "client": "DSH",
+      "eventual_input_tokens": 87290
+    },
+    {
+      "request_id": "7b1680304a10d0074aaab510",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 2917,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 87290,
+      "output_tokens": 270,
+      "total_tokens": 87560,
+      "line": 158,
+      "start": "2026-10-18T12:41:40.296+08:00",
+      "end": "2026-10-18T12:41:43.213+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 79872,
+      "uncached_input_tokens": 7418,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 317298,
+      "client": "DSH",
+      "eventual_input_tokens": 87290
+    },
+    {
+      "request_id": "793afee96fb6a7b5779f0a6d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 381,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 160,
+      "start": "2026-10-18T12:41:44.349+08:00",
+      "end": "2026-10-18T12:41:44.731+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 324233,
+      "client": "DSH",
+      "eventual_input_tokens": 89027
+    },
+    {
+      "request_id": "793afee96fb6a7b5779f0a6d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 9567,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 89027,
+      "output_tokens": 401,
+      "total_tokens": 89428,
+      "line": 163,
+      "start": "2026-10-18T12:41:56.041+08:00",
+      "end": "2026-10-18T12:42:05.609+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 85248,
+      "uncached_input_tokens": 3779,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 324233,
+      "client": "DSH",
+      "eventual_input_tokens": 89027
+    },
+    {
+      "request_id": "1dcc9fbd453aecd10ae538c7",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 485,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 165,
+      "start": "2026-10-18T12:42:06.301+08:00",
+      "end": "2026-10-18T12:42:06.787+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 330916,
+      "client": "DSH",
+      "eventual_input_tokens": 90791
+    },
+    {
+      "request_id": "1dcc9fbd453aecd10ae538c7",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 2470,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 90791,
+      "output_tokens": 144,
+      "total_tokens": 90935,
+      "line": 168,
+      "start": "2026-10-18T12:42:14.744+08:00",
+      "end": "2026-10-18T12:42:17.214+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 87040,
+      "uncached_input_tokens": 3751,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 330916,
+      "client": "DSH",
+      "eventual_input_tokens": 90791
+    },
+    {
+      "request_id": "3f13683e53fab837209cdb9d",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 5247,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 92018,
+      "output_tokens": 640,
+      "total_tokens": 92658,
+      "line": 170,
+      "start": "2026-10-18T12:42:17.636+08:00",
+      "end": "2026-10-18T12:42:22.883+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 90112,
+      "uncached_input_tokens": 1906,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 335270,
+      "client": "DSH",
+      "eventual_input_tokens": 92018
+    },
+    {
+      "request_id": "099059ce47c3d84bdea15899",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 2296,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 92834,
+      "output_tokens": 162,
+      "total_tokens": 92996,
+      "line": 172,
+      "start": "2026-10-18T12:42:23.039+08:00",
+      "end": "2026-10-18T12:42:25.335+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 91136,
+      "uncached_input_tokens": 1698,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 338220,
+      "client": "DSH",
+      "eventual_input_tokens": 92834
+    },
+    {
+      "request_id": "0669f661ba247863d6fc35c2",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 1664,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 93054,
+      "output_tokens": 63,
+      "total_tokens": 93117,
+      "line": 174,
+      "start": "2026-10-18T12:42:25.688+08:00",
+      "end": "2026-10-18T12:42:27.353+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 92160,
+      "uncached_input_tokens": 894,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 339087,
+      "client": "DSH",
+      "eventual_input_tokens": 93054
+    },
+    {
+      "request_id": "f30719bbd5ded209c2b473a0",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 21350,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 95301,
+      "output_tokens": 2447,
+      "total_tokens": 97748,
+      "line": 176,
+      "start": "2026-10-18T12:42:27.433+08:00",
+      "end": "2026-10-18T12:42:48.784+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 92160,
+      "uncached_input_tokens": 3141,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 346744,
+      "client": "DSH",
+      "eventual_input_tokens": 95301
+    },
+    {
+      "request_id": "6363909215467c98e8fd1431",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 22879,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 98204,
+      "output_tokens": 2292,
+      "total_tokens": 100496,
+      "line": 178,
+      "start": "2026-10-18T12:42:49.092+08:00",
+      "end": "2026-10-18T12:43:11.971+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 95232,
+      "uncached_input_tokens": 2972,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 358066,
+      "client": "DSH",
+      "eventual_input_tokens": 98204
+    },
+    {
+      "request_id": "8de4c371912083c58c2049a3",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 681,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 180,
+      "start": "2026-10-18T13:47:32.236+08:00",
+      "end": "2026-10-18T13:47:32.918+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 367094,
+      "client": "DSH",
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "8de4c371912083c58c2049a3",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 396,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "insufficient_quota",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 181,
+      "start": "2026-10-18T13:47:32.929+08:00",
+      "end": "2026-10-18T13:47:33.326+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 367094,
+      "client": "DSH",
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "cc545c0855ef8aeea62bb230",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 702,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 185,
+      "start": "2026-10-18T14:05:46.388+08:00",
+      "end": "2026-10-18T14:05:47.091+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 367501,
+      "client": "DSH",
+      "eventual_input_tokens": 100841
+    },
+    {
+      "request_id": "cc545c0855ef8aeea62bb230",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 28432,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 100841,
+      "output_tokens": 1988,
+      "total_tokens": 102829,
+      "line": 186,
+      "start": "2026-10-18T14:05:47.103+08:00",
+      "end": "2026-10-18T14:06:15.536+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 8192,
+      "uncached_input_tokens": 92649,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 367501,
+      "client": "DSH",
+      "eventual_input_tokens": 100841
+    },
+    {
+      "request_id": "f25f0ea9de3697d717bf9e82",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 555,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 188,
+      "start": "2026-10-18T14:06:17.482+08:00",
+      "end": "2026-10-18T14:06:18.037+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 376858,
+      "client": "DSH",
+      "eventual_input_tokens": 102964
+    },
+    {
+      "request_id": "f25f0ea9de3697d717bf9e82",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 608,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 189,
+      "start": "2026-10-18T14:06:18.054+08:00",
+      "end": "2026-10-18T14:06:18.665+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 376858,
+      "client": "DSH",
+      "eventual_input_tokens": 102964
+    },
+    {
+      "request_id": "f25f0ea9de3697d717bf9e82",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 7330,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 102964,
+      "output_tokens": 253,
+      "total_tokens": 103217,
+      "line": 192,
+      "start": "2026-10-18T14:06:48.046+08:00",
+      "end": "2026-10-18T14:06:55.376+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 100608,
+      "uncached_input_tokens": 2356,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 376858,
+      "client": "DSH",
+      "eventual_input_tokens": 102964
+    },
+    {
+      "request_id": "a58b45d3a9e32f4e668d8cdd",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 14573,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 103266,
+      "output_tokens": 916,
+      "total_tokens": 104182,
+      "line": 194,
+      "start": "2026-10-18T14:06:59.964+08:00",
+      "end": "2026-10-18T14:07:14.538+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 102656,
+      "uncached_input_tokens": 610,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 377974,
+      "client": "DSH",
+      "eventual_input_tokens": 103266
+    },
+    {
+      "request_id": "1e810512d3787c9aca1e1a2b",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 19003,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 104488,
+      "output_tokens": 1223,
+      "total_tokens": 105711,
+      "line": 196,
+      "start": "2026-10-18T14:07:14.815+08:00",
+      "end": "2026-10-18T14:07:33.819+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 103168,
+      "uncached_input_tokens": 1320,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 382730,
+      "client": "DSH",
+      "eventual_input_tokens": 104488
+    },
+    {
+      "request_id": "2bf1cff08325781ba8a3ca17",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 20824,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 106142,
+      "output_tokens": 1487,
+      "total_tokens": 107629,
+      "line": 198,
+      "start": "2026-10-18T14:07:35.896+08:00",
+      "end": "2026-10-18T14:07:56.721+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 104448,
+      "uncached_input_tokens": 1694,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 389976,
+      "client": "DSH",
+      "eventual_input_tokens": 106142
+    },
+    {
+      "request_id": "64969c953aa1d2eee73e54ee",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 35509,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 107683,
+      "output_tokens": 2553,
+      "total_tokens": 110236,
+      "line": 200,
+      "start": "2026-10-18T14:13:55.698+08:00",
+      "end": "2026-10-18T14:14:31.208+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 104448,
+      "uncached_input_tokens": 3235,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 395992,
+      "client": "DSH",
+      "eventual_input_tokens": 107683
+    },
+    {
+      "request_id": "7993ea0b96d8244230a4b30a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 408,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 202,
+      "start": "2026-10-18T14:14:31.478+08:00",
+      "end": "2026-10-18T14:14:31.887+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 406313,
+      "client": "DSH",
+      "eventual_input_tokens": 110275
+    },
+    {
+      "request_id": "7993ea0b96d8244230a4b30a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 6286,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 110275,
+      "output_tokens": 177,
+      "total_tokens": 110452,
+      "line": 203,
+      "start": "2026-10-18T14:14:31.894+08:00",
+      "end": "2026-10-18T14:14:38.181+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 107520,
+      "uncached_input_tokens": 2755,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 406313,
+      "client": "DSH",
+      "eventual_input_tokens": 110275
+    },
+    {
+      "request_id": "4757b91b8bafa54bab696af6",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 618,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 205,
+      "start": "2026-10-18T14:14:38.318+08:00",
+      "end": "2026-10-18T14:14:38.937+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 407515,
+      "client": "DSH",
+      "eventual_input_tokens": 110587
+    },
+    {
+      "request_id": "4757b91b8bafa54bab696af6",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 4906,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 110587,
+      "output_tokens": 95,
+      "total_tokens": 110682,
+      "line": 208,
+      "start": "2026-10-18T14:15:01.898+08:00",
+      "end": "2026-10-18T14:15:06.804+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 110080,
+      "uncached_input_tokens": 507,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 407515,
+      "client": "DSH",
+      "eventual_input_tokens": 110587
+    },
+    {
+      "request_id": "bfb09a60d6850f40a2d12193",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 640,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 210,
+      "start": "2026-10-18T14:15:06.900+08:00",
+      "end": "2026-10-18T14:15:07.541+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 410609,
+      "client": "DSH",
+      "eventual_input_tokens": 111467
+    },
+    {
+      "request_id": "bfb09a60d6850f40a2d12193",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 696,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 213,
+      "start": "2026-10-18T14:15:08.947+08:00",
+      "end": "2026-10-18T14:15:09.643+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 410609,
+      "client": "DSH",
+      "eventual_input_tokens": 111467
+    },
+    {
+      "request_id": "bfb09a60d6850f40a2d12193",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 3,
+      "duration_ms": 460,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 216,
+      "start": "2026-10-18T14:15:37.559+08:00",
+      "end": "2026-10-18T14:15:38.020+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 410609,
+      "client": "DSH",
+      "eventual_input_tokens": 111467
+    },
+    {
+      "request_id": "bfb09a60d6850f40a2d12193",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 4,
+      "duration_ms": 427,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 219,
+      "start": "2026-10-18T14:16:09.660+08:00",
+      "end": "2026-10-18T14:16:10.088+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 410609,
+      "client": "DSH",
+      "eventual_input_tokens": 111467
+    },
+    {
+      "request_id": "bfb09a60d6850f40a2d12193",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 5,
+      "duration_ms": 11725,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 111467,
+      "output_tokens": 402,
+      "total_tokens": 111869,
+      "line": 222,
+      "start": "2026-10-18T14:17:38.034+08:00",
+      "end": "2026-10-18T14:17:49.759+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 108544,
+      "uncached_input_tokens": 2923,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 410609,
+      "client": "DSH",
+      "eventual_input_tokens": 111467
+    },
+    {
+      "request_id": "66dd6269f5ce32f4e967f926",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 6049,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 112340,
+      "output_tokens": 170,
+      "total_tokens": 112510,
+      "line": 224,
+      "start": "2026-10-18T14:17:49.919+08:00",
+      "end": "2026-10-18T14:17:55.968+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 111360,
+      "uncached_input_tokens": 980,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 413997,
+      "client": "DSH",
+      "eventual_input_tokens": 112340
+    },
+    {
+      "request_id": "4ad36ebc13a2878165d45aa0",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 8884,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 114000,
+      "output_tokens": 343,
+      "total_tokens": 114343,
+      "line": 226,
+      "start": "2026-10-18T14:17:56.075+08:00",
+      "end": "2026-10-18T14:18:04.960+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 112128,
+      "uncached_input_tokens": 1872,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 419802,
+      "client": "DSH",
+      "eventual_input_tokens": 114000
+    },
+    {
+      "request_id": "ff5d058491c008b684f04c05",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 669,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 228,
+      "start": "2026-10-18T14:18:05.274+08:00",
+      "end": "2026-10-18T14:18:05.943+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 421546,
+      "client": "DSH",
+      "eventual_input_tokens": 114461
+    },
+    {
+      "request_id": "ff5d058491c008b684f04c05",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 4110,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 114461,
+      "output_tokens": 97,
+      "total_tokens": 114558,
+      "line": 231,
+      "start": "2026-10-18T14:18:10.098+08:00",
+      "end": "2026-10-18T14:18:14.208+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 113920,
+      "uncached_input_tokens": 541,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 421546,
+      "client": "DSH",
+      "eventual_input_tokens": 114461
+    },
+    {
+      "request_id": "8cc8fa87bc19622c73c6b82c",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 9809,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 115385,
+      "output_tokens": 423,
+      "total_tokens": 115808,
+      "line": 233,
+      "start": "2026-10-18T14:18:14.333+08:00",
+      "end": "2026-10-18T14:18:24.143+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 114176,
+      "uncached_input_tokens": 1209,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 425087,
+      "client": "DSH",
+      "eventual_input_tokens": 115385
+    },
+    {
+      "request_id": "9e328edb98217c6aa017bbdf",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 468,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 235,
+      "start": "2026-10-18T14:18:24.513+08:00",
+      "end": "2026-10-18T14:18:24.982+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 426820,
+      "client": "DSH",
+      "eventual_input_tokens": 115856
+    },
+    {
+      "request_id": "9e328edb98217c6aa017bbdf",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 22373,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 115856,
+      "output_tokens": 1599,
+      "total_tokens": 117455,
+      "line": 238,
+      "start": "2026-10-18T14:18:35.960+08:00",
+      "end": "2026-10-18T14:18:58.334+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 115200,
+      "uncached_input_tokens": 656,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 426820,
+      "client": "DSH",
+      "eventual_input_tokens": 115856
+    },
+    {
+      "request_id": "9131bcc1e8b6b4781450cc60",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 455,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 240,
+      "start": "2026-10-18T14:27:48.377+08:00",
+      "end": "2026-10-18T14:27:48.834+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 432943,
+      "client": "DSH",
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "9131bcc1e8b6b4781450cc60",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 451,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 241,
+      "start": "2026-10-18T14:27:48.841+08:00",
+      "end": "2026-10-18T14:27:49.293+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 432943,
+      "client": "DSH",
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "9131bcc1e8b6b4781450cc60",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 3,
+      "duration_ms": 388,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 242,
+      "start": "2026-10-18T14:27:49.299+08:00",
+      "end": "2026-10-18T14:27:49.687+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 432943,
+      "client": "DSH",
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "9131bcc1e8b6b4781450cc60",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 4,
+      "duration_ms": 602,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 245,
+      "start": "2026-10-18T14:28:18.849+08:00",
+      "end": "2026-10-18T14:28:19.451+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 432943,
+      "client": "DSH",
+      "eventual_input_tokens": null
+    },
+    {
+      "request_id": "2b306e85f9400106acfd170f",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 542,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 249,
+      "start": "2026-10-18T14:30:13.748+08:00",
+      "end": "2026-10-18T14:30:14.290+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 433576,
+      "client": "DSH",
+      "eventual_input_tokens": 117619
+    },
+    {
+      "request_id": "2b306e85f9400106acfd170f",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 13674,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 117619,
+      "output_tokens": 811,
+      "total_tokens": 118430,
+      "line": 250,
+      "start": "2026-10-18T14:30:14.297+08:00",
+      "end": "2026-10-18T14:30:27.972+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 114688,
+      "uncached_input_tokens": 2931,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 433576,
+      "client": "DSH",
+      "eventual_input_tokens": 117619
+    },
+    {
+      "request_id": "6c8d22147095b7afb1486619",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 649,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 252,
+      "start": "2026-10-18T14:30:31.979+08:00",
+      "end": "2026-10-18T14:30:32.629+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 444355,
+      "client": "DSH",
+      "eventual_input_tokens": 120410
+    },
+    {
+      "request_id": "6c8d22147095b7afb1486619",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 6963,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 120410,
+      "output_tokens": 260,
+      "total_tokens": 120670,
+      "line": 253,
+      "start": "2026-10-18T14:30:32.636+08:00",
+      "end": "2026-10-18T14:30:39.600+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 117504,
+      "uncached_input_tokens": 2906,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 444355,
+      "client": "DSH",
+      "eventual_input_tokens": 120410
+    },
+    {
+      "request_id": "cd31e9e1ca60a33333536dde",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 865,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 255,
+      "start": "2026-10-18T14:30:43.652+08:00",
+      "end": "2026-10-18T14:30:44.518+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 476511,
+      "client": "DSH",
+      "eventual_input_tokens": 128167
+    },
+    {
+      "request_id": "cd31e9e1ca60a33333536dde",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 889,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 256,
+      "start": "2026-10-18T14:30:44.525+08:00",
+      "end": "2026-10-18T14:30:45.414+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 476511,
+      "client": "DSH",
+      "eventual_input_tokens": 128167
+    },
+    {
+      "request_id": "cd31e9e1ca60a33333536dde",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 3,
+      "duration_ms": 686,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 259,
+      "start": "2026-10-18T14:31:02.642+08:00",
+      "end": "2026-10-18T14:31:03.328+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 476511,
+      "client": "DSH",
+      "eventual_input_tokens": 128167
+    },
+    {
+      "request_id": "cd31e9e1ca60a33333536dde",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 4,
+      "duration_ms": 32507,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 128167,
+      "output_tokens": 2405,
+      "total_tokens": 130572,
+      "line": 262,
+      "start": "2026-10-18T14:31:14.534+08:00",
+      "end": "2026-10-18T14:31:47.041+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 120320,
+      "uncached_input_tokens": 7847,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 476511,
+      "client": "DSH",
+      "eventual_input_tokens": 128167
+    },
+    {
+      "request_id": "4582ff31b2f564bf8a1cce31",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 653,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 264,
+      "start": "2026-10-18T14:31:49.739+08:00",
+      "end": "2026-10-18T14:31:50.393+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 496036,
+      "client": "DSH",
+      "eventual_input_tokens": 132808
+    },
+    {
+      "request_id": "4582ff31b2f564bf8a1cce31",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 377,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 265,
+      "start": "2026-10-18T14:31:50.401+08:00",
+      "end": "2026-10-18T14:31:50.778+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 496036,
+      "client": "DSH",
+      "eventual_input_tokens": 132808
+    },
+    {
+      "request_id": "4582ff31b2f564bf8a1cce31",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 70240,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 132808,
+      "output_tokens": 5750,
+      "total_tokens": 138558,
+      "line": 268,
+      "start": "2026-10-18T14:32:20.408+08:00",
+      "end": "2026-10-18T14:33:30.648+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 126976,
+      "uncached_input_tokens": 5832,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 496036,
+      "client": "DSH",
+      "eventual_input_tokens": 132808
+    },
+    {
+      "request_id": "02bbe14a74c613d5a7947c64",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 41647,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 138649,
+      "output_tokens": 2881,
+      "total_tokens": 141530,
+      "line": 270,
+      "start": "2026-10-18T15:02:13.238+08:00",
+      "end": "2026-10-18T15:02:54.884+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 131072,
+      "uncached_input_tokens": 7577,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 519823,
+      "client": "DSH",
+      "eventual_input_tokens": 138649
+    },
+    {
+      "request_id": "3b6bab59e76492780a1afb11",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 615,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 272,
+      "start": "2026-10-18T15:07:37.758+08:00",
+      "end": "2026-10-18T15:07:38.374+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 531364,
+      "client": "DSH",
+      "eventual_input_tokens": 141553
+    },
+    {
+      "request_id": "3b6bab59e76492780a1afb11",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 666,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 273,
+      "start": "2026-10-18T15:07:38.381+08:00",
+      "end": "2026-10-18T15:07:39.048+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 531364,
+      "client": "DSH",
+      "eventual_input_tokens": 141553
+    },
+    {
+      "request_id": "3b6bab59e76492780a1afb11",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 3,
+      "duration_ms": 720,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 274,
+      "start": "2026-10-18T15:07:39.053+08:00",
+      "end": "2026-10-18T15:07:39.774+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 531364,
+      "client": "DSH",
+      "eventual_input_tokens": 141553
+    },
+    {
+      "request_id": "3b6bab59e76492780a1afb11",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 4,
+      "duration_ms": 883,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 277,
+      "start": "2026-10-18T15:08:08.382+08:00",
+      "end": "2026-10-18T15:08:09.266+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 531364,
+      "client": "DSH",
+      "eventual_input_tokens": 141553
+    },
+    {
+      "request_id": "3b6bab59e76492780a1afb11",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 5,
+      "duration_ms": 12026,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 141553,
+      "output_tokens": 644,
+      "total_tokens": 142197,
+      "line": 280,
+      "start": "2026-10-18T15:08:39.060+08:00",
+      "end": "2026-10-18T15:08:51.085+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 137216,
+      "uncached_input_tokens": 4337,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 531364,
+      "client": "DSH",
+      "eventual_input_tokens": 141553
+    },
+    {
+      "request_id": "64aca60623902163d7529313",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 8477,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 142262,
+      "output_tokens": 332,
+      "total_tokens": 142594,
+      "line": 282,
+      "start": "2026-10-18T15:08:51.284+08:00",
+      "end": "2026-10-18T15:08:59.761+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 141312,
+      "uncached_input_tokens": 950,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 534197,
+      "client": "DSH",
+      "eventual_input_tokens": 142262
+    },
+    {
+      "request_id": "2bd016b3b4c45c99ca8e176a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 837,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 284,
+      "start": "2026-10-18T15:09:05.444+08:00",
+      "end": "2026-10-18T15:09:06.282+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 536245,
+      "client": "DSH",
+      "eventual_input_tokens": 142867
+    },
+    {
+      "request_id": "2bd016b3b4c45c99ca8e176a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 5140,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 142867,
+      "output_tokens": 137,
+      "total_tokens": 143004,
+      "line": 287,
+      "start": "2026-10-18T15:09:36.282+08:00",
+      "end": "2026-10-18T15:09:41.422+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 142080,
+      "uncached_input_tokens": 787,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 536245,
+      "client": "DSH",
+      "eventual_input_tokens": 142867
+    },
+    {
+      "request_id": "f0eff5c338022305df954b01",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 774,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 289,
+      "start": "2026-10-18T15:09:41.584+08:00",
+      "end": "2026-10-18T15:09:42.358+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 538430,
+      "client": "DSH",
+      "eventual_input_tokens": 143444
+    },
+    {
+      "request_id": "f0eff5c338022305df954b01",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 846,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 290,
+      "start": "2026-10-18T15:09:42.365+08:00",
+      "end": "2026-10-18T15:09:43.212+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 538430,
+      "client": "DSH",
+      "eventual_input_tokens": 143444
+    },
+    {
+      "request_id": "f0eff5c338022305df954b01",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 4981,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 143444,
+      "output_tokens": 124,
+      "total_tokens": 143568,
+      "line": 293,
+      "start": "2026-10-18T15:10:09.276+08:00",
+      "end": "2026-10-18T15:10:14.258+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 142592,
+      "uncached_input_tokens": 852,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 538430,
+      "client": "DSH",
+      "eventual_input_tokens": 143444
+    },
+    {
+      "request_id": "d91dd0f9b1307e603e9d669a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 731,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 295,
+      "start": "2026-10-18T15:10:14.386+08:00",
+      "end": "2026-10-18T15:10:15.117+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 544614,
+      "client": "DSH",
+      "eventual_input_tokens": 144963
+    },
+    {
+      "request_id": "d91dd0f9b1307e603e9d669a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 887,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 296,
+      "start": "2026-10-18T15:10:15.124+08:00",
+      "end": "2026-10-18T15:10:16.011+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 544614,
+      "client": "DSH",
+      "eventual_input_tokens": 144963
+    },
+    {
+      "request_id": "d91dd0f9b1307e603e9d669a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 3,
+      "duration_ms": 716,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 299,
+      "start": "2026-10-18T15:10:43.229+08:00",
+      "end": "2026-10-18T15:10:43.945+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 544614,
+      "client": "DSH",
+      "eventual_input_tokens": 144963
+    },
+    {
+      "request_id": "d91dd0f9b1307e603e9d669a",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 200,
+      "attempts": 4,
+      "duration_ms": 10878,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 144963,
+      "output_tokens": 533,
+      "total_tokens": 145496,
+      "line": 302,
+      "start": "2026-10-18T15:10:45.131+08:00",
+      "end": "2026-10-18T15:10:56.009+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 143360,
+      "uncached_input_tokens": 1603,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 544614,
+      "client": "DSH",
+      "eventual_input_tokens": 144963
+    },
+    {
+      "request_id": "20512943d0be9e7d0bb825f9",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 5084,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 145631,
+      "output_tokens": 139,
+      "total_tokens": 145770,
+      "line": 304,
+      "start": "2026-10-18T15:10:56.198+08:00",
+      "end": "2026-10-18T15:11:01.283+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 144896,
+      "uncached_input_tokens": 735,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 547257,
+      "client": "DSH",
+      "eventual_input_tokens": 145631
+    },
+    {
+      "request_id": "89c141efa83bfaa15835e029",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 766,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 306,
+      "start": "2026-10-18T15:11:01.413+08:00",
+      "end": "2026-10-18T15:11:02.180+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 553810,
+      "client": "DSH",
+      "eventual_input_tokens": 147477
+    },
+    {
+      "request_id": "89c141efa83bfaa15835e029",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 12057,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 147477,
+      "output_tokens": 602,
+      "total_tokens": 148079,
+      "line": 309,
+      "start": "2026-10-18T15:11:16.016+08:00",
+      "end": "2026-10-18T15:11:28.073+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 145408,
+      "uncached_input_tokens": 2069,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 553810,
+      "client": "DSH",
+      "eventual_input_tokens": 147477
+    },
+    {
+      "request_id": "09cf8fb5cbe4c6b5a638da54",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 780,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 311,
+      "start": "2026-10-18T15:11:28.245+08:00",
+      "end": "2026-10-18T15:11:29.026+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 557268,
+      "client": "DSH",
+      "eventual_input_tokens": 148328
+    },
+    {
+      "request_id": "09cf8fb5cbe4c6b5a638da54",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 884,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 314,
+      "start": "2026-10-18T15:11:32.188+08:00",
+      "end": "2026-10-18T15:11:33.072+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 557268,
+      "client": "DSH",
+      "eventual_input_tokens": 148328
+    },
+    {
+      "request_id": "09cf8fb5cbe4c6b5a638da54",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 4219,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 148328,
+      "output_tokens": 87,
+      "total_tokens": 148415,
+      "line": 317,
+      "start": "2026-10-18T15:11:59.042+08:00",
+      "end": "2026-10-18T15:12:03.262+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 147456,
+      "uncached_input_tokens": 872,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 557268,
+      "client": "DSH",
+      "eventual_input_tokens": 148328
+    },
+    {
+      "request_id": "4cc46a66e2513d170a038c48",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 680,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 319,
+      "start": "2026-10-18T15:12:03.432+08:00",
+      "end": "2026-10-18T15:12:04.112+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 562273,
+      "client": "DSH",
+      "eventual_input_tokens": 149649
+    },
+    {
+      "request_id": "4cc46a66e2513d170a038c48",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 9566,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 149649,
+      "output_tokens": 411,
+      "total_tokens": 150060,
+      "line": 322,
+      "start": "2026-10-18T15:12:33.081+08:00",
+      "end": "2026-10-18T15:12:42.856+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 148224,
+      "uncached_input_tokens": 1425,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 562273,
+      "client": "DSH",
+      "eventual_input_tokens": 149649
+    },
+    {
+      "request_id": "aea8ec2c19d1223ff34370fc",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 20375,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 152512,
+      "output_tokens": 1312,
+      "total_tokens": 153824,
+      "line": 324,
+      "start": "2026-10-18T15:12:43.109+08:00",
+      "end": "2026-10-18T15:13:03.483+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 149504,
+      "uncached_input_tokens": 3008,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 570088,
+      "client": "DSH",
+      "eventual_input_tokens": 152512
+    },
+    {
+      "request_id": "76ed76c053b81fc7bf16bde2",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 33457,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 154959,
+      "output_tokens": 2609,
+      "total_tokens": 157568,
+      "line": 326,
+      "start": "2026-10-18T15:13:03.617+08:00",
+      "end": "2026-10-18T15:13:37.073+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 152320,
+      "uncached_input_tokens": 2639,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 580263,
+      "client": "DSH",
+      "eventual_input_tokens": 154959
+    },
+    {
+      "request_id": "7e3ae9931742aea8e5d3898c",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 533,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 328,
+      "start": "2026-10-18T15:24:30.020+08:00",
+      "end": "2026-10-18T15:24:30.554+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 590397,
+      "client": "DSH",
+      "eventual_input_tokens": 157668
+    },
+    {
+      "request_id": "7e3ae9931742aea8e5d3898c",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 2,
+      "duration_ms": 699,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 329,
+      "start": "2026-10-18T15:24:30.564+08:00",
+      "end": "2026-10-18T15:24:31.264+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 590397,
+      "client": "DSH",
+      "eventual_input_tokens": 157668
+    },
+    {
+      "request_id": "7e3ae9931742aea8e5d3898c",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 3,
+      "duration_ms": 72149,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 157668,
+      "output_tokens": 5993,
+      "total_tokens": 163661,
+      "line": 330,
+      "start": "2026-10-18T15:24:31.272+08:00",
+      "end": "2026-10-18T15:25:43.420+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 153600,
+      "uncached_input_tokens": 4068,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 590397,
+      "client": "DSH",
+      "eventual_input_tokens": 157668
+    },
+    {
+      "request_id": "cdab2f5a2fa8b48caf664dbd",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 516,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 332,
+      "start": "2026-10-18T15:25:43.812+08:00",
+      "end": "2026-10-18T15:25:44.329+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 627993,
+      "client": "DSH",
+      "eventual_input_tokens": 167508
+    },
+    {
+      "request_id": "cdab2f5a2fa8b48caf664dbd",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 9683,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 167508,
+      "output_tokens": 383,
+      "total_tokens": 167891,
+      "line": 333,
+      "start": "2026-10-18T15:25:44.335+08:00",
+      "end": "2026-10-18T15:25:54.018+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 157440,
+      "uncached_input_tokens": 10068,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 627993,
+      "client": "DSH",
+      "eventual_input_tokens": 167508
+    },
+    {
+      "request_id": "9a0d1bb659be4e9de064f637",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 626,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 335,
+      "start": "2026-10-18T15:25:55.658+08:00",
+      "end": "2026-10-18T15:25:56.285+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 641627,
+      "client": "DSH",
+      "eventual_input_tokens": 171656
+    },
+    {
+      "request_id": "9a0d1bb659be4e9de064f637",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 4953,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 171656,
+      "output_tokens": 103,
+      "total_tokens": 171759,
+      "line": 336,
+      "start": "2026-10-18T15:25:56.291+08:00",
+      "end": "2026-10-18T15:26:01.245+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 167424,
+      "uncached_input_tokens": 4232,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 641627,
+      "client": "DSH",
+      "eventual_input_tokens": 171656
+    },
+    {
+      "request_id": "f4aea19dfad04e53bc978e2e",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 728,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 338,
+      "start": "2026-10-18T15:26:01.364+08:00",
+      "end": "2026-10-18T15:26:02.092+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 650706,
+      "client": "DSH",
+      "eventual_input_tokens": 174456
+    },
+    {
+      "request_id": "f4aea19dfad04e53bc978e2e",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 28956,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 174456,
+      "output_tokens": 2145,
+      "total_tokens": 176601,
+      "line": 341,
+      "start": "2026-10-18T15:26:14.341+08:00",
+      "end": "2026-10-18T15:26:43.297+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 171520,
+      "uncached_input_tokens": 2936,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 650706,
+      "client": "DSH",
+      "eventual_input_tokens": 174456
+    },
+    {
+      "request_id": "ed06e25a7f25489835a9aaf6",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-dda49232",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 750,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 343,
+      "start": "2026-10-18T15:26:43.493+08:00",
+      "end": "2026-10-18T15:26:44.244+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 659924,
+      "client": "DSH",
+      "eventual_input_tokens": 176761
+    },
+    {
+      "request_id": "ed06e25a7f25489835a9aaf6",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 9806,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 176761,
+      "output_tokens": 520,
+      "total_tokens": 177281,
+      "line": 344,
+      "start": "2026-10-18T15:26:44.253+08:00",
+      "end": "2026-10-18T15:26:54.060+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 174336,
+      "uncached_input_tokens": 2425,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 659924,
+      "client": "DSH",
+      "eventual_input_tokens": 176761
+    },
+    {
+      "request_id": "cc6ac709da1ee32f2dd42305",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 5745,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 177309,
+      "output_tokens": 160,
+      "total_tokens": 177469,
+      "line": 346,
+      "start": "2026-10-18T15:26:54.335+08:00",
+      "end": "2026-10-18T15:27:00.080+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 176640,
+      "uncached_input_tokens": 669,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 662090,
+      "client": "DSH",
+      "eventual_input_tokens": 177309
+    },
+    {
+      "request_id": "1f6c4873561c82d6437b6e7f",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 200,
+      "attempts": 1,
+      "duration_ms": 10106,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 178382,
+      "output_tokens": 385,
+      "total_tokens": 178767,
+      "line": 348,
+      "start": "2026-10-18T15:27:43.242+08:00",
+      "end": "2026-10-18T15:27:53.348+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 177152,
+      "uncached_input_tokens": 1230,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 665820,
+      "client": "DSH",
+      "eventual_input_tokens": 178382
+    },
+    {
+      "request_id": "20e3cbdd1fb2137562d7d958",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-f2240d9d",
+      "status": 429,
+      "attempts": 1,
+      "duration_ms": 569,
+      "retry": true,
+      "reason": "model_rate_limit",
+      "error_code": "429003",
+      "usage_known": false,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "line": 350,
+      "start": "2026-10-18T15:27:53.501+08:00",
+      "end": "2026-10-18T15:27:54.071+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 0,
+      "uncached_input_tokens": null,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 679661,
+      "client": "DSH",
+      "eventual_input_tokens": 182822
+    },
+    {
+      "request_id": "20e3cbdd1fb2137562d7d958",
+      "model": "deepseek-v4-flash",
+      "account_id": "sense-e413ac65",
+      "status": 200,
+      "attempts": 2,
+      "duration_ms": 9994,
+      "retry": false,
+      "reason": null,
+      "error_code": null,
+      "usage_known": true,
+      "input_tokens": 182822,
+      "output_tokens": 382,
+      "total_tokens": 183204,
+      "line": 351,
+      "start": "2026-10-18T15:27:54.079+08:00",
+      "end": "2026-10-18T15:28:04.073+08:00",
+      "start_source": "encrypted_attempt_metadata",
+      "cached_input_tokens": 178176,
+      "uncached_input_tokens": 4646,
+      "request_limits": {
+        "max_completion_tokens": 32768
+      },
+      "request_bytes": 679661,
+      "client": "DSH",
+      "eventual_input_tokens": 182822
+    }
+  ],
+  "assessment": {
+    "configured_tpm_limit": null,
+    "configured_rpm_limit": null,
+    "confidence_in_exact_limit": "insufficient_evidence",
+    "observed_peak_accepted_requests_per_rolling_60s": 6,
+    "observed_peak_reported_total_tokens_per_rolling_60s": 567950,
+    "peak_window_input_tokens": 562202,
+    "peak_window_cached_input_tokens": 547840,
+    "peak_window_output_tokens": 5748,
+    "peak_window_uncached_input_plus_output_tokens": 20110,
+    "peak_window_account": "sense-f2240d9d",
+    "peak_window_first_start": "2026-10-18T12:42:14.744+08:00",
+    "peak_window_last_start": "2026-10-18T12:42:49.092+08:00",
+    "interpretation": "Observed workload throughput is not the configured TPM/RPM. Cache accounting, token reservation, burst/refill rules, external traffic and upstream shared capacity are not known.",
+    "short_request_counterexample": {
+      "request_id": "d0c17fd0fbb38e3d82c611d6",
+      "time": "2026-10-18T12:15:46.385+08:00",
+      "account": "sense-dda49232",
+      "seconds_since_last_observed_same_account_model_attempt": 1049.03,
+      "initial_status": 429,
+      "eventual_input_tokens_on_other_account": 86,
+      "request_max_tokens": 64,
+      "log_lines": [
+        90,
+        91
+      ],
+      "interpretation": "The same short request was rejected after over 17 minutes without logged same-account traffic, then accepted on another account. Local minute throughput alone cannot explain all rejections."
+    },
+    "same_account_429_with_no_other_observed_inflight_attempt": 69,
+    "max_completion_tokens_32768_client_requests": 75,
+    "reported_output_tokens_median": 341,
+    "reported_output_tokens_max": 5993,
+    "notes": [
+      "HTTP 200 accepted attempts include six client-cancelled streams that still reported usage; accepted does not always mean a fully delivered response.",
+      "Some 429 requests have no usage; zero numeric log fields are unknown consumption, not evidence of zero charge.",
+      "Retries and request_completed are not double-counted: only upstream_attempt contributes to counts.",
+      "The gateway 30-second fallback cooldown is a local policy, not evidence of upstream reset duration.",
+      "Archive header allowlist does not retain Retry-After or rate-limit headers; absence in archives does not mean upstream omitted them.",
+      "No new upstream calls or load tests were performed."
+    ],
+    "recommended_next_observations": [
+      "Record per-attempt upstream Retry-After, rate-limit limit/remaining/reset headers when present, with safe header allowlist.",
+      "Record request output cap and reported cached/uncached tokens in per-attempt structured logs.",
+      "Use controlled short-input/short-output sequential requests to distinguish RPM from TPM only as a separately scoped test.",
+      "Validate whether accounts are independent quota subjects and whether there is traffic outside this gateway."
+    ]
+  }
+}

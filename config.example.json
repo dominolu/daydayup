@@ -1,0 +1,109 @@
+{
+  "listen": "127.0.0.1:8080",
+  "default_provider": "workbuddy",
+  "default_realm": "intl",
+  "default_group": "default",
+  "gateway_key_env": "GATEWAY_API_KEY",
+  "admin_key_env": "GATEWAY_ADMIN_KEY",
+  "session_store_dir": "data/sessions",
+  "session_store_key_env": "GATEWAY_SESSION_STORE_KEY",
+  "state_file": "data/state.json",
+  "request_timeout_seconds": 300,
+  "refresh_interval_seconds": 60,
+  "max_request_bytes": 33554432,
+  "max_attempts": 3,
+  "max_waiting_requests": 128,
+  "guards": {
+    "reserve_credits": 0,
+    "daily_tokens": 0,
+    "daily_credits": 0,
+    "per_model_daily_tokens": 0,
+    "reset_hour": 0
+  },
+  "redaction": {
+    "enabled": false,
+    "scope": "default",
+    "store_file": "data/redaction.map.enc",
+    "store_key_env": "GATEWAY_REDACTION_STORE_KEY",
+    "max_restore_buffer": 33554432,
+    "token_ttl_seconds": 2592000,
+    "fail_closed": true,
+    "tool_guard": {
+      "enabled": false,
+      "mode": "observe"
+    },
+    "custom_words": {}
+  },
+  "accounts": [
+    {
+      "id": "wb-intl-1",
+      "provider": "workbuddy",
+      "api_key_env": "WORKBUDDY_INTL_1_ACCESS",
+      "refresh_token_env": "WORKBUDDY_INTL_1_REFRESH",
+      "uid_env": "WORKBUDDY_INTL_1_UID",
+      "realm": "intl",
+      "product": "desktop",
+      "max_in_flight": 4,
+      "group": "default"
+    },
+    {
+      "id": "wb-cn-1",
+      "provider": "workbuddy",
+      "api_key_env": "WORKBUDDY_CN_1_ACCESS",
+      "refresh_token_env": "WORKBUDDY_CN_1_REFRESH",
+      "uid_env": "WORKBUDDY_CN_1_UID",
+      "realm": "cn",
+      "product": "desktop",
+      "max_in_flight": 4
+    },
+    {
+      "id": "tp-1",
+      "name": "Intern-ai 主号",
+      "provider": "tokenplan",
+      "api_key_env": "TOKENPLAN_ACCOUNT_1_KEY",
+      "base_url": "https://discovery-api.intern-ai.org.cn",
+      "max_in_flight": 4
+    }
+  ],
+  "agent_store_file": "data/agents.json",
+  "agents": {
+    "enabled": true,
+    "write_mode": "auto",
+    "gateway_url": "http://127.0.0.1:8080"
+  },
+  "bridges": {
+    "messages": false,
+    "responses": false
+  },
+  "pricing": {
+    "deepseek-v4.1-flash": {
+      "input": 2.0,
+      "output": 8.0,
+      "cache_read": 0.5
+    }
+  },
+  "routing": "round_robin",
+  "middleware": {
+    "model_map": {
+      "fast": "deepseek-v4.1-flash"
+    },
+    "system_prompt": [
+      {
+        "match_agent": "claude-code",
+        "text": "你是 Claude Code 接入网关后的助手。"
+      }
+    ],
+    "think_tags": {
+      "strip": true
+    }
+  },
+  "prewarm": {
+    "enabled": false,
+    "hour": 4,
+    "timeout": 30
+  },
+  "intent": {
+    "enabled": false
+  },
+  "db_file": "data/gateway.db"
+}

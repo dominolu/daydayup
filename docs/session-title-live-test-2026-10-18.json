@@ -1,0 +1,56 @@
+{
+  "version": "0.5.0",
+  "session_id": "sess-12e6dcd02fd6f1645a539c294ede8b46",
+  "main_request_id": "d287355feb9a9f624bc71f4d",
+  "title_request_id": "3b790bbec1ccdbf0a551bfc9",
+  "name": "网关自动标题关联功能自检",
+  "name_info": {
+    "source": "model_title",
+    "request_id": "3b790bbec1ccdbf0a551bfc9",
+    "detector": "dsh:session-title",
+    "updated_at": "2026-10-18T11:04:41.403842+08:00",
+    "request_started_at": "2026-10-18T11:04:36.321714+08:00"
+  },
+  "requests": 2,
+  "title": {
+    "detector": "dsh:session-title",
+    "association": "user_messages",
+    "status": "applied",
+    "source_message_hashes": [
+      "77bfe064f13f2b5b723b324ba324f2404606a3e722fd9383fdf58308fbc24eda"
+    ],
+    "linked_request_id": "d287355feb9a9f624bc71f4d",
+    "text": "网关自动标题关联功能自检"
+  },
+  "usage": {
+    "reported_fields": [
+      "total_tokens",
+      "input_tokens",
+      "output_tokens",
+      "cached_input_tokens"
+    ],
+    "input_tokens": 297,
+    "output_tokens": 158,
+    "total_tokens": 455,
+    "cached_input_tokens": 0,
+    "known": true
+  },
+  "title_usage": {
+    "reported_fields": [
+      "input_tokens",
+      "output_tokens",
+      "total_tokens",
+      "cached_input_tokens"
+    ],
+    "input_tokens": 183,
+    "output_tokens": 126,
+    "total_tokens": 309,
+    "cached_input_tokens": 0,
+    "known": true
+  },
+  "stream_complete": true,
+  "account_binding": {
+    "sensenova": "sense-dda49232"
+  },
+  "test_kind": "real SenseNova upstream with a DSH-format title request; not an installed-client UI test"
+}

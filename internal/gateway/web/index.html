@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>DayDayNew · 模型网关管理台</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='11' fill='%23109486'/%3E%3Cpath d='M11 12h9a8 8 0 010 16h-9v-5h9a3 3 0 000-6h-9z' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/admin/assets/app.css">
+  <script src="/admin/assets/app.js" defer></script>
+</head>
+<body>
+<svg class="sprite" aria-hidden="true"><defs>
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-stack" viewBox="0 0 24 24"><path d="m12 3 10 5-10 5L2 8zM2 12l10 5 10-5M2 16l10 5 10-5"/></symbol>
+  <symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 2 9 5v10l-9 5-9-5V7zM3 7l9 5 9-5M12 12v10M7.5 4.5l9 5"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 3v18h17M8 15v2M13 10v7M18 5v12"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-14-2 16"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 8a8.5 8.5 0 0 0-14.8-3L3 8m0-5v5h5M4 16a8.5 8.5 0 0 0 14.8 3L21 16m0 5v-5h-5"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7h.01"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="8" r="5"/><path d="m12 12 9 9M16 16l3-3M19 19l3-3"/></symbol>
+  <symbol id="i-zap" viewBox="0 0 24 24"><path d="m13 2-9 12h7l-1 8 10-12h-7z"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="m15 4 5 5M4 20l1-6L17 2l5 5-12 12z"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7"/></symbol>
+  <symbol id="i-exit" viewBox="0 0 24 24"><path d="M9 4H4v16h5m7-12 4 4-4 4m-6-4h10"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 10c0 4 16 4 16 0M4 15c0 4 16 4 16 0"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5zM9 12l2 2 4-4"/></symbol>
+  <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/><path d="M7 6.5h.01M7 17.5h.01M15 6.5h3M15 17.5h3"/></symbol>
+  <symbol id="i-agent" viewBox="0 0 24 24"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M9 7V5a3 3 0 0 1 6 0v2M9 13h.01M15 13h.01M9 16.5c1.8 1 4.2 1 6 0"/></symbol>
+  <symbol id="i-route" viewBox="0 0 24 24"><circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7 6h10M5.5 8.5 11 16.5M18.5 8.5 13 16.5"/></symbol>
+  <symbol id="logo-sensenova" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" stroke="none"/><path d="M7.4 15.4c1.2 1 2.7 1.5 4.4 1.5 2.2 0 3.6-1 3.6-2.5 0-1.4-1-2-3.3-2.4l-1.7-.3c-2-.4-3-1.3-3-3 0-2 1.8-3.4 4.5-3.4 1.5 0 2.9.4 4 1.2" stroke="#fff" stroke-width="1.9" fill="none" stroke-linecap="round"/></symbol>
+  <symbol id="logo-workbuddy" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" stroke="none"/><path d="M6.6 14.6 9 9.4l2.1 4.3 1-2.2 1.1 2.2L17.4 9.4" stroke="#fff" stroke-width="1.9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="logo-tokenplan" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="6" fill="currentColor" stroke="none"/><path d="M12 6.2c1.9 2.3 3.1 4 3.1 5.8 0 1.9-1.4 3.3-3.1 3.3s-3.1-1.4-3.1-3.3c0-1.8 1.2-3.5 3.1-5.8Z" fill="#fff" stroke="none"/><path d="M7.6 16.6h8.8" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/></symbol>
+</defs></svg>
+
+<div class="app-shell" inert>
+  <aside class="sidebar">
+    <a class="brand" href="/admin/" aria-label="DayDayNew 首页"><span class="brand-logo"><svg viewBox="0 0 30 30"><path d="M7 7h8a8 8 0 0 1 0 16H7v-5h8a3 3 0 0 0 0-6H7z" fill="currentColor"/></svg></span><span><b>DAYDAYNEW</b><small>MODEL GATEWAY</small></span></a>
+    <div class="workspace"><span class="workspace-icon">D</span><div><b>默认工作空间</b><small>个人网关 · 管理员</small></div><span class="workspace-chevron">⌘</span></div>
+    <p class="nav-caption">工作空间</p>
+    <nav aria-label="主要导航">
+      <button class="nav-item" data-page="overview"><svg><use href="#i-grid"/></svg>概览</button>
+      <button class="nav-item active" data-page="accounts"><svg><use href="#i-stack"/></svg>账号池<span id="nav-count" class="nav-count">0</span></button>
+      <button class="nav-item" data-page="models"><svg><use href="#i-cube"/></svg>模型目录</button>
+      <button class="nav-item" data-page="agents"><svg><use href="#i-agent"/></svg>Agent 接入<small>适配</small></button>
+      <button class="nav-item" data-page="routing"><svg><use href="#i-route"/></svg>路由<small>决策</small></button>
+      <button class="nav-item" data-page="sessions"><svg><use href="#i-clock"/></svg>会话管理</button>
+      <button class="nav-item" data-page="usage"><svg><use href="#i-chart"/></svg>用量统计</button>
+      <button class="nav-item" data-page="redaction"><svg><use href="#i-shield"/></svg>脱敏<small>隐私</small></button>
+      <span class="nav-divider"></span>
+      <button class="nav-item" data-page="connect"><svg><use href="#i-code"/></svg>接口接入<small>API</small></button>
+    </nav>
+    <div class="sidebar-note"><svg><use href="#i-zap"/></svg><b>一个入口，多份算力。</b><p>让账号轮询、模型发现和请求调度井然有序。</p><span>SenseNova 已支持 <span class="tiny-dot"></span></span></div>
+    <div class="sidebar-bottom"><span class="system-light"></span><span>Go Gateway <b>v0.5.2</b></span><svg><use href="#i-lock"/></svg></div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar"><div class="breadcrumb">工作空间 <span>/</span> <b id="breadcrumb-page">账号池</b></div><div class="topbar-right"><span id="connection-status" class="connection"><i></i> 等待连接</span><span class="topbar-divider"></span><button id="logout" class="icon-button" title="退出管理台" aria-label="退出管理台"><svg><use href="#i-exit"/></svg></button><span class="user-avatar">AD</span></div></header>
+    <div class="page-wrap">
+      <section class="page-heading"><div><div class="eyebrow">YOUR MODELS, CONNECTED.</div><h1 id="page-title">账号池 <span id="title-badge">ACCOUNT POOL</span></h1><p id="page-subtitle">在一个入口，管理每一份模型算力。</p></div><div class="heading-actions"><button id="refresh-all" class="button secondary"><svg><use href="#i-refresh"/></svg>刷新状态</button><button id="add-account" class="button primary"><svg><use href="#i-plus"/></svg>添加账号</button></div></section>
+      <div id="error-banner" class="error-banner" role="alert" hidden></div>
+      <section id="metrics" class="metrics" aria-label="网关指标"></section>
+      <section id="page-content"></section>
+      <footer class="page-footer"><span><svg><use href="#i-lock"/></svg>API Key 加密保存 · 管理密钥仅保留在当前页面内存</span><span id="last-update">等待首次同步</span></footer>
+    </div>
+  </main>
+</div>
+
+<div id="login-overlay" class="login-overlay">
+  <div class="login-decoration"><span>DAYDAYNEW / GATEWAY CONSOLE</span><div class="login-art"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit-center"><svg><use href="#i-stack"/></svg></div><div class="orbit-node node-one"><svg><use href="#i-cube"/></svg></div><div class="orbit-node node-two"><svg><use href="#i-zap"/></svg></div><div class="orbit-node node-three"><svg><use href="#i-key"/></svg></div></div><h2>连接模型，<br>让每一份算力有序运转。</h2><p>统一入口 · 智能轮询 · 清晰可见</p><small>DESIGNED FOR YOUR MODEL INFRASTRUCTURE</small></div>
+  <form id="login-form" class="login-form"><span class="login-label">WELCOME BACK</span><h2>连接你的管理台</h2><p>输入此网关的管理密钥，查看和管理账号池。</p><label for="admin-key">管理密钥</label><div class="password-input"><input id="admin-key" type="password" placeholder="GATEWAY_ADMIN_KEY" required autocomplete="off" spellcheck="false"><button type="button" class="icon-button reveal" data-target="admin-key" aria-label="显示或隐藏管理密钥"><svg><use href="#i-eye"/></svg></button></div><p id="login-error" class="field-error" role="alert"></p><button id="login-submit" class="button primary full" type="submit">进入工作空间 <svg><use href="#i-arrow"/></svg></button><div class="login-tip"><svg><use href="#i-lock"/></svg><span>密钥只用于连接当前网关，不保存在浏览器。<br>此处填写管理密钥，而非 SenseNova API Key。</span></div></form>
+</div>
+
+<dialog id="account-dialog" class="modal">
+  <form id="account-form"><div class="modal-heading"><div><span class="section-overline">ACCOUNT CONNECTION</span><h2 id="account-dialog-title">接入新的账号</h2></div><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><p class="modal-intro">配置一个独立的额度主体，加入统一调度。</p><div class="field platform-field"><span class="field-label" id="platform-label">平台 <span>*</span></span><div id="platform-picker" class="platform-grid" role="radiogroup" aria-labelledby="platform-label"></div><input id="account-provider" name="provider" type="hidden" value=""><small id="platform-note">平台列表由网关注册表自动生成，新增平台会在这里自动出现。</small></div><div class="form-grid"><div class="field"><label for="account-name">账号名称 <span>*</span></label><input id="account-name" name="name" maxlength="80" placeholder="例如：生产主账号" required></div><div class="field"><label for="account-id">账号 ID <span>*</span></label><input id="account-id" name="id" pattern="[a-zA-Z0-9_.\-]{1,64}" maxlength="64" required spellcheck="false"><small>创建后不可修改</small></div></div><div class="field"><label id="account-key-label" for="account-key">API Key / Access Token <span>*</span></label><div class="password-input"><input id="account-key" name="api_key" type="password" placeholder="sk-… 或 wb access token" autocomplete="new-password" spellcheck="false"><button type="button" class="icon-button reveal" data-target="account-key" aria-label="显示或隐藏 API Key"><svg><use href="#i-eye"/></svg></button></div><small id="account-key-hint">保存后不再显示明文，检查状态不会发起模型生成。</small></div><div id="workbuddy-fields" hidden><div id="oauth-panel" class="oauth-panel" hidden><div class="oauth-title">浏览器授权登录 <span class="tag">免粘贴凭证</span></div><p class="oauth-desc">在官方登录页完成登录后，网关自动获取 UID / Access Token / Refresh Token 并创建账号，无需复制粘贴任何凭证。</p><div class="oauth-actions"><button type="button" id="oauth-start" class="button secondary">开始浏览器授权</button><button type="button" id="oauth-cancel" class="button text" hidden>取消授权</button></div><p id="oauth-status" class="oauth-status" role="status"></p><small>登录状态只保留在网关内存中，10 分钟未完成自动失效；⌘-打开弹窗被拦截时请手动允许。</small></div><div class="field"><label for="account-uid">UID（X-User-Id）<span>*</span></label><input id="account-uid" name="uid" maxlength="128" placeholder="OAuth 导入得到的账号 UID" spellcheck="false"></div><div class="field"><label for="account-refresh">Refresh Token</label><div class="password-input"><input id="account-refresh" type="password" autocomplete="new-password" spellcheck="false"><button type="button" class="icon-button reveal" data-target="account-refresh" aria-label="显示或隐藏 Refresh Token"><svg><use href="#i-eye"/></svg></button></div><small>access token 过期时自动刷新；留空则不能续期。</small></div><div class="form-grid"><div class="field"><label for="account-realm">区域</label><select id="account-realm"><option value="intl">国际版 workbuddy.ai</option><option value="cn">国内版 copilot.tencent.com</option></select></div><div class="field"><label for="account-product">客户端身份</label><select id="account-product"><option value="desktop">桌面端 (WorkBuddy 5.8.4)</option><option value="vscode">VSCode 扩展</option><option value="cli">CodeBuddy CLI</option></select></div></div></div><details class="advanced"><summary>高级配置 <span>源站、并发与模型范围</span></summary><div class="field"><label for="account-base">Base URL</label><input id="account-base" name="base_url" type="url" value="https://token.sensenova.cn" required spellcheck="false"><small>填写源站地址，不包含 /v1</small></div><div class="field"><label for="account-concurrency">每号最大并发</label><input id="account-concurrency" type="number" value="4" min="1" max="1000" required></div><div class="field"><label for="account-models">模型白名单 <span class="optional">可选</span></label><textarea id="account-models" rows="2" placeholder="留空使用动态发现的模型；多个模型用逗号或换行分隔"></textarea></div></details><div class="security-note"><svg><use href="#i-lock"/></svg>凭证以 AES-256-GCM 加密保存在网关本地。</div><p id="account-error" class="field-error" role="alert"></p><div class="modal-footer"><button type="button" class="button secondary close-dialog">取消</button><button id="account-save" type="submit" class="button primary">保存并检查 <svg><use href="#i-arrow"/></svg></button></div></form>
+</dialog>
+
+<dialog id="quota-dialog" class="modal"><form id="quota-form"><div class="modal-heading"><div><span class="section-overline">QUOTA OBSERVATION</span><h2>更新额度快照</h2></div><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><p class="modal-intro">填写你从账户页面核实的额度，网关不会将 Token 换算成积分。</p><div class="form-grid"><div class="field"><label for="quota-pool">积分池</label><select id="quota-pool"><option value="general">通用积分</option><option value="flash-lite">Flash-Lite 专属积分</option></select></div><div class="field"><label for="quota-ttl">有效时间（分钟）</label><input id="quota-ttl" type="number" min="1" max="1440" value="5" required></div><div class="field"><label for="quota-five">5 小时剩余积分</label><input id="quota-five" type="number" min="0" step="any" placeholder="填写已核实的余额" required></div><div class="field"><label for="quota-week">周剩余积分</label><input id="quota-week" type="number" min="0" step="any" placeholder="填写已核实的余额" required></div></div><div class="security-note"><svg><use href="#i-info"/></svg>本次只观测选中的积分池，将替换旧快照，不用于判定账号整体额度耗尽。</div><p id="quota-error" class="field-error" role="alert"></p><div class="modal-footer"><button type="button" class="button secondary close-dialog">取消</button><button type="submit" class="button primary">保存观测值</button></div></form></dialog>
+
+<dialog id="confirm-dialog" class="modal small-modal"><form id="confirm-form"><div class="modal-heading"><h2>移除这个账号？</h2><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><p id="confirm-description" class="modal-intro"></p><p id="confirm-error" class="field-error" role="alert"></p><div class="modal-footer"><button type="button" class="button secondary close-dialog">取消</button><button id="confirm-delete" type="submit" class="button danger">移除账号</button></div></form></dialog>
+<div id="drawer-backdrop" class="drawer-backdrop" hidden></div><aside id="account-drawer" class="drawer" role="dialog" aria-modal="true" aria-label="账号详情" hidden></aside>
+<div id="toast-region" class="toast-region" role="status" aria-live="polite"></div>
+<dialog id="session-edit-dialog" class="form-dialog"><form id="session-edit-form"><div class="dialog-header"><div><span class="eyebrow">SESSION</span><h2>重命名会话</h2></div><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div class="dialog-body"><label for="session-name">会话名称</label><input id="session-name" required maxlength="120" autocomplete="off"><p id="session-edit-error" class="form-error" role="alert"></p></div><div class="dialog-footer"><button type="button" class="button secondary close-dialog">取消</button><button id="session-save" type="submit" class="button primary">保存名称</button></div></form></dialog>
+
+<dialog id="agent-dialog" class="modal">
+  <form id="agent-form"><div class="modal-heading"><div><span class="section-overline">AGENT WIRING</span><h2 id="agent-dialog-title">接入 Agent</h2></div><button type="button" class="icon-button close-dialog" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><p id="agent-dialog-intro" class="modal-intro">选择模型并写入该 Agent 的配置文件。</p><div class="field"><label for="agent-model">模型 <span>*</span></label><select id="agent-model" required><option value="">选择模型…</option></select><small>模型来自当前账号池的发现目录（provider/model）。</small></div><div class="form-grid"><div class="field"><label for="agent-mode">写入模式</label><select id="agent-mode"><option value="auto">自动写入（备份 → 写入 → 可还原）</option><option value="snippet">仅生成片段</option></select></div><div id="agent-target-field" class="field"><label for="agent-target">目标文件</label><input id="agent-target" type="text" spellcheck="false" placeholder="~/.config/opencode/opencode.json"><small>自动写入前会备份原文件；检测到外部修改时拒绝覆盖。</small></div></div><div id="agent-preview-area" class="code-wrap" hidden><label>将写入的内容</label><pre id="agent-preview" class="code-block"></pre></div><div id="agent-bridge-note" class="security-note" hidden><svg><use href="#i-info"/></svg><span id="agent-bridge-note-text"></span></div><p id="agent-error" class="field-error" role="alert"></p><div class="modal-footer"><button type="button" class="button secondary" data-action="agent-preview">预览</button><button type="button" class="button secondary close-dialog">取消</button><button id="agent-save" type="submit" class="button primary">应用并写入 <svg><use href="#i-arrow"/></svg></button></div></form>
+</dialog>
+</body>
+</html>

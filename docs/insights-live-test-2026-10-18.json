@@ -1,0 +1,70 @@
+{
+  "session_id": "insights-selfcheck-20261018-093556",
+  "request_id": "4d6c643a27550bf6b657a54e",
+  "status": 200,
+  "stream_complete": true,
+  "summary": {
+    "performance": {
+      "model_time_ms": 8877,
+      "ttft_ms": 8717.626625,
+      "ttft_samples": 1,
+      "tps": 620.5085302034805,
+      "tps_samples": 1,
+      "generation_ms": 103.141209,
+      "generation_tokens": 64,
+      "tool_time_ms": 5.655,
+      "tool_calls": 1,
+      "tool_time_source": "client_reported"
+    },
+    "token_details": {
+      "uncached_input_tokens": 98,
+      "cache_hit_rate": 0,
+      "cache_samples": 1,
+      "cache_unknown_attempts": 0,
+      "cache_observed_input_tokens": 98,
+      "cache_observed_read_tokens": 0
+    },
+    "id": "insights-selfcheck-20261018-093556",
+    "name": "统计功能自检 · TTFT / TPS / 工具耗时",
+    "archived": false,
+    "created_at": "2026-10-18T09:35:56.450058+08:00",
+    "updated_at": "2026-10-18T09:36:05.37594+08:00",
+    "preferred_accounts": {
+      "sensenova": "sense-dda49232"
+    },
+    "requests": 1,
+    "in_flight": 0,
+    "failures": 0,
+    "requests_with_unknown_usage": 0,
+    "attempts_without_usage": 0,
+    "usage": {
+      "reported_fields": [
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "cached_input_tokens"
+      ],
+      "input_tokens": 98,
+      "output_tokens": 64,
+      "total_tokens": 162,
+      "cached_input_tokens": 0,
+      "known": true
+    },
+    "models": [
+      "sensenova-6.8-flash-lite"
+    ]
+  },
+  "tool_events": [
+    {
+      "id": "call_archive_verify_001",
+      "request_id": "4d6c643a27550bf6b657a54e",
+      "name": "verify_response_archive",
+      "duration_ms": 5.655,
+      "status": "success",
+      "reported_at": "2026-10-18T09:36:05.37594+08:00",
+      "source": "client_reported"
+    }
+  ],
+  "archive_download_verified": true,
+  "tool_report_idempotency_verified": true
+}
