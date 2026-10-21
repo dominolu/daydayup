@@ -182,6 +182,24 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		prov = parts[0]
 		path = "/" + parts[1]
 	}
+	// Group pinning has a URL form too: /groups/{group}/v1/... is the stable
+	// per-group Base URL the admin console advertises, equivalent to sending
+	// the X-Group header. It takes precedence over the header when both are
+	// present; an invalid name in the path is rejected outright.
+	pathGroup := ""
+	if strings.HasPrefix(path, "/groups/") {
+		parts := strings.SplitN(strings.TrimPrefix(path, "/groups/"), "/", 2)
+		if len(parts) != 2 {
+			apiError(w, 404, "not_found", "expected /groups/{group}/v1/...")
+			return
+		}
+		var err error
+		if pathGroup, err = config.NormalizeGroup(parts[0]); err != nil {
+			apiError(w, 400, "invalid_group", err.Error())
+			return
+		}
+		path = "/" + parts[1]
+	}
 	// The empty provider is the global routing mode, not an unknown platform;
 	// an explicitly selected platform must be a registered adapter.
 	if prov != "" {
@@ -194,18 +212,23 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	trace.Provider = prov
 	// The routing group bounds the aggregated model→account pool: requests
 	// under group G only ever see accounts of group G (across platforms).
-	// X-Group selects a group; absent, the configured default_group applies.
-	group := r.Header.Get("X-Group")
+	// /groups/{group}/v1/... or the X-Group header selects a group; absent,
+	// the configured default_group applies.
+	group := pathGroup
+	if group == "" {
+		group = r.Header.Get("X-Group")
+		if group != "" {
+			var err error
+			if group, err = config.NormalizeGroup(group); err != nil {
+				apiError(w, 400, "invalid_group", err.Error())
+				return
+			}
+		}
+	}
 	if group == "" {
 		group = s.Config.DefaultGroup
 		if group == "" {
 			group = pool.DefaultGroup
-		}
-	} else {
-		var err error
-		if group, err = config.NormalizeGroup(group); err != nil {
-			apiError(w, 400, "invalid_group", err.Error())
-			return
 		}
 	}
 	trace.Group = group
@@ -403,6 +426,39 @@ func (s *Server) checkAccount(ctx context.Context, a config.Account) {
 	}
 }
 
+// sessionMaintenance runs the session archive maintenance passes once shortly
+// after boot: BLOB→file migration, file/index reconciliation and retention.
+// Each is chunked so the shared database connection is never held for long.
+func (s *Server) sessionMaintenance(ctx context.Context) {
+	if s.Sessions == nil {
+		return
+	}
+	select {
+	case <-time.After(3 * time.Second):
+	case <-ctx.Done():
+		return
+	}
+	if s.Sessions.BodyFiles() {
+		if err := s.Sessions.MigrateBodiesToFiles(); err != nil {
+			slog.Error("session bodies migration failed", "error", err)
+		}
+		added, removed, err := s.Sessions.ReconcileFiles()
+		if err != nil {
+			slog.Error("session file reconciliation failed", "error", err)
+		} else if added > 0 || removed > 0 {
+			slog.Info("session file index reconciled", "indexed", added, "removed_dead", removed)
+		}
+	}
+	if s.Config.Sessions.ShouldPrune() {
+		purged, freed, err := s.Sessions.Prune()
+		if err != nil {
+			slog.Error("session retention failed", "error", err)
+		} else if purged > 0 {
+			slog.Info("session retention pruned", "body_rows", purged, "freed_mb", freed>>20)
+		}
+	}
+}
+
 // StoreError reports a startup database/migration failure, checked by main
 // before any store is used.
 func (s *Server) StoreError() error { return s.dbErr }
@@ -416,6 +472,8 @@ func (s *Server) Run(ctx context.Context) {
 	defer tokenRefresh.Stop()
 	save := time.NewTicker(5 * time.Second)
 	defer save.Stop()
+	retention := time.NewTicker(1 * time.Hour)
+	defer retention.Stop()
 	// Discovery must not hold up persistence or shutdown.
 	probeCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -430,6 +488,11 @@ func (s *Server) Run(ctx context.Context) {
 	go s.workBuddyTasksLoop(probeCtx)
 	// M4: daily quota-window pre-warm at the reset hour.
 	go s.prewarmLoop(probeCtx)
+	// Session archive maintenance: migrate legacy body BLOBs to per-session
+	// files, reconcile the file index after any crash, then apply retention.
+	// A large first cut takes tens of seconds, so it runs in the background
+	// after boot instead of delaying startup.
+	go s.sessionMaintenance(probeCtx)
 	for {
 		select {
 		case <-ctx.Done():
@@ -451,6 +514,22 @@ func (s *Server) Run(ctx context.Context) {
 			}
 			if err := s.Pool.Save(s.Config.DBFile); err != nil {
 				slog.Error("state checkpoint failed", "error", err)
+			}
+			// Drain the WAL after every persistence tick so the next boot
+			// never pays a blocking checkpoint-on-close of the multi-gigabyte
+			// database (the dominant historical startup cost, ~16s).
+			if err := s.Pool.Checkpoint(s.Config.DBFile); err != nil {
+				slog.Debug("wal checkpoint failed", "error", err)
+			}
+		case <-retention.C:
+			if s.Sessions == nil || !s.Config.Sessions.ShouldPrune() {
+				continue
+			}
+			purged, freed, err := s.Sessions.Prune()
+			if err != nil {
+				slog.Error("session retention failed", "error", err)
+			} else if purged > 0 {
+				slog.Info("session retention pruned", "body_rows", purged, "freed_mb", freed>>20)
 			}
 		}
 	}

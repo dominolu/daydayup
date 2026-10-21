@@ -28,6 +28,7 @@ type accountInput struct {
 	Name         *string   `json:"name"`
 	Provider     string    `json:"provider"`
 	BaseURL      *string   `json:"base_url"`
+	Group        *string   `json:"group"` // routing group; nil keeps the stored value
 	APIKey       string    `json:"api_key"`
 	MaxInFlight  *int      `json:"max_in_flight"`
 	Models       *[]string `json:"models"`
@@ -254,6 +255,9 @@ func (s *Server) accountAdmin(w http.ResponseWriter, r *http.Request) bool {
 	}
 	if input.EnterpriseID != "" {
 		a.EnterpriseID = strings.TrimSpace(input.EnterpriseID)
+	}
+	if input.Group != nil {
+		a.Group = strings.TrimSpace(*input.Group)
 	}
 	if err := config.NormalizeAccount(&a); err != nil {
 		apiError(w, 400, "invalid_account", err.Error())

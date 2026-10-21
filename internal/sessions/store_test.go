@@ -90,14 +90,23 @@ func TestEncryptedBodiesRestartAggregationAndIsolation(t *testing.T) {
 	if _, total = reopened.List("", false, 0, 30); total != 0 {
 		t.Fatal("archived shown as active")
 	}
-	// A body row copied from another request must fail its authenticated
-	// chunk context (every chunk is bound to its session/request/direction).
+	// A body copied from another request must fail its authenticated chunk
+	// context (every chunk is bound to its session/request/direction). Tamper
+	// with the active storage medium: the archive file in file-backed mode,
+	// the BLOB column in database mode.
 	var blob []byte
-	if err := s.db.SQL().QueryRow(`SELECT body FROM session_bodies WHERE session_id = ? AND request_id = 'r1' AND direction = 'response'`, "session-1").Scan(&blob); err != nil {
+	blob, err = s.storedBodyBytes("session-1", "r1", "response")
+	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := s.db.SQL().Exec(`UPDATE session_bodies SET body = ? WHERE session_id = ? AND request_id = 'r2' AND direction = 'response'`, blob, "session-1"); err != nil {
-		t.Fatal(err)
+	if s.BodyFiles() {
+		if err := writeBodyFile(bodyFilesRoot(dbPath), "session-1", "r2", "response", blob); err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		if _, err := s.db.SQL().Exec(`UPDATE session_bodies SET body = ? WHERE session_id = ? AND request_id = ? AND direction = ?`, blob, "session-1", "r2", "response"); err != nil {
+			t.Fatal(err)
+		}
 	}
 	f, err = s.ReadBody("session-1", "r2", "response")
 	if err != nil {

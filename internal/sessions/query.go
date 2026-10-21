@@ -176,7 +176,15 @@ func (s *Store) ReadBody(sessionID, requestID, direction string) (io.ReadCloser,
 	}
 	// The stored bytes are the chunked-encrypted body format (same contexts as
 	// the writer used); no outer decryption is needed.
-	return &bodyReader{reader: &bytesReader{b: sealed}, aead: s.db.AEAD(), context: sessionID + "/" + requestID + "/" + direction}, nil
+	if len(sealed) > 0 {
+		return &bodyReader{reader: &bytesReader{b: sealed}, aead: s.db.AEAD(), context: sessionID + "/" + requestID + "/" + direction}, nil
+	}
+	// Empty column: file-backed body (one encrypted file per request direction).
+	f, err := os.Open(s.bodyPath(sessionID, requestID, direction))
+	if err != nil {
+		return nil, err
+	}
+	return &bodyReader{reader: f, closer: f, aead: s.db.AEAD(), context: sessionID + "/" + requestID + "/" + direction}, nil
 }
 
 func (s *Store) Update(id string, name *string, archived *bool) error {

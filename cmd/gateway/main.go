@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	bootStarted := time.Now()
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 	path := flag.String("config", "config.json", "configuration JSON path")
 	flag.Parse()
@@ -24,7 +25,9 @@ func main() {
 		slog.Error("configuration failed", "error", err)
 		os.Exit(1)
 	}
+	slog.Info("startup instrumentation", "phase", "config", "since_start_ms", time.Since(bootStarted).Milliseconds())
 	s := gateway.New(c)
+	slog.Info("startup instrumentation", "phase", "new", "since_start_ms", time.Since(bootStarted).Milliseconds())
 	if err = s.StoreError(); err != nil {
 		slog.Error("storage initialization failed", "error", err)
 		os.Exit(1)
@@ -37,10 +40,12 @@ func main() {
 		slog.Error("account store load failed", "error", err)
 		os.Exit(1)
 	}
+	slog.Info("startup instrumentation", "phase", "accounts", "since_start_ms", time.Since(bootStarted).Milliseconds())
 	if err = s.LoadSessions(); err != nil {
 		slog.Error("session store load failed", "error", err)
 		os.Exit(1)
 	}
+	slog.Info("startup instrumentation", "phase", "sessions", "since_start_ms", time.Since(bootStarted).Milliseconds())
 	if err = s.LoadAgents(); err != nil {
 		slog.Error("agent store load failed", "error", err)
 		os.Exit(1)
@@ -49,6 +54,7 @@ func main() {
 		slog.Error("state load failed", "error", err)
 		os.Exit(1)
 	}
+	slog.Info("startup instrumentation", "phase", "loads_done", "since_start_ms", time.Since(bootStarted).Milliseconds())
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	backgroundDone := make(chan struct{})
@@ -83,6 +89,11 @@ func main() {
 	if err = s.Pool.Save(c.DBFile); err != nil {
 		slog.Error("final checkpoint failed", "error", err)
 		failed = true
+	}
+	// Leave the WAL drained at exit so the next boot's database open never
+	// pays a blocking checkpoint (measured ~16s on the 3.8GB database).
+	if err = s.Pool.Checkpoint(c.DBFile); err != nil {
+		slog.Warn("final wal checkpoint failed", "error", err)
 	}
 	if failed {
 		os.Exit(1)

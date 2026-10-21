@@ -1,6 +1,7 @@
 package pool
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -444,6 +445,124 @@ func TestGroupRoutingBoundsAccounts(t *testing.T) {
 	// An unknown group serves nothing.
 	if _, err := p.AcquireGroup("", "", "nope", "m", nil, "", false); err == nil {
 		t.Fatal("unknown group served a model")
+	}
+}
+
+func TestMoveGroupRenamesAndDissolves(t *testing.T) {
+	p := New([]config.Account{
+		{ID: "ga-1", Provider: "sensenova", Group: "a", Models: []string{"m"}, MaxInFlight: 4},
+		{ID: "ga-2", Provider: "workbuddy", UID: "u1", Group: "a", Models: []string{"m"}, MaxInFlight: 4},
+		{ID: "gb-1", Provider: "tokenplan", Group: "b", Models: []string{"m"}, MaxInFlight: 4},
+	})
+	persisted := []string{}
+	persist := func(a config.Account) error { persisted = append(persisted, a.ID+"->"+a.Group); return nil }
+	// Rename group a -> alpha: accounts follow and round-robin keeps working.
+	if err := p.MoveGroup("a", "alpha", true, persist); err != nil {
+		t.Fatalf("rename: %v", err)
+	}
+	if len(persisted) != 2 {
+		t.Fatalf("persist count: %d", len(persisted))
+	}
+	seen := map[string]bool{}
+	for i := 0; i < 4; i++ {
+		a, err := p.AcquireGroup("", "", "alpha", "m", nil, "", false)
+		if err != nil {
+			t.Fatalf("renamed group acquire: %v", err)
+		}
+		if a.Group != "alpha" {
+			t.Fatalf("renamed group leak: %s", a.ID)
+		}
+		seen[a.ID] = true
+		p.Finish(a.ID, 200, Usage{Total: 1, Known: true}, false, 0, "m")
+	}
+	if !seen["ga-1"] || !seen["ga-2"] {
+		t.Fatalf("renamed pool: %v", seen)
+	}
+	// The old name now serves nothing.
+	if _, err := p.AcquireGroup("", "", "a", "m", nil, "", false); err == nil {
+		t.Fatal("old group still served a model")
+	}
+	// Dissolve group b into default: accounts land in the default group.
+	persisted = nil
+	if err := p.MoveGroup("b", "", false, persist); err != nil {
+		t.Fatalf("dissolve: %v", err)
+	}
+	if len(persisted) != 1 || persisted[0] != "gb-1->default" {
+		t.Fatalf("dissolve persist: %v", persisted)
+	}
+	acct, err := p.Acquire("", "m", nil)
+	if err != nil || acct.ID != "gb-1" {
+		t.Fatalf("dissolved account not in default: %v %v", acct.ID, err)
+	}
+	// Renaming an empty group is a no-op error; dissolving one is fine.
+	p2 := New([]config.Account{{ID: "x", Provider: "sensenova", MaxInFlight: 4}})
+	if err := p2.MoveGroup("ghost", "g1", true, persist); err != ErrEmptyGroup {
+		t.Fatalf("empty rename should fail: %v", err)
+	}
+	if err := p2.MoveGroup("ghost", "g1", false, persist); err != nil {
+		t.Fatalf("empty dissolve should be a no-op: %v", err)
+	}
+}
+
+// A persist failure part-way through a group move must not split the group:
+// neither disk nor memory may show a partial migration.
+func TestMoveGroupPersistFailureIsAtomic(t *testing.T) {
+	p := New([]config.Account{
+		{ID: "ga-1", Provider: "sensenova", Group: "a", Models: []string{"m"}, MaxInFlight: 4},
+		{ID: "ga-2", Provider: "sensenova", Group: "a", Models: []string{"m"}, MaxInFlight: 4},
+		{ID: "ga-3", Provider: "sensenova", Group: "a", Models: []string{"m"}, MaxInFlight: 4},
+	})
+	persisted := []string{}
+	persist := func(a config.Account) error {
+		if len(persisted) == 2 {
+			return errors.New("disk full")
+		}
+		persisted = append(persisted, a.ID)
+		return nil
+	}
+	if err := p.MoveGroup("a", "b", true, persist); err == nil {
+		t.Fatal("expected persist failure")
+	}
+	for _, g := range p.Groups() {
+		if g.Name != "a" || g.Accounts != 3 {
+			t.Fatalf("group split after failed move: %+v", p.Groups())
+		}
+	}
+	acct, err := p.AcquireGroup("", "", "a", "m", nil, "", false)
+	if err != nil || acct.Group != "a" {
+		t.Fatalf("account left group a after failed move: %v %v", acct.Group, err)
+	}
+	if _, err := p.AcquireGroup("", "", "b", "m", nil, "", false); err == nil {
+		t.Fatal("partial move created group b")
+	}
+}
+
+func TestGroupInfoStatsAndModels(t *testing.T) {
+	p := New([]config.Account{
+		{ID: "ga-1", Provider: "sensenova", Group: "a", Models: []string{"m"}, MaxInFlight: 4},
+		{ID: "ga-2", Provider: "sensenova", Group: "a", Models: []string{"m"}, MaxInFlight: 4},
+	})
+	p.Discovery("ga-1", []provider.Model{{"id": "m"}, {"id": "m2"}}, nil, 0)
+	p.Discovery("ga-2", []provider.Model{{"id": "m"}}, nil, 0)
+	a1, err := p.AcquireGroup("", "", "a", "m", nil, "", false)
+	if err != nil {
+		t.Fatalf("acquire: %v", err)
+	}
+	p.Finish(a1.ID, 200, Usage{Total: 1, Known: true}, false, 0, "m")
+	a2, err := p.AcquireGroup("", "", "a", "m", nil, "", false)
+	if err != nil {
+		t.Fatalf("acquire: %v", err)
+	}
+	p.Finish(a2.ID, 500, Usage{Total: 1, Known: true}, true, 0, "m")
+	g := p.Groups()
+	if len(g) != 1 || g[0].Name != "a" || g[0].Accounts != 2 || g[0].Enabled != 2 {
+		t.Fatalf("group info: %+v", g)
+	}
+	if g[0].Models != 2 {
+		t.Fatalf("group distinct models: %d", g[0].Models)
+	}
+	if g[0].Requests != 2 || g[0].Failures != 1 {
+		t.Fatalf("group traffic: %+v", g[0])
 	}
 }
 

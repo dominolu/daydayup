@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -101,10 +102,27 @@ func (c *Capture) AddAttempt(attempt Attempt) {
 	c.record.Attempts = append(c.record.Attempts, attempt)
 }
 
-// importBody moves one transient body file into the database and removes the
-// file. A missing file is not an error (a previous run may already have
-// imported it).
+// importBody moves one transient body file into durable storage and removes
+// the source file. In file-backed mode the transient file is atomically
+// renamed into the session archive and only an index row is written; in
+// database mode the bytes are imported as a BLOB as before. A missing source
+// file is not an error (a previous run may already have imported it).
 func (c *Capture) importBody(sessionID, requestID, direction, path string) error {
+	if c.store.bodyFiles {
+		dst := c.store.bodyPath(sessionID, requestID, direction)
+		if dir := filepath.Dir(dst); dir != "" {
+			if err := os.MkdirAll(dir, 0700); err != nil {
+				return err
+			}
+		}
+		if err := os.Rename(path, dst); err != nil {
+			if !os.IsNotExist(err) {
+				return err
+			}
+			// Already moved by a previous attempt: only the index is missing.
+		}
+		return c.store.ensureBodyIndex(sessionID, requestID, direction)
+	}
 	b, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
 		return nil

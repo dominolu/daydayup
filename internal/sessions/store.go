@@ -34,16 +34,24 @@ type entry struct {
 }
 
 type Store struct {
-	mu      sync.Mutex
-	dbPath  string
-	db      *store.DB
-	dbOnce  sync.Once
-	dbErr   error
-	tmpDir  string
-	entries map[string]*entry
+	mu            sync.Mutex
+	dbPath        string
+	db            *store.DB
+	dbOnce        sync.Once
+	dbErr         error
+	tmpDir        string
+	entries       map[string]*entry
+	retentionDays int                // body retention window (0 = off)
+	maxBodyMB     int                // total body capacity cap (0 = off)
+	pruned        map[[2]string]bool // request owners whose bodies were already pruned
+	bodyFiles     bool               // archive bodies on disk with a DB index only
 }
 
-// Open opens the session archive inside the gateway database at dbPath.
+// Open opens the session archive inside the gateway database at dbPath with
+// its own freshly opened handle (each call revalidates the database key and
+// reloads the archive). Tests and legacy callers use Open; the production
+// gateway uses OpenWithRetention, which shares the process-wide handle so a
+// boot never opens the multi-gigabyte database more than once.
 // keyEnv is retained for the legacy migration path and ignored otherwise; the
 // database key comes from store.Open.
 func Open(dbPath, keyEnv string) (*Store, error) {
@@ -51,13 +59,37 @@ func Open(dbPath, keyEnv string) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
-	s := &Store{dbPath: dbPath, db: db, tmpDir: filepath.Join(filepath.Dir(dbPath), "tmp"), entries: map[string]*entry{}}
+	return openWith(dbPath, db, Retention{})
+}
+
+// OpenWithRetention opens the session archive inside the gateway database at
+// dbPath using the process-wide shared handle, and applies the configured
+// body retention policy after loading. keyEnv is ignored; the database key
+// comes from store.Open.
+func OpenWithRetention(dbPath string, retention Retention) (*Store, error) {
+	db, err := store.Shared(dbPath)
+	if err != nil {
+		return nil, err
+	}
+	return openWith(dbPath, db, retention)
+}
+
+func openWith(dbPath string, db *store.DB, retention Retention) (*Store, error) {
+	s := &Store{dbPath: dbPath, db: db, tmpDir: filepath.Join(filepath.Dir(dbPath), "tmp"), entries: map[string]*entry{}, retentionDays: retention.Days, maxBodyMB: retention.MaxBodyMB, pruned: map[[2]string]bool{}, bodyFiles: retention.BodyFilesEnabled()}
 	if err := os.MkdirAll(s.tmpDir, 0700); err != nil {
 		return nil, err
+	}
+	if s.bodyFiles {
+		if err := os.MkdirAll(s.filesRoot(), 0700); err != nil {
+			return nil, err
+		}
 	}
 	if err := s.loadAll(); err != nil {
 		return nil, err
 	}
+	// Retention and file-index maintenance are applied by the gateway in the
+	// background after boot (a large first cut over thousands of bodies takes
+	// tens of seconds; it must not delay startup).
 	return s, nil
 }
 
@@ -159,12 +191,11 @@ func (s *Store) loadAll() error {
 				}
 			}
 			// Rebuild missing legacy fingerprints from authenticated requests.
-			// Reads the body row directly: the entry is not registered in
+			// Reads the stored body directly: the entry is not registered in
 			// s.entries until this loop finishes, so Record/ReadBody cannot
 			// be used here.
 			if rr.record.Title == nil && len(rr.record.UserMessages) == 0 && rr.record.Request.Complete && rr.record.Request.Bytes <= 1<<20 {
-				var sealed []byte
-				err := s.db.SQL().QueryRow(`SELECT body FROM session_bodies WHERE session_id = ? AND request_id = ? AND direction = 'request'`, mr.id, rr.record.ID).Scan(&sealed)
+				sealed, err := s.storedBodyBytes(mr.id, rr.record.ID, "request")
 				if err == nil {
 					reader := &bodyReader{reader: &bytesReader{b: sealed}, aead: s.db.AEAD(), context: mr.id + "/" + rr.record.ID + "/request"}
 					b, readErr := io.ReadAll(io.LimitReader(reader, (1<<20)+1))
@@ -214,7 +245,8 @@ func (s *Store) saveMeta(meta sessionMeta) error {
 }
 
 // importLeftovers moves transient body files left by a crashed process into
-// the database as the durable (interrupted) bodies, then removes the files.
+// durable storage (renamed into the session archive in file-backed mode, or
+// imported as BLOBs in database mode), then removes the source files.
 func (s *Store) importLeftovers() error {
 	files, err := os.ReadDir(s.tmpDir)
 	if err != nil {
@@ -239,6 +271,21 @@ func (s *Store) importLeftovers() error {
 			continue
 		}
 		path := filepath.Join(s.tmpDir, name)
+		if s.bodyFiles {
+			dst := s.bodyPath(sessionID, requestID, direction)
+			if dir := filepath.Dir(dst); dir != "" {
+				if err := os.MkdirAll(dir, 0700); err != nil {
+					return err
+				}
+			}
+			if err := os.Rename(path, dst); err != nil {
+				return err
+			}
+			if err := s.ensureBodyIndex(sessionID, requestID, direction); err != nil {
+				return err
+			}
+			continue
+		}
 		b, err := os.ReadFile(path)
 		if err != nil {
 			return err

@@ -23,7 +23,8 @@ func (s *Server) LoadSessions() error {
 	if s.Config.DBFile == "" {
 		return nil
 	}
-	store, err := sessions.Open(s.Config.DBFile, s.Config.SessionStoreKeyEnv)
+	retention := sessions.Retention{Days: s.Config.Sessions.RetentionDays, MaxBodyMB: s.Config.Sessions.MaxBodyMB, BodyFiles: s.Config.Sessions.BodyFiles}
+	store, err := sessions.OpenWithRetention(s.Config.DBFile, retention)
 	if err == nil {
 		s.Sessions = store
 	}

@@ -120,7 +120,7 @@ type Profile struct {
 
 func (s *Store) open() (*store.DB, error) {
 	s.dbOnce.Do(func() {
-		s.db, s.dbErr = store.Open(s.dbPath)
+		s.db, s.dbErr = store.Shared(s.dbPath)
 	})
 	return s.db, s.dbErr
 }

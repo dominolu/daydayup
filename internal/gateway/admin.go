@@ -35,8 +35,10 @@ func (s *Server) admin(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, 200, map[string]any{"data": platformCatalog()})
 		return
 	}
-	if path == "/admin/v1/groups" && r.Method == http.MethodGet {
-		writeJSON(w, 200, map[string]any{"data": s.Pool.Groups(), "default_group": pool.DefaultGroup, "config_default_group": s.Config.DefaultGroup})
+	if s.groupsAdmin(w, r) {
+		return
+	}
+	if s.middlewareAdmin(w, r) {
 		return
 	}
 	if path == "/admin/v1/providers" && r.Method == http.MethodGet {

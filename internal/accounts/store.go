@@ -30,7 +30,7 @@ type Store struct {
 
 // New opens the account store inside the gateway database at dbPath.
 func New(dbPath string) (*Store, error) {
-	db, err := store.Open(dbPath)
+	db, err := store.Shared(dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("accounts: %w", err)
 	}

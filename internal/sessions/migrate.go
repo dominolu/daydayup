@@ -9,12 +9,99 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"daydayup/internal/store"
 )
+
+// MigrateBodiesToFiles exports body BLOBs from the database into the
+// per-session archive files (one encrypted file per request direction),
+// leaving empty-column index rows behind — the file-backed storage mode.
+// The database file is snapshot-copied first so the export can always be
+// redone from the backup. Idempotent per marker; runs in the background
+// after boot so a large export never delays startup.
+func MigrateBodiesToFiles(db *store.DB, dbPath string) error {
+	if dbPath == "" {
+		return nil
+	}
+	done, err := db.Migrated("bodies_files_v1")
+	if err != nil || done {
+		return err
+	}
+	backup := dbPath + ".bak-bodies-" + time.Now().Format("20060102-150405")
+	if _, err := os.Stat(backup); os.IsNotExist(err) {
+		if err := copyFile(dbPath, backup); err != nil {
+			return fmt.Errorf("bodies migration: backup: %w", err)
+		}
+	}
+	root := bodyFilesRoot(dbPath)
+	for {
+		rows, err := db.SQL().Query(`SELECT session_id, request_id, direction, body FROM session_bodies WHERE length(body) > 0 LIMIT 500`)
+		if err != nil {
+			return err
+		}
+		type item struct {
+			sid, rid, dir string
+			body          []byte
+		}
+		var batch []item
+		for rows.Next() {
+			var it item
+			if err := rows.Scan(&it.sid, &it.rid, &it.dir, &it.body); err != nil {
+				rows.Close()
+				return err
+			}
+			batch = append(batch, it)
+		}
+		err = rows.Err()
+		rows.Close()
+		if err != nil {
+			return err
+		}
+		if len(batch) == 0 {
+			break
+		}
+		tx, err := db.SQL().Begin()
+		if err != nil {
+			return err
+		}
+		for _, it := range batch {
+			if err := writeBodyFile(root, it.sid, it.rid, it.dir, it.body); err != nil {
+				tx.Rollback()
+				return fmt.Errorf("bodies migration: %s/%s/%s: %w", it.sid, it.rid, it.dir, err)
+			}
+			if _, err := tx.Exec(`UPDATE session_bodies SET body = ? WHERE session_id = ? AND request_id = ? AND direction = ?`, "", it.sid, it.rid, it.dir); err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+		if err := tx.Commit(); err != nil {
+			return err
+		}
+	}
+	return db.MarkMigrated("bodies_files_v1")
+}
+
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		_ = out.Close()
+		return err
+	}
+	return out.Close()
+}
 
 // MigrateDB imports a legacy directory-based session archive (data/sessions/
 // with per-session encrypted files) into the shared database. Records, bodies

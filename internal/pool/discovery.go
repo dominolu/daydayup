@@ -174,11 +174,15 @@ func (p *Pool) ModelListGroup(group string, ttl time.Duration) ([]provider.Model
 	return p.modelList(ttl, func(e *entry) bool { return e.group == group })
 }
 
-// GroupInfo describes one routing group for the admin console.
+// GroupInfo describes one routing group for the admin console: account
+// counts, the distinct discovered model surface and cumulative traffic.
 type GroupInfo struct {
 	Name     string `json:"name"`
 	Accounts int    `json:"accounts"`
 	Enabled  int    `json:"enabled"`
+	Models   int    `json:"models"` // distinct discovered model ids in the group
+	Requests uint64 `json:"requests"`
+	Failures uint64 `json:"failures"`
 }
 
 // Groups lists every routing group with account counts in stable sorted
@@ -187,25 +191,103 @@ type GroupInfo struct {
 func (p *Pool) Groups() []GroupInfo {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	counts := map[string]int{}
-	enabled := map[string]int{}
+	type acc struct {
+		requests uint64
+		failures uint64
+		models   map[string]bool
+	}
+	byGroup := map[string]*acc{}
 	for _, e := range p.entries {
 		g := e.group
-		counts[g]++
-		if e.state.Enabled {
-			enabled[g]++
+		a := byGroup[g]
+		if a == nil {
+			a = &acc{models: map[string]bool{}}
+			byGroup[g] = a
+		}
+		a.requests += e.state.Stats.Requests
+		a.failures += e.state.Stats.Failures
+		for _, m := range e.state.Models {
+			if id, _ := m["id"].(string); id != "" {
+				a.models[id] = true
+			}
 		}
 	}
-	names := make([]string, 0, len(counts))
-	for g := range counts {
+	names := make([]string, 0, len(byGroup))
+	for g := range byGroup {
 		names = append(names, g)
 	}
 	sort.Strings(names)
 	out := make([]GroupInfo, 0, len(names))
 	for _, g := range names {
-		out = append(out, GroupInfo{Name: g, Accounts: counts[g], Enabled: enabled[g]})
+		a := byGroup[g]
+		enabled := 0
+		accounts := 0
+		for _, e := range p.entries {
+			if e.group != g {
+				continue
+			}
+			accounts++
+			if e.state.Enabled {
+				enabled++
+			}
+		}
+		out = append(out, GroupInfo{Name: g, Accounts: accounts, Enabled: enabled, Models: len(a.models), Requests: a.requests, Failures: a.failures})
 	}
 	return out
+}
+
+// ErrEmptyGroup reports a rename/move that matches no account.
+var ErrEmptyGroup = errors.New("group has no accounts")
+
+// MoveGroup reassigns every account of one routing group to another. It is
+// two-phase so a failure never splits a group: every account config is
+// persisted first (into pending), and only when all writes succeeded are the
+// in-memory entries switched over. A mid-way persist error therefore leaves
+// both disk and memory exactly as they were. Cursor keys are (group, model)
+// pairs, so the round-robin rotation resets when a group is renamed or
+// dissolved. An empty source group is a no-op success unless failEmpty is
+// true (rename requires a live group).
+func (p *Pool) MoveGroup(from, to string, failEmpty bool, persist func(config.Account) error) error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if from == "" {
+		from = DefaultGroup
+	}
+	if to == "" {
+		to = DefaultGroup
+	}
+	if from == to {
+		return nil
+	}
+	var pending []*entry
+	var configs []config.Account
+	for _, e := range p.entries {
+		if e.group != from {
+			continue
+		}
+		cfg := e.config
+		cfg.Group = to
+		pending = append(pending, e)
+		configs = append(configs, cfg)
+	}
+	if failEmpty && len(pending) == 0 {
+		return ErrEmptyGroup
+	}
+	for _, cfg := range configs {
+		if err := persist(cfg); err != nil {
+			return err
+		}
+	}
+	for i, e := range pending {
+		e.config = configs[i]
+		e.group = to
+		e.state.Group = to
+	}
+	if len(pending) > 0 {
+		p.cursor = map[string]int{}
+		p.notifyLocked()
+	}
+	return nil
 }
 
 func (p *Pool) modelList(ttl time.Duration, include func(*entry) bool) ([]provider.Model, bool) {

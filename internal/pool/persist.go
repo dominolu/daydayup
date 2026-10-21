@@ -23,17 +23,44 @@ func credentialRevision(a config.Account) string {
 
 // db lazily opens (once) the shared gateway database for pool state. The same
 // database file backs every store; the handle is cached for the process.
+// The returned handle is the process-wide shared handle (store.Shared), so
+// the pool never owns a close-on-boot connection that would trigger a WAL
+// checkpoint during startup.
 func (p *Pool) db(path string) (*store.DB, error) {
 	p.persistMu.Lock()
 	defer p.persistMu.Unlock()
 	if p.persistDB == nil {
-		db, err := store.Open(path)
+		db, err := store.Shared(path)
 		if err != nil {
 			return nil, err
 		}
 		p.persistDB = db
 	}
 	return p.persistDB, nil
+}
+
+// Checkpoint drains the SQLite WAL into the main database and truncates the
+// WAL file. Called periodically during runtime (and before process exit) so
+// the WAL is never large when the next boot opens the database: a large WAL
+// at boot makes the close of the last connection pay a blocking checkpoint
+// (~16s on the multi-gigabyte gateway database). TRUNCATE may briefly wait on
+// active readers; it is serialized against Save and errors are returned to
+// the caller for logging.
+func (p *Pool) Checkpoint(path string) error {
+	if path == "" {
+		return nil
+	}
+	db, err := p.db(path)
+	if err != nil {
+		return err
+	}
+	p.saveMu.Lock()
+	defer p.saveMu.Unlock()
+	var busy, log, ckpt int
+	if err := db.SQL().QueryRow(`PRAGMA wal_checkpoint(TRUNCATE)`).Scan(&busy, &log, &ckpt); err != nil {
+		return fmt.Errorf("pool checkpoint: %w", err)
+	}
+	return nil
 }
 
 // Save checkpoints every account's scheduling state into the database inside

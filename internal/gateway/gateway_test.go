@@ -585,3 +585,72 @@ func TestGroupRoutingHeaderAndCatalog(t *testing.T) {
 		t.Fatalf("invalid group accepted: %d", w.Code)
 	}
 }
+
+func TestGroupRoutingPathPrefix(t *testing.T) {
+	var hits atomic.Int32
+	upShared := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits.Add(1)
+		if r.Header.Get("X-Group") != "" {
+			t.Error("X-Group leaked upstream")
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = io.WriteString(w, `{"usage":{"total_tokens":7}}`)
+	}))
+	defer upShared.Close()
+	upIsolated := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		hits.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(429)
+		_, _ = io.WriteString(w, `{"error":{"type":"rate_limit_error"}}`)
+	}))
+	defer upIsolated.Close()
+	reg := provider.NewRegistry()
+	_ = reg.Register("p1", stubProvider{name: "p1", models: []provider.Model{{"id": "m"}}})
+	_ = reg.Register("p2", stubProvider{name: "p2", models: []provider.Model{{"id": "m2"}}})
+	c := config.Config{GatewayKey: "gateway-secret-at-least-16", AdminKey: "admin-secret-at-least-16", RequestTimeoutSeconds: 5, RefreshIntervalSeconds: 60, MaxRequestBytes: 1 << 20, MaxAttempts: 3, Accounts: []config.Account{
+		{ID: "g1-p1", Provider: "p1", Group: "shared", BaseURL: upShared.URL, APIKey: "sk-shared-01", MaxInFlight: 8},
+		{ID: "g2-p2", Provider: "p2", Group: "isolated", BaseURL: upIsolated.URL, APIKey: "sk-isolated-01", MaxInFlight: 8},
+	}}
+	s := NewWithProviders(c, reg)
+	s.logger = slog.New(slog.NewTextHandler(io.Discard, nil))
+	s.Refresh(context.Background())
+	pathCall := func(method, path, body string) *httptest.ResponseRecorder {
+		r := httptest.NewRequest(method, path, strings.NewReader(body))
+		r.Header.Set("Authorization", "Bearer "+c.GatewayKey)
+		r.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+		s.ServeHTTP(w, r)
+		return w
+	}
+	w := pathCall("POST", "/groups/shared/v1/chat/completions", `{"model":"m"}`)
+	if w.Code != 200 {
+		t.Fatalf("path group failover: %d %s", w.Code, w.Body)
+	}
+	w = pathCall("POST", "/groups/isolated/v1/chat/completions", `{"model":"m"}`)
+	if w.Code != 503 {
+		t.Fatalf("path cross-group leak: %d %s", w.Code, w.Body)
+	}
+	w = pathCall("GET", "/groups/shared/v1/models", "")
+	var models struct {
+		Data []map[string]any `json:"data"`
+	}
+	_ = json.Unmarshal(w.Body.Bytes(), &models)
+	if w.Code != 200 || len(models.Data) != 1 || models.Data[0]["id"] != "m" {
+		t.Fatalf("path shared catalog: %d %s", w.Code, w.Body)
+	}
+	// An empty path segment normalizes to the default group rather than being
+	// rejected: the request reaches the catalog path (which has no fresh
+	// discovery for the empty default group) instead of failing as invalid.
+	w = pathCall("GET", "/groups//v1/models", "")
+	if w.Code != 503 || !strings.Contains(w.Body.String(), "models_unavailable") {
+		t.Fatalf("empty path group should resolve to the default group: %d %s", w.Code, w.Body)
+	}
+	w = pathCall("GET", "/groups/bad%20group!/v1/models", "")
+	if w.Code != 400 {
+		t.Fatalf("invalid path group accepted: %d", w.Code)
+	}
+	w = pathCall("GET", "/groups/shared", "")
+	if w.Code != 404 {
+		t.Fatalf("bare group path accepted: %d", w.Code)
+	}
+}

@@ -37,7 +37,7 @@ func OpenStore(path, keyEnv string) *Store {
 
 func (s *Store) open() (*store.DB, error) {
 	s.dbOnce.Do(func() {
-		s.db, s.dbErr = store.Open(s.path)
+		s.db, s.dbErr = store.Shared(s.path)
 	})
 	return s.db, s.dbErr
 }

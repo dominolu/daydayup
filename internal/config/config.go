@@ -39,6 +39,27 @@ type Account struct {
 	EnterpriseID    string `json:"enterprise_id,omitempty"`     // enterprise account (X-Enterprise-Id)
 }
 
+// SessionsConfig tunes the session archive inside the gateway database.
+type SessionsConfig struct {
+	// RetentionDays deletes archived body content of requests older than N
+	// days (0 = keep forever). Records/metadata are never deleted.
+	RetentionDays int `json:"retention_days,omitempty"`
+	// MaxBodyMB keeps only the newest archived bodies within N MB of stored
+	// body content, deleting the oldest overflow (0 = unlimited).
+	MaxBodyMB int `json:"max_body_mb,omitempty"`
+	// BodyFiles stores archived bodies on disk (one directory per session,
+	// one encrypted file per request direction) with only an index in the
+	// database. nil (default) enables file storage; set false to store body
+	// BLOBs inside the database as before.
+	BodyFiles *bool `json:"body_files,omitempty"`
+}
+
+// BodyFilesEnabled reports the effective body storage mode (default: files).
+func (s SessionsConfig) BodyFilesEnabled() bool { return s.BodyFiles == nil || *s.BodyFiles }
+
+// ShouldPrune reports whether any body retention policy is enabled.
+func (s SessionsConfig) ShouldPrune() bool { return s.RetentionDays > 0 || s.MaxBodyMB > 0 }
+
 type Config struct {
 	InstanceName       string `json:"instance_name"`
 	SessionStoreDir    string `json:"session_store_dir"`
@@ -66,6 +87,7 @@ type Config struct {
 	Routing                string           `json:"routing,omitempty"` // "round_robin" (default) | "smart"
 	Accounts               []Account        `json:"accounts"`
 	Guards                 Guards           `json:"guards,omitempty"`
+	Sessions               SessionsConfig   `json:"sessions,omitempty"`
 	Redaction              *redact.Config   `json:"redaction,omitempty"`
 	Agents                 AgentsConfig     `json:"agents,omitempty"`
 	Bridges                BridgesConfig    `json:"bridges,omitempty"`

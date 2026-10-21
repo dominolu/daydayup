@@ -82,3 +82,48 @@
 .platform-meta small{font-size:9px;color:#8d9aa7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .platform-lock{margin-left:auto;font-size:9px;color:var(--teal);background:#e2f3ef;border-radius:4px;padding:2px 5px;white-space:nowrap}
 #platform-note{display:block;margin-top:9px;color:#93a1ad}
+
+/* ---- 路由分组 (group cards) ---- */
+.group-hint{display:flex;gap:12px;align-items:flex-start;padding:16px 20px;border:1px solid #d7e6e1;border-radius:10px;background:#f4faf8;margin-bottom:18px;font-size:12px;line-height:1.9;color:#5f7a71}
+.group-hint>svg{width:20px;height:20px;color:var(--teal);margin-top:2px}
+.group-hint code{background:#e3f0ec;border-radius:4px;padding:1px 5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px}
+.group-hint .button{margin-left:auto;white-space:nowrap}
+.group-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.group-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:16px 18px;box-shadow:0 2px 6px #17293b05;display:flex;flex-direction:column;gap:12px;min-width:0}
+.group-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.group-card-head>b{font-size:15px}
+.group-card-stats{display:flex;flex-wrap:wrap;gap:6px;font-size:10px;color:var(--muted)}
+.group-card-stats span{background:#f3f6f8;border-radius:6px;padding:3px 8px}
+.group-card-base{display:flex;align-items:center;gap:8px;border:1px dashed #d7e0dc;border-radius:8px;padding:8px 10px;background:#fafcfc;min-width:0}
+.group-card-base svg{width:15px;height:15px;color:var(--teal)}
+.group-card-base code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;color:#4a6459;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.group-card-base .button{flex:none}
+.group-card-actions{display:flex;flex-wrap:wrap;gap:4px;border-top:1px solid var(--line);padding-top:10px}
+.group-card-actions .button{padding:3px 8px;font-size:11px;color:#557b6f}
+.group-card .tag.teal{background:#e2f3ef;color:var(--teal-dark)}
+.group-tag{cursor:pointer}
+.group-tag:hover{background:var(--teal);color:#fff}
+.toolbar-label{font-size:10px;color:var(--muted);align-self:center}
+#routing-strategy{max-width:340px}
+@media(max-width:820px){.group-hint{flex-wrap:wrap}.group-hint .button{margin-left:0}}
+@media(max-width:1040px){.group-hint .button{display:none}}
+@media(max-width:480px){.group-grid{grid-template-columns:1fr}}
+/* ---- connect page: per-group base rows ---- */
+.connect-group-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);min-width:0}
+.connect-group-row:last-child{border-bottom:none}
+.connect-group-row code{flex:1;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;color:#3c6a5c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.connect-group-row .button{flex:none}
+/* ---- models page: alias + detail ---- */
+.alias-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid var(--line);margin-top:12px}
+.alias-form input{width:170px;border:1px solid #dfe7e5;border-radius:7px;padding:8px 10px;font-size:12px;outline:none}
+.alias-form input:focus{border-color:var(--teal)}
+.alias-form select{max-width:230px}
+.alias-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px;flex-wrap:wrap}
+.alias-row .button{margin-left:auto}
+.model-detail-row>td{background:#f7faf9;padding:0!important}
+.model-detail{padding:14px 20px 18px}
+.model-detail-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.model-detail-head b{font-size:13px}
+.model-detail-head .sub-line{flex:1}
+.model-serving{min-width:420px}
+.form-note{font-size:11px;color:var(--muted);line-height:1.8;margin:8px 0}

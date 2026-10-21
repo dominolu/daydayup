@@ -17,12 +17,18 @@ import (
 // shared SQLite database. Each domain migrates once (idempotent markers); the
 // legacy files are never modified. The legacy paths come from the config's
 // retained fields; they are migration inputs only.
+//
+// The database handle is the process-wide shared handle (store.Shared) and is
+// deliberately never closed here: closing the last connection to the
+// multi-gigabyte gateway database during boot triggers SQLite's blocking WAL
+// checkpoint (measured ~16s on a 3.8GB database), the dominant startup cost.
+// The shared handle lives for the whole process; the WAL is drained by
+// pool.Checkpoint during runtime instead.
 func migrateLegacyData(c config.Config) error {
-	db, err := store.Open(c.DBFile)
+	db, err := store.Shared(c.DBFile)
 	if err != nil {
 		return fmt.Errorf("open database: %w", err)
 	}
-	defer db.Close()
 	if err := accounts.MigrateDB(db, c.AccountStoreFile, c.AccountStoreKeyEnv); err != nil {
 		return fmt.Errorf("accounts migration: %w", err)
 	}

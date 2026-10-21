@@ -37,15 +37,55 @@ const DefaultKeyEnv = "GATEWAY_DB_KEY"
 // DB wraps the SQLite handle plus the application-layer AEAD used to encrypt
 // sensitive columns. It is safe for concurrent use by one process.
 type DB struct {
-	mu     sync.Mutex
-	sql    *sql.DB
-	path   string
-	keyEnv string
-	aead   cipher.AEAD
+	mu       sync.Mutex
+	sql      *sql.DB
+	path     string
+	keyEnv   string
+	aead     cipher.AEAD
+	cacheKey string // non-empty when returned by Shared/SharedKey
+}
+
+// sharedDBs caches one process-wide handle per database path. Production
+// startup constructs every store (accounts, sessions, pool, redaction,
+// agents) through Shared so a boot opens the (possibly multi-gigabyte)
+// database exactly once instead of six independent handles — and so no
+// handle is ever closed during boot, which would otherwise trigger SQLite's
+// blocking WAL checkpoint on last-connection close.
+var (
+	sharedMu  sync.Mutex
+	sharedDBs = map[string]*DB{}
+)
+
+// Shared returns the process-wide handle for path, opening it once and
+// caching it for the lifetime of the process. The returned handle must not
+// be closed by production code; Close evicts the cache entry.
+func Shared(path string) (*DB, error) {
+	return SharedKey(path, DefaultKeyEnv)
+}
+
+// SharedKey is Shared with an explicit key environment variable name.
+func SharedKey(path, keyEnv string) (*DB, error) {
+	if keyEnv == "" {
+		keyEnv = DefaultKeyEnv
+	}
+	k := path + "\x00" + keyEnv
+	sharedMu.Lock()
+	defer sharedMu.Unlock()
+	if db, ok := sharedDBs[k]; ok {
+		return db, nil
+	}
+	db, err := OpenKey(path, keyEnv)
+	if err != nil {
+		return nil, err
+	}
+	db.cacheKey = k
+	sharedDBs[k] = db
+	return db, nil
 }
 
 // Open opens (creating if needed) the SQLite database at path and applies the
 // schema. The returned handle is the single persistence point for every store.
+// Tests use Open for isolated handles; production startup paths use Shared.
 func Open(path string) (*DB, error) {
 	return OpenKey(path, DefaultKeyEnv)
 }
@@ -102,8 +142,18 @@ func secureFile(path string) {
 	}
 }
 
-// Close releases the database handle.
-func (d *DB) Close() error { return d.sql.Close() }
+// Close releases the database handle. A handle returned by Shared is evicted
+// from the process cache first, so a later Shared call reopens the database.
+func (d *DB) Close() error {
+	if d.cacheKey != "" {
+		sharedMu.Lock()
+		if sharedDBs[d.cacheKey] == d {
+			delete(sharedDBs, d.cacheKey)
+		}
+		sharedMu.Unlock()
+	}
+	return d.sql.Close()
+}
 
 // Path returns the database file path.
 func (d *DB) Path() string { return d.path }
