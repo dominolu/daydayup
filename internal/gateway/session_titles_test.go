@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/sessions"
+	"safuno/internal/sessions"
 )
 
 const dshTitleSystem = "Create a concise title for an AI coding-assistant session from the supplied human messages."

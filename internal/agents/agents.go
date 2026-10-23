@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 // Agent describes one supported client and how to wire it to the gateway.
@@ -457,7 +457,7 @@ func Snippet(id, baseURL, gatewayKey, model string) (string, error) {
 	}
 	switch id {
 	case "dsh":
-		return fmt.Sprintf("# DeepSeek Harness 接入 DayDayUp 网关\n# 单机个人使用：把下面几行加入你的 shell 环境或 ~/.dsh/gateway.env\nexport ANTHROPIC_BASE_URL=%s\nexport ANTHROPIC_API_KEY=%s\nexport OPENAI_BASE_URL=%s\nexport OPENAI_API_KEY=%s\n# 默认模型（可选）\nexport DSH_DEFAULT_MODEL=%s\n", shellQuote(baseURL), shellQuote(gatewayKey), shellQuote(baseURL+"/v1"), shellQuote(gatewayKey), shellQuote(model)), nil
+		return fmt.Sprintf("# DeepSeek Harness 接入 Safuno 安诺网关\n# 单机个人使用：把下面几行加入你的 shell 环境或 ~/.dsh/gateway.env\nexport ANTHROPIC_BASE_URL=%s\nexport ANTHROPIC_API_KEY=%s\nexport OPENAI_BASE_URL=%s\nexport OPENAI_API_KEY=%s\n# 默认模型（可选）\nexport DSH_DEFAULT_MODEL=%s\n", shellQuote(baseURL), shellQuote(gatewayKey), shellQuote(baseURL+"/v1"), shellQuote(gatewayKey), shellQuote(model)), nil
 	case "opencode":
 		return fmt.Sprintf("// OpenCode 接入：写入 ~/.config/opencode/opencode.json 后重启 OpenCode\n{\n  \"model\": %q\n}\n", model), nil
 	case "claude-code":

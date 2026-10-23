@@ -1,5 +1,5 @@
 {
-  "instance_name": "DayDayUp 网关",
+  "instance_name": "Safuno 安诺网关",
   "listen": "127.0.0.1:8080",
   "default_provider": "workbuddy",
   "default_realm": "intl",

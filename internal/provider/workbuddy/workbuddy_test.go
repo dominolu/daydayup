@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func testAccount(apiKey, refreshToken, uid, realm, product string) config.Account {

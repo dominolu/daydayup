@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Launch the built desktop shell with this repository's existing config.json
-# and data/ directory. Use this instead of `open dist/DayDayUp.app` when you
+# and data/ directory. Use this instead of `open dist/Safuno.app` when you
 # want the app to take over the developer profile rather than create a fresh
-# ~/Library/Application Support/DayDayUp profile.
+# ~/Library/Application Support/Safuno profile.
 #
 # The app binary is launched directly with -config/-data-dir. LaunchServices
 # (`open --env`/`--args`) can drop those values on current macOS, which would
@@ -11,8 +11,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 ROOT="$PWD"
-APP_BUNDLE="$ROOT/dist/DayDayUp.app"
-APP="$APP_BUNDLE/Contents/MacOS/DayDayUp"
+APP_BUNDLE="$ROOT/dist/Safuno.app"
+APP="$APP_BUNDLE/Contents/MacOS/Safuno"
 CONFIG="$ROOT/config.json"
 PORT=$(python3 -c "import json;print(json.load(open('config.json')).get('listen','127.0.0.1:8080').rsplit(':',1)[1])" 2>/dev/null || echo 8080)
 

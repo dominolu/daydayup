@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"daydayup/internal/config"
-	"daydayup/internal/store"
+	"safuno/internal/config"
+	"safuno/internal/store"
 )
 
 // writeLegacyStore produces an accounts.enc in the pre-database format:

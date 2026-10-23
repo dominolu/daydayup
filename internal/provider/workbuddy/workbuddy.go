@@ -9,8 +9,8 @@ import (
 	"bytes"
 	"net/http"
 
-	"daydayup/internal/config"
-	wbp "daydayup/internal/provider"
+	"safuno/internal/config"
+	wbp "safuno/internal/provider"
 )
 
 type WorkBuddy struct{}

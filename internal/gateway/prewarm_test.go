@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func TestNextPrewarmTime(t *testing.T) {

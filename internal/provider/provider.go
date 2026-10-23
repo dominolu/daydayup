@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 var ErrQuotaUnsupported = errors.New("official API-key quota endpoint is not documented")
@@ -161,6 +161,36 @@ func (SenseNova) ModelUnavailable(body []byte) bool {
 }
 
 func (SenseNova) Name() string { return "sensenova" }
+
+func init() {
+	config.SetEndpoint("sensenova", config.EndpointSpec{Origin: "https://token.sensenova.cn"})
+	// Declared here, in the package every adapter imports, so no adapter
+	// package's init order can hide it. The WorkBuddy adapter refines the
+	// declaration with its realm origins (and the realm lookup the CN base
+	// URL implies) in its own init.
+	config.SetRealmPlatform("workbuddy", []string{"intl", "cn"}, []string{"desktop", "vscode", "cli"}, nil)
+}
+
+var _ Descriptor = SenseNova{}
+
+// PlatformInfo is the admin-console description of SenseNova (model discovery
+// under /v1/models with a Bearer API key; quota only via an operator feed).
+func (SenseNova) PlatformInfo() Info {
+	return Info{
+		ID:          "sensenova",
+		Name:        "SenseNova",
+		Tagline:     "商汤日日新 · 积分额度",
+		Logo:        "logo-sensenova",
+		IDPrefix:    "sense",
+		BaseURL:     "https://token.sensenova.cn",
+		Credential:  "API Key",
+		Placeholder: "sk-…",
+		Hint:        "在 SenseNova 控制台创建 API Key 后粘贴到这里。",
+		Auth:        "api_key",
+		Quota:       "snapshot",
+	}
+}
+
 func (SenseNova) Authorize(r *http.Request, a config.Account) {
 	r.Header.Set("Authorization", "Bearer "+a.APIKey)
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 // realmConfig holds the per-realm upstream endpoints and client identities.

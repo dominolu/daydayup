@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 // Store persists the placeholder reverse index (token -> label+original)

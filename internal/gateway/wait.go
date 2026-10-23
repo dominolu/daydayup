@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
+	"safuno/internal/config"
+	"safuno/internal/pool"
 )
 
 var errWaitQueueFull = errors.New("gateway waiting queue is full; retry later")

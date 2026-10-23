@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"daydayup/internal/redact"
+	"safuno/internal/redact"
 )
 
 // DefaultPoolWaitTimeoutSeconds bounds rate-limit waiting when the config does
@@ -99,6 +99,11 @@ type Config struct {
 	MaxWaitingRequests     int               `json:"max_waiting_requests"`
 	Routing                string            `json:"routing,omitempty"`       // global "round_robin" (default) | "smart"
 	GroupRouting           map[string]string `json:"group_routing,omitempty"` // per-group override: group -> "round_robin" | "smart"; absent groups use Routing
+	// ProviderOverrides holds operator-registered platforms (admin console →
+	// 平台). They are replayed onto the provider registry at boot, so a
+	// platform added without restarting survives one, including its default
+	// endpoint for accounts that omit base_url.
+	ProviderOverrides      []ProviderOverride `json:"provider_overrides,omitempty"`
 	Accounts               []Account         `json:"accounts"`
 	Guards                 Guards            `json:"guards,omitempty"`
 	Sessions               SessionsConfig    `json:"sessions,omitempty"`
@@ -117,6 +122,28 @@ type Config struct {
 	GatewayKey  string                       `json:"-"`
 	AdminKey    string                       `json:"-"`
 	SourcePath  string                       `json:"-"`
+}
+
+// ProviderOverride is a persisted description of an operator-registered
+// platform. It carries display metadata, the default endpoint and the realm
+// vocabulary; the adapter code itself is always provider.Generic in-process.
+type ProviderOverride struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name,omitempty"`
+	Tagline     string   `json:"tagline,omitempty"`
+	Logo        string   `json:"logo,omitempty"`
+	IDPrefix    string   `json:"id_prefix,omitempty"`
+	BaseURL     string   `json:"base_url,omitempty"`
+	Credential  string   `json:"credential,omitempty"`
+	Placeholder string   `json:"placeholder,omitempty"`
+	Hint        string   `json:"hint,omitempty"`
+	Auth        string   `json:"auth,omitempty"`
+	UIDField    string   `json:"uid_field,omitempty"`
+	Realms      []string `json:"realms,omitempty"`
+	Quota       string   `json:"quota,omitempty"`
+	// Adapter names the adapter implementation the platform runs; only
+	// "generic" (the OpenAI-compatible adapter) is available in-process.
+	Adapter string `json:"adapter,omitempty"`
 }
 
 // AgentsConfig controls the agent-adaptation layer (M1/M2 of the product
@@ -213,7 +240,7 @@ type Guards struct {
 }
 
 func Load(path string) (Config, error) {
-	c := Config{SessionStoreDir: "data/sessions", SessionStoreKeyEnv: "GATEWAY_SESSION_STORE_KEY", InstanceName: "DayDayUp 网关", AccountStoreFile: "data/accounts.enc", AccountStoreKeyEnv: "GATEWAY_ACCOUNT_STORE_KEY", AgentStoreFile: "data/agents.json", Listen: "127.0.0.1:8080", DefaultProvider: "sensenova", GatewayKeyEnv: "GATEWAY_API_KEY", AdminKeyEnv: "GATEWAY_ADMIN_KEY", StateFile: "data/state.json", RequestTimeoutSeconds: 300, RefreshIntervalSeconds: 60, MaxRequestBytes: 32 << 20, MaxAttempts: 3, DBFile: "data/gateway.db", DBKeyEnv: "GATEWAY_DB_KEY"}
+	c := Config{SessionStoreDir: "data/sessions", SessionStoreKeyEnv: "GATEWAY_SESSION_STORE_KEY", InstanceName: "Safuno 安诺网关", AccountStoreFile: "data/accounts.enc", AccountStoreKeyEnv: "GATEWAY_ACCOUNT_STORE_KEY", AgentStoreFile: "data/agents.json", Listen: "127.0.0.1:8080", DefaultProvider: "sensenova", GatewayKeyEnv: "GATEWAY_API_KEY", AdminKeyEnv: "GATEWAY_ADMIN_KEY", StateFile: "data/state.json", RequestTimeoutSeconds: 300, RefreshIntervalSeconds: 60, MaxRequestBytes: 32 << 20, MaxAttempts: 3, DBFile: "data/gateway.db", DBKeyEnv: "GATEWAY_DB_KEY"}
 	f, err := os.Open(path)
 	if err != nil {
 		return c, err
@@ -381,14 +408,9 @@ func Load(path string) (Config, error) {
 				return c, fmt.Errorf("account %s: missing uid in %s", a.ID, a.UIDEnv)
 			}
 		}
-		if a.Realm != "" && a.Realm != "intl" && a.Realm != "cn" {
-			return c, fmt.Errorf("account %s: realm must be intl or cn", a.ID)
+		if err := validateRealmProduct(a); err != nil {
+			return c, fmt.Errorf("account %s: %w", a.ID, err)
 		}
-		if a.Product != "" && a.Product != ProductDesktop && a.Product != ProductVSCode && a.Product != ProductCLI {
-			return c, fmt.Errorf("account %s: product must be desktop, vscode or cli", a.ID)
-		}
-		a.Realm = RealmOf(a)
-		a.Product = DefaultProduct(*a)
 		if keys[a.BaseURL+"\x00"+a.APIKey+"\x00"+a.Provider] {
 			return c, fmt.Errorf("account %s: duplicate upstream credential", a.ID)
 		}
@@ -447,35 +469,18 @@ func NormalizeAccount(a *Account) error {
 		a.Provider = "sensenova"
 	}
 	if !Registered(a.Provider) {
-		return fmt.Errorf("当前仅支持 %s", strings.Join(RegisteredProviders, "、"))
+		return fmt.Errorf("当前仅支持 %s", strings.Join(RegisteredProviders(), "、"))
 	}
 	if a.BaseURL == "" {
-		a.BaseURL = defaultBaseURL(a.Provider, a.Realm)
+		a.BaseURL = DefaultBaseURL(a.Provider, a.Realm)
 	}
 	u, e := url.Parse(a.BaseURL)
 	if e != nil || u.Host == "" || u.User != nil || u.RawQuery != "" || u.Fragment != "" || (u.Path != "" && u.Path != "/") || (u.Scheme != "https" && !(u.Scheme == "http" && (u.Hostname() == "localhost" || u.Hostname() == "127.0.0.1" || u.Hostname() == "::1"))) {
 		return fmt.Errorf("Base URL 必须为 HTTPS 源站地址，不包含 /v1 路径（本机测试允许 HTTP）")
 	}
 	a.BaseURL = strings.TrimRight(a.BaseURL, "/")
-	if a.Realm != "" && a.Realm != "intl" && a.Realm != "cn" {
-		return fmt.Errorf("区域必须是 intl 或 cn")
-	}
-	if a.Product != "" && a.Product != ProductDesktop && a.Product != ProductVSCode && a.Product != ProductCLI {
-		return fmt.Errorf("客户端身份必须是 desktop、vscode 或 cli")
-	}
-	a.Realm = RealmOf(a)
-	a.Product = DefaultProduct(*a)
-	if a.Provider == "workbuddy" {
-		a.Realm = RealmOf(a)
-		if a.UID == "" {
-			return fmt.Errorf("WorkBuddy 账号需要 uid（X-User-Id），请从 OAuth 导入或检查配置")
-		}
-		if len(a.UID) > 128 || strings.ContainsAny(a.UID, "\r\n\x00") {
-			return fmt.Errorf("uid 不合法")
-		}
-		if len(a.RefreshToken) > 8192 || strings.ContainsAny(a.RefreshToken, "\r\n\x00") {
-			return fmt.Errorf("refresh_token 不合法")
-		}
+	if err := validateRealmProduct(a); err != nil {
+		return err
 	}
 	if a.APIKey == "" || len(a.APIKey) > 4096 || strings.ContainsAny(a.APIKey, "\r\n") {
 		return fmt.Errorf("请填写有效的 API Key")
@@ -492,6 +497,58 @@ func NormalizeAccount(a *Account) error {
 	for _, m := range a.Models {
 		if len(m) == 0 || len(m) > 256 || strings.ContainsAny(m, "\r\n") {
 			return fmt.Errorf("模型标识不合法")
+		}
+	}
+	return nil
+}
+
+// validateRealmProduct validates and fills the platform-declared realm and
+// client-identity fields. Platforms without a realm declaration ignore both
+// fields; realm-aware platforms (WorkBuddy, and any platform that declares
+// realms at runtime) are validated against their declared values. The
+// single-realm WorkBuddy family authenticates by OAuth, so it additionally
+// requires an uid and a bounded refresh token because credentials imported from
+// an account export.
+func validateRealmProduct(a *Account) error {
+	values := RealmValues(a.Provider)
+	if len(values) == 0 {
+		a.Product = ""
+		return nil
+	}
+	if a.Realm != "" {
+		valid := false
+		for _, v := range values {
+			if v == a.Realm {
+				valid = true
+			}
+		}
+		if !valid {
+			return fmt.Errorf("区域必须是 %s", strings.Join(values, " 或 "))
+		}
+	}
+	products := Products(a.Provider)
+	if a.Product != "" {
+		valid := false
+		for _, p := range products {
+			if p == a.Product {
+				valid = true
+			}
+		}
+		if !valid {
+			return fmt.Errorf("客户端身份必须是 %s", strings.Join(products, "、"))
+		}
+	}
+	a.Realm = RealmOf(a)
+	a.Product = DefaultProduct(*a)
+	if a.Provider == "workbuddy" {
+		if a.UID == "" {
+			return fmt.Errorf("WorkBuddy 账号需要 uid（X-User-Id），请从 OAuth 导入或检查配置")
+		}
+		if len(a.UID) > 128 || strings.ContainsAny(a.UID, "\r\n\x00") {
+			return fmt.Errorf("uid 不合法")
+		}
+		if len(a.RefreshToken) > 8192 || strings.ContainsAny(a.RefreshToken, "\r\n\x00") {
+			return fmt.Errorf("refresh_token 不合法")
 		}
 	}
 	return nil

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/observe"
-	"daydayup/internal/sessions"
+	"safuno/internal/observe"
+	"safuno/internal/sessions"
 )
 
 func TestNativeSessionIdentity(t *testing.T) {

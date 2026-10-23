@@ -15,7 +15,7 @@ var webFiles embed.FS
 // adminSessionCookie is the HttpOnly, same-site cookie that lets the console
 // call /admin/v1 without asking for GATEWAY_ADMIN_KEY. It is set by the HTML
 // response itself, so opening /admin/ is the whole "login" flow.
-const adminSessionCookie = "daydayup_admin_session"
+const adminSessionCookie = "safuno_admin_session"
 
 func (s *Server) serveAdminUI(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {

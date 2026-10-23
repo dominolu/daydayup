@@ -484,7 +484,7 @@ func (s *Store) WriteFile(target, backupID string, content []byte) (*ApplyResult
 	} else {
 		res.Created = true
 	}
-	tmp := target + ".daydayup-tmp"
+	tmp := target + ".safuno-tmp"
 	if err := os.WriteFile(tmp, content, 0600); err != nil {
 		return nil, fmt.Errorf("配置写入：%w", err)
 	}
@@ -542,7 +542,7 @@ func (s *Store) RestoreFile(target, backupID string) error {
 	if err != nil {
 		return fmt.Errorf("读取备份：%w", err)
 	}
-	tmp := target + ".daydayup-tmp"
+	tmp := target + ".safuno-tmp"
 	if err := os.WriteFile(tmp, b, 0600); err != nil {
 		return err
 	}

@@ -13,9 +13,9 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/accounts"
-	"daydayup/internal/config"
-	"daydayup/internal/provider/workbuddy"
+	"safuno/internal/accounts"
+	"safuno/internal/config"
+	"safuno/internal/provider/workbuddy"
 )
 
 // oauthTestToken builds a fake JWT carrying uid/exp so the mock upstream can

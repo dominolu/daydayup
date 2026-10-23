@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/provider"
 )
 
 func cnTestAccount() config.Account {

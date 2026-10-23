@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/redact"
+	"safuno/internal/redact"
 )
 
 func restoreSSE(t *testing.T, engine *sseChannelRestorer, events []string) (string, error) {

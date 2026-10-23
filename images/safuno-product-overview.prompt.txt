@@ -1,0 +1,49 @@
+Generation mode: built-in image_gen edit
+Brand: Safuno 安诺
+Source image: ai-agent-privacy-security-gateway-overview-v2.png
+Product plan: https://chatgpt.com/space/page_36e4782834e88191ad83d55380a89525
+Date: 2026-10-23
+
+Use case: precise-object-edit, product naming update.
+Edit target: the supplied latest product introduction image with DeepSeek Harness on the left and OpenRouter / WorkBuddy on the right.
+The user has chosen the brand "Safuno 安诺". Update the product branding in this existing image. This is a precise typography edit, not a redesign.
+
+Change only these five text areas:
+1. Replace the large first heading "AI Agent" with the exact brand text "Safuno 安诺". Make it the primary heading, centered and prominent, with Safuno and 安诺 together on one line. Preserve the polished bold dark type style.
+2. Replace the large second heading "本地隐私与安全网关" with the exact descriptive line "AI Agent 本地隐私与安全网关". It should fit cleanly on one centered line beneath the brand, slightly smaller than the brand if needed.
+3. Replace the center panel heading "本地安全网关" with "Safuno 本地安全网关", fitting within the existing shield area.
+4. Replace the lower left edition heading "个人版" with "Safuno 个人版".
+5. Replace the lower right edition heading "团队版" with "Safuno 团队版".
+Adjust ONLY the typography within these named areas as needed for clean spacing and alignment.
+
+Preserve everything else from the reference: the same image dimensions and aspect ratio, light glass visual style, background, central laptop and shield, all icons, panel positions, arrows, colors, all feature descriptions, and the footer.
+
+All of the following existing text must remain accurate and readable:
+"产品方案"
+"发送前脱敏 · 返回时检测 · 执行前校验"
+"你的 AI Agent"
+"Codex"
+"Claude Code"
+"Pi"
+"OpenClaw"
+"DeepSeek Harness"
+"发送请求"
+"敏感信息脱敏"
+"提示注入检测"
+"工具执行校验"
+"本地处理"
+"API 与授权订阅"
+"返回结果（检测）"
+"模型服务"
+"GPT · Claude"
+"OpenRouter · WorkBuddy 等"
+"本地安装 · 一键接入"
+"密码、密钥、电话、地址脱敏"
+"自定义规则 · 风险提示"
+"多用户与权限管理"
+"企业规则 · 集中策略"
+"配额统计 · 安全审计"
+"方案示意 · 保护范围以实际接入路径为准"
+
+Do not add a website, price, registration mark, new logo, security guarantee, extra copy, or new product names. Render "Safuno" with exact case and spelling. Render "安诺" correctly, especially 诺. Output one finished branded image.
+

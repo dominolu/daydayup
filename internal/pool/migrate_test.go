@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"daydayup/internal/config"
-	"daydayup/internal/store"
+	"safuno/internal/config"
+	"safuno/internal/store"
 )
 
 func TestMigrateLegacyState(t *testing.T) {

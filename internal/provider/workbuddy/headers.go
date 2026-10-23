@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 // identityHeaders builds the full header family for the account product
@@ -14,7 +14,7 @@ import (
 // monitor timestamps on model requests (official extension behavior).
 func identityHeaders(a config.Account, sessionKey, model string) map[string]string {
 	rc := realmOf(a)
-	p := config.DefaultProduct(a)
+	p := defaultProduct(a)
 	uid := uidOf(a)
 
 	var conv string
@@ -28,7 +28,7 @@ func identityHeaders(a config.Account, sessionKey, model string) map[string]stri
 
 	h := map[string]string{}
 	switch p {
-	case config.ProductVSCode:
+	case ProductVSCode:
 		h["X-Agent-Intent"] = "craft"
 		h["X-Agent-Type"] = "main"
 		h["X-IDE-Type"] = "VSCode"
@@ -62,7 +62,7 @@ func identityHeaders(a config.Account, sessionKey, model string) map[string]stri
 		for k, v := range vscodeTraceHeaders() {
 			h[k] = v
 		}
-	case config.ProductCLI:
+	case ProductCLI:
 		// Official CodeBuddy CLI 2.168.2 identity (OpenAI Node SDK 6.25.0
 		// headers + CLI product constants), per wb_identity.py.
 		h["X-Agent-Intent"] = "craft"
@@ -113,7 +113,7 @@ func identityHeaders(a config.Account, sessionKey, model string) map[string]stri
 		}
 	}
 	// Browser-ish common headers (desktop and vscode identities only).
-	if p != config.ProductCLI {
+	if p != ProductCLI {
 		h["Accept"] = "application/json, text/plain, */*"
 		h["X-Requested-With"] = "XMLHttpRequest"
 		h["Origin"] = rc.origin

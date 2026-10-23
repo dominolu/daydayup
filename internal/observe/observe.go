@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/pool"
-	"daydayup/internal/sessions"
+	"safuno/internal/pool"
+	"safuno/internal/sessions"
 )
 
 const observationLimit = 4 << 20

@@ -16,7 +16,7 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/redact"
+	"safuno/internal/redact"
 )
 
 // RedactionError reports a redaction engine initialization failure so the

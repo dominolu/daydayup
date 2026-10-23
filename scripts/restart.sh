@@ -23,6 +23,9 @@ if ! command -v go >/dev/null 2>&1; then
 fi
 command -v go >/dev/null 2>&1 || { echo "error: go toolchain not found"; exit 1; }
 
+# 项目内缓存（首次构建或受限环境）：GO 默认缓存不可写时直接用仓库内的
+if [[ -d "$PWD/.gocache" ]]; then export GOCACHE="$PWD/.gocache"; fi
+if [[ -d "$PWD/.tools/gomodcache" ]]; then export GOMODCACHE="$PWD/.tools/gomodcache"; fi
 # 默认 GOCACHE 不可写（如受限环境）时回落到项目内目录
 GOCACHE_DIR=$(go env GOCACHE 2>/dev/null)
 if [[ -n "$GOCACHE_DIR" ]] && ! mkdir -p "$GOCACHE_DIR" 2>/dev/null; then

@@ -1,4 +1,4 @@
-# DayDayUp 产品需求文档（PRD）：个人订阅转 API 网关 · 让本机 Agent 直接适配
+# Safuno 产品需求文档（PRD）：个人订阅转 API 网关 · 让本机 Agent 直接适配
 
 | 项 | 内容 |
 |---|---|
@@ -12,7 +12,7 @@
 
 ## 1. 背景与问题
 
-DayDayUp 现在是一个"多账号模型 API 代理"（[README.md](README.md)）：账号轮询、冷却、额度观测、会话归档、脱敏、管理台都已具备，并已把 WorkBuddy/CodeBuddy 订阅账号包装成 OpenAI 兼容 API。
+Safuno 现在是一个"多账号模型 API 代理"（[README.md](README.md)）：账号轮询、冷却、额度观测、会话归档、脱敏、管理台都已具备，并已把 WorkBuddy/CodeBuddy 订阅账号包装成 OpenAI 兼容 API。
 
 当前形态的问题是 **"只提供 API"**：
 

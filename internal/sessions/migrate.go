@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 // MigrateBodiesToFiles exports body BLOBs from the database into the

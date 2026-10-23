@@ -1,9 +1,9 @@
-# DayDayUp：融合脱敏的个人 AI 代理网关
+# Safuno：融合脱敏的个人 AI 代理网关
 
 > **对标**：[CC Switch（farion1231/cc-switch）](https://github.com/farion1231/cc-switch) · [Magpie（yetone/magpie）](https://github.com/yetone/magpie/blob/main/README.zh-CN.md)
-> **对象**：本仓库 DayDayUp（Go 标准库实现，单二进制网关）
+> **对象**：本仓库 Safuno（Go 标准库实现，单二进制网关）
 > **撰写日期**：2026-10-19
-> **一句话**：CC Switch 管"**配置**在哪切"，Magpie 管"**流量**去哪走"，DayDayUp 在前两者的位置上多管一件事——"**什么内容可以出网**"。
+> **一句话**：CC Switch 管"**配置**在哪切"，Magpie 管"**流量**去哪走"，Safuno 在前两者的位置上多管一件事——"**什么内容可以出网**"。
 
 ---
 
@@ -19,7 +19,7 @@
   ┌─────────────────────────────────────────┐
   │  ② 本地网关 / 反向代理                    │ ← Magpie 的主战场（协议互译、账号池、限额、账单）
   │  ┌───────────────────────────────────┐   │
-  │  │ ③ 内容理解层                       │   │ ← DayDayUp 的差异化（脱敏 / 还原 / 危险工具防护）
+  │  │ ③ 内容理解层                       │   │ ← Safuno 的差异化（脱敏 / 还原 / 危险工具防护）
   │  └───────────────────────────────────┘   │
   └─────────────────────────────────────────┘
         │
@@ -27,13 +27,13 @@
    多条上游：官方 API / WorkBuddy·CodeBuddy 订阅 / SenseNova / 其它订阅账号
 ```
 
-| 层 | 解决的问题 | CC Switch | Magpie | DayDayUp |
+| 层 | 解决的问题 | CC Switch | Magpie | Safuno |
 |---|---|---|---|---|
 | ① 配置层 | 每个 Agent 的配置格式不同，换供应商要手改 | **核心**：90+ 供应商预设、一键切换、托盘切换 | 有（Agents 页模型选择器 + 方案） | 有（Agent 接入页，5 个内置 Agent） |
 | ② 网关层 | 协议、账号、限流、额度、计费 | 有（本地路由 + 故障转移 + 聚合，v4 起） | **核心**：路由组、插件、Key 限额、计费 | **核心**：账号池、轮询/冷却/等待、三协议桥、额度观测 |
 | ③ 内容层 | 发出去的东西里有没有不该出网的 | 无 | 无 | **核心**：出网前掩码、返回时还原、映射审计 |
 
-> **结论先行**：CC Switch 和 Magpie 都默认"请求内容原样转发"。DayDayUp 的定位是在**同样做好配置与网关的前提下，把"内容"变成可治理的第三层**——这就是标题里的"融合了脱敏功能"。
+> **结论先行**：CC Switch 和 Magpie 都默认"请求内容原样转发"。Safuno 的定位是在**同样做好配置与网关的前提下，把"内容"变成可治理的第三层**——这就是标题里的"融合了脱敏功能"。
 
 ---
 
@@ -45,9 +45,9 @@ CC Switch 是 Tauri 2 桌面应用（Rust 后端），定位"Claude Code、Codex
 2. **第一次改写前自动备份**，并提供"恢复官方登录"这条退路；
 3. **切换成本要低到一次点击**：主界面、系统托盘、项目切换器三个入口。
 
-DayDayUp 的 Agent 接入页（M1）已按同样思路实现，差异集中在"谁是改写的执行者"：
+Safuno 的 Agent 接入页（M1）已按同样思路实现，差异集中在"谁是改写的执行者"：
 
-| 能力 | CC Switch | DayDayUp 现状 | 说明 |
+| 能力 | CC Switch | Safuno 现状 | 说明 |
 |---|---|---|---|
 | Agent 覆盖 | 10 个工具（含 Gemini CLI、Grok Build、OpenClaw） | 5 个：DSH、OpenCode、Claude Code、Codex、Cline | 见 README「Agent 接入」 |
 | 写入方式 | 桌面 GUI，直接改本机配置 | 管理台（Web）在**网关本机**改配置 | 单机自用前提；跨机器需自行搬运 |
@@ -55,12 +55,12 @@ DayDayUp 的 Agent 接入页（M1）已按同样思路实现，差异集中在"�
 | 备份与还原 | 自动备份、恢复官方 | 写入前备份，一键还原 | 还原后与写入前逐字节一致 |
 | 漂移检测 | — | **有**：被外部工具改动后标记"配置漂移"并拒绝覆盖 | 比"静默覆盖"更稳 |
 | 写入后自检 | — | **有**：确认模型在目录中 + 发一个 `max_tokens=8` 最小请求 | 失败不覆盖原配置 |
-| 方案 / 项目快照 | 项目切换器（供应商+MCP+Skills+提示词） | 方案（Profiles）：各 Agent 模型选择快照，一键整套切换 | DayDayUp 的"方案"是**纯模型快照**，不含凭证与白名单 |
+| 方案 / 项目快照 | 项目切换器（供应商+MCP+Skills+提示词） | 方案（Profiles）：各 Agent 模型选择快照，一键整套切换 | Safuno 的"方案"是**纯模型快照**，不含凭证与白名单 |
 | 托盘快捷切换 | 系统托盘 | macOS 第一版有菜单栏壳；Windows/Linux 后续 | 打开管理台、复制 Base URL / Key、退出 |
 | MCP / Skills / 提示词统管 | 有 | 无 | 明确不在本项目范围 |
 | 供应商预设库 | 90+ 预设 | 无预设；上游是自持账号 | 本项目不对外售卖，不需要"供应商货架" |
 
-**从 CC Switch 借来、但 DayDayUp 要做得更狠的一点**：CC Switch 的配置改写发生在**用户桌面**，DayDayUp 的改写发生在**网关侧**——这意味着 DayDayUp 能在"写入"与"请求实际发出"之间插一层内容治理，CC Switch 做不到。
+**从 CC Switch 借来、但 Safuno 要做得更狠的一点**：CC Switch 的配置改写发生在**用户桌面**，Safuno 的改写发生在**网关侧**——这意味着 Safuno 能在"写入"与"请求实际发出"之间插一层内容治理，CC Switch 做不到。
 
 ---
 
@@ -68,7 +68,7 @@ DayDayUp 的 Agent 接入页（M1）已按同样思路实现，差异集中在"�
 
 Magpie 的定位是"所有 Agent 的模型，一处搞定"：本机一个网关（`127.0.0.1:3425`），同时讲 OpenAI Chat、Responses、Anthropic Messages、Gemini 四种协议并互相转换，账号池用尽自动切下一个。详细拆解见 [magpie-analysis-zh.md](magpie-analysis-zh.md)，这里只列与本定位直接相关的部分：
 
-| Magpie 能力 | DayDayUp 现状 | 落点 |
+| Magpie 能力 | Safuno 现状 | 落点 |
 |---|---|---|
 | 协议互译（Chat ↔ Responses ↔ Messages） | **已实现**（`bridges.messages` / `bridges.responses`，默认关闭） | `internal/gateway/bridge*.go` |
 | 账号池轮询、冷却、用尽切换 | **已实现**，此外有有界等待队列与恢复节流 | `internal/pool` |
@@ -78,7 +78,7 @@ Magpie 的定位是"所有 Agent 的模型，一处搞定"：本机一个网关�
 | 网关中间件插件 | **部分**：脱敏与工具防护是"内置中间件"，未做热插拔 | 先做对，再做可插拔 |
 | Key 限额、命名 Key、局域网共享 | **无** | 单机单用户，非目标 |
 
-Magpie 给 DayDayUp 的启示只有一句：**让用户不必改 Agent 的工作方式**。DayDayUp 沿用了这条，并且把同样的克制用在脱敏上——见下一节。
+Magpie 给 Safuno 的启示只有一句：**让用户不必改 Agent 的工作方式**。Safuno 沿用了这条，并且把同样的克制用在脱敏上——见下一节。
 
 ---
 
@@ -91,7 +91,7 @@ Magpie 给 DayDayUp 的启示只有一句：**让用户不必改 Agent 的工作
 3. **流式还原难**：模型的回复是 SSE 流，占位符会被切在两个事件之间；脱离协议做不了正确还原。
 4. **不可审计**：没有"哪条原文被换成了哪个占位符、又在什么时候还原"的凭据，出了问题说不清。
 
-DayDayUp 把脱敏放在**网关请求流水线的出口**，这正是 CC Switch（只管配置）和 Magpie（只管转发）都不做的那一层。请求处理顺序（`internal/gateway/server.go`）：
+Safuno 把脱敏放在**网关请求流水线的出口**，这正是 CC Switch（只管配置）和 Magpie（只管转发）都不做的那一层。请求处理顺序（`internal/gateway/server.go`）：
 
 ```
 客户端请求
@@ -149,7 +149,7 @@ DayDayUp 把脱敏放在**网关请求流水线的出口**，这正是 CC Switch
 
 ## 6. 三者能力对照总表
 
-| 能力维度 | CC Switch | Magpie | DayDayUp |
+| 能力维度 | CC Switch | Magpie | Safuno |
 |---|---|---|---|
 | 形态 | 桌面 App（Tauri 2） | 本机网关 + 菜单栏 | **单个 Go 二进制 + 第一版 macOS 桌面壳（Wails v3）** |
 | Agent 配置改写 | ✅ 10 个工具 / 90+ 预设 | ✅ Agents 页 | ✅ 5 个 Agent，带漂移检测与自检 |
@@ -221,7 +221,7 @@ rg '"msg":"redaction span"' data/gateway.log | rg '3f6e...'
 
 CC Switch 选择做**桌面应用**，收益是体验（托盘、项目切换器、一键升级），代价是与操作系统强耦合、需要跨平台打包。Magpie 选择做**本机网关 + 菜单栏**，收益是协议灵活，代价是要维护进程与端口。
 
-DayDayUp 仍然保留**单二进制 + 内置 Web 管理台**作为服务端形态：
+Safuno 仍然保留**单二进制 + 内置 Web 管理台**作为服务端形态：
 
 - 一个文件即可部署（含 Docker 镜像），CLI 和服务器不依赖桌面运行时；
 - 管理台与 API 同端口，安全边界清晰（管理 Key 只存内存，不落 localStorage）；

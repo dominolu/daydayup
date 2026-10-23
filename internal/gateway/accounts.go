@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
+	"safuno/internal/config"
+	"safuno/internal/pool"
 )
 
 // configurePool (re)installs the runtime settings that live outside the pool's
@@ -26,12 +26,17 @@ func (s *Server) configurePool() {
 func (s *Server) LoadAccounts() error {
 	s.accountsMu.Lock()
 	defer s.accountsMu.Unlock()
-	accounts, err := s.accountStore.Load(s.Config.Accounts)
+	var unbound []string
+	accounts, err := s.accountStore.LoadWithUnbound(s.Config.Accounts, &unbound)
 	if err != nil {
 		return err
 	}
 	s.Pool = pool.New(accounts)
 	s.configurePool()
+	if len(unbound) > 0 {
+		// Kept, not deleted: re-registering the platform rebinds them.
+		slog.Info("stored accounts skipped: platform not registered", "accounts", strings.Join(unbound, ","))
+	}
 	return nil
 }
 
@@ -140,6 +145,11 @@ func (s *Server) importTokens(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) accountAdmin(w http.ResponseWriter, r *http.Request) bool {
+	// /admin/v1/providers/... is platform management, not an account whose id
+	// happens to be "providers".
+	if r.URL.Path == providerAdminBase || strings.HasPrefix(r.URL.Path, providerAdminBase+"/") {
+		return false
+	}
 	if r.URL.Path == "/admin/v1/session-adapters" && r.Method == http.MethodGet {
 		writeJSON(w, 200, map[string]any{"data": sessionAdapters()})
 		return true
@@ -147,9 +157,9 @@ func (s *Server) accountAdmin(w http.ResponseWriter, r *http.Request) bool {
 	if r.URL.Path == "/admin/v1/info" && r.Method == http.MethodGet {
 		name := s.Config.InstanceName
 		if name == "" {
-			name = "DayDayUp 网关"
+			name = "Safuno 安诺网关"
 		}
-		writeJSON(w, 200, map[string]any{"instance_name": name, "version": "0.6.0", "session_storage": s.Sessions != nil, "session_titles": true, "pool_waiting": true, "rate_limit_diagnostics": true, "sse_completion": "terminal_event_after_successful_flush", "max_waiting_requests": cap(s.waitSlots), "request_timeout_seconds": s.Config.RequestTimeoutSeconds, "session_adapters": sessionAdapters(), "session_identity": "native_headers_tools_and_titles", "default_provider": s.Config.DefaultProvider, "default_group": s.Config.DefaultGroup, "default_realm": s.Config.DefaultRealm, "groups": s.Pool.Groups(), "guards": s.Config.Guards, "refresh_interval_seconds": s.Config.RefreshIntervalSeconds, "account_storage": "AES-256-GCM", "quota_api": "unsupported", "platforms": platformCatalog()})
+		writeJSON(w, 200, map[string]any{"instance_name": name, "version": "0.6.0", "session_storage": s.Sessions != nil, "session_titles": true, "pool_waiting": true, "rate_limit_diagnostics": true, "sse_completion": "terminal_event_after_successful_flush", "max_waiting_requests": cap(s.waitSlots), "request_timeout_seconds": s.Config.RequestTimeoutSeconds, "session_adapters": sessionAdapters(), "session_identity": "native_headers_tools_and_titles", "default_provider": s.Config.DefaultProvider, "default_group": s.Config.DefaultGroup, "default_realm": s.Config.DefaultRealm, "groups": s.Pool.Groups(), "guards": s.Config.Guards, "refresh_interval_seconds": s.Config.RefreshIntervalSeconds, "account_storage": "AES-256-GCM", "quota_api": "unsupported", "platforms": s.platformCatalog()})
 		return true
 	}
 	if r.URL.Path == "/admin/v1/accounts/import" && r.Method == http.MethodPost {

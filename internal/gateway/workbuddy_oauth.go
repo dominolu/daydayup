@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
-	"daydayup/internal/provider/workbuddy"
+	"safuno/internal/config"
+	"safuno/internal/pool"
+	"safuno/internal/provider/workbuddy"
 )
 
 // WorkBuddy browser OAuth login admin endpoints. The flow mirrors the

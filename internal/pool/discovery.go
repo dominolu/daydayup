@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/provider"
 )
 
 func (p *Pool) Discovery(id string, models []provider.Model, err error, cooldown time.Duration) {

@@ -17,8 +17,8 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/provider"
 )
 
 func newTestGateway(t *testing.T, upstream http.Handler, n int) (*Server, *httptest.Server) {

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build a minimal, locally-runnable macOS .app bundle for DayDayUp.
+# Build a minimal, locally-runnable macOS .app bundle for Safuno.
 #
 # This is an ad-hoc signed development bundle. Distribution still needs a
 # Developer ID Application certificate, hardened runtime and notarization.
@@ -8,10 +8,10 @@ cd "$(dirname "$0")/.."
 
 ./scripts/build-desktop.sh
 
-APP="dist/DayDayUp.app"
+APP="dist/Safuno.app"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp bin/daydayup "$APP/Contents/MacOS/DayDayUp"
+cp bin/safuno "$APP/Contents/MacOS/Safuno"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -19,13 +19,13 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
 <plist version="1.0">
 <dict>
   <key>CFBundleName</key>
-  <string>DayDayUp</string>
+  <string>Safuno</string>
   <key>CFBundleDisplayName</key>
-  <string>DayDayUp</string>
+  <string>Safuno 安诺</string>
   <key>CFBundleIdentifier</key>
-  <string>dev.daydayup.gateway</string>
+  <string>dev.safuno.gateway</string>
   <key>CFBundleExecutable</key>
-  <string>DayDayUp</string>
+  <string>Safuno</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleInfoDictionaryVersion</key>
@@ -48,7 +48,7 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <true/>
   </dict>
   <key>NSHumanReadableCopyright</key>
-  <string>DayDayUp</string>
+  <string>Safuno 安诺</string>
 </dict>
 </plist>
 PLIST
@@ -59,7 +59,7 @@ if [[ -f desktop/packaging/AppIcon.icns ]]; then
 fi
 
 # Ad-hoc signing is enough for local execution. Re-sign nested code first.
-codesign --force --sign - "$APP/Contents/MacOS/DayDayUp"
+codesign --force --sign - "$APP/Contents/MacOS/Safuno"
 codesign --force --sign - "$APP"
 xattr -cr "$APP" 2>/dev/null || true
 

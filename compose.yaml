@@ -1,3 +1,5 @@
+name: safuno
+
 services:
   gateway:
     build: .

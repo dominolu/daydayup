@@ -10,9 +10,9 @@ import (
 	"time"
 	"unicode"
 
-	"daydayup/internal/observe"
-	"daydayup/internal/pool"
-	"daydayup/internal/sessions"
+	"safuno/internal/observe"
+	"safuno/internal/pool"
+	"safuno/internal/sessions"
 )
 
 type traceKey struct{}

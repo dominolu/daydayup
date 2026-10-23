@@ -3,13 +3,13 @@ package gateway
 import (
 	"fmt"
 
-	"daydayup/internal/accounts"
-	"daydayup/internal/agents"
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
-	"daydayup/internal/redact"
-	"daydayup/internal/sessions"
-	"daydayup/internal/store"
+	"safuno/internal/accounts"
+	"safuno/internal/agents"
+	"safuno/internal/config"
+	"safuno/internal/pool"
+	"safuno/internal/redact"
+	"safuno/internal/sessions"
+	"safuno/internal/store"
 )
 
 // migrateLegacyData imports any pre-database storage artifacts (accounts.enc,

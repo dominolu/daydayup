@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	wbp "daydayup/internal/provider"
+	wbp "safuno/internal/provider"
 )
 
 // The bundled curated model snapshots align with the official desktop picker:

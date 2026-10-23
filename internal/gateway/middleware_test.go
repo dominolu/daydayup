@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func middlewareGateway(t *testing.T, upstream http.Handler, mw config.MiddlewareConfig) (*Server, *httptest.Server) {

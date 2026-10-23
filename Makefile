@@ -1,4 +1,4 @@
-.PHONY: build run restart test vet app app-package app-test app-start-existing
+.PHONY: build run restart restart-app test vet app app-toolchain app-package app-test app-start-existing
 
 build:
 	go build -trimpath -o bin/gateway ./cmd/gateway
@@ -21,7 +21,16 @@ vet:
 app:
 	./scripts/build-desktop.sh
 
-# 生成可双击的 dist/DayDayUp.app（本地 ad-hoc 签名，未公证）
+# 下载桌面模块所需的 Go 1.26 工具链到 desktop/vendor/go（离线可构建）
+app-toolchain:
+	./scripts/install-go126.sh
+
+# 编译网关 + 优雅重启 + 再以桌面壳接管现有 config.json / data（窗口 + 菜单栏）
+restart-app:
+	chmod +x scripts/restart-app.sh
+	./scripts/restart-app.sh
+
+# 生成可双击的 dist/Safuno.app（本地 ad-hoc 签名，未公证）
 app-package:
 	./scripts/package-macos.sh
 

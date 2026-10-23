@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/agents"
-	"daydayup/internal/pool"
+	"safuno/internal/agents"
+	"safuno/internal/pool"
 )
 
 // LoadAgents opens the agent binding store (M1). Disabled main switch or an

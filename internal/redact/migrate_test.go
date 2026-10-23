@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 func TestMigrateLegacyRedactionStore(t *testing.T) {

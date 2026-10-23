@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 
-	"daydayup/internal/config"
-	"daydayup/internal/store"
+	"safuno/internal/config"
+	"safuno/internal/store"
 )
 
 type persistedState struct {

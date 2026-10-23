@@ -10,13 +10,13 @@
   const future = t => t && new Date(t) > new Date();
   let accounts = [], info = {}, page = 'overview', filter = 'all', search = '', providerFilter = '', connected = false;
   let editing = null, selected = null, drawerTab = 'overview', deleteID = null, quotaID = null, polling = false;
-  let groups = [], groupFilter = '', defaultGroup = 'default', groupStats = [], modelDetail = '', routingGroupFilter = '', connectGroup = '', middlewareUI = {model_map:{}, model_rename:{}, routing:'', loaded:false};
+  let groups = [], groupFilter = '', defaultGroup = 'default', groupStats = [], modelDetail = '', connectGroup = '', middlewareUI = {model_map:{}, model_rename:{}, routing:'', loaded:false};
   let clientKey = '', clientKeyBusy = false, clientKeyEpoch = 0;
   // WorkBuddy browser OAuth login: only the state string is held client-side;
   // uid/tokens are extracted and persisted by the gateway on poll completion.
   let wbOAuth = {state:'', timer:null, active:false};
   const checking = new Set();
-  const titles = {overview:['概览','OVERVIEW','你的模型网关，运行状态一目了然。'],accounts:['账号池','ACCOUNT POOL','在一个入口，管理每一份模型算力。'],models:['模型目录','MODEL DIRECTORY','发现可用能力，为每次请求选择合适的模型。'],agents:['Agent 接入','AGENT WIRING','让本机 Agent 直接使用账号池：选模型、写配置、一键还原。'],routing:['路由决策','ROUTING','每次请求选了谁、跳过谁、为什么，一目了然。'],groups:['路由分组','GROUPS','分组是聚合池的边界：每组账号、聚合模型与独立的 Base URL。'],usage:['用量统计','USAGE INSIGHTS','让每个账号的调用与消耗清晰可见。'],sessions:['会话管理','SESSIONS','按会话追踪每次调用、请求内容与 Token 消耗。'],connect:['接口接入','API CONNECTION','一个 Base URL，接入你常用的工具与工作流。'],redaction:['脱敏','REDACTION','敏感内容出网前替换为稳定占位符，返回时自动还原。']};
+  const titles = {overview:['概览','OVERVIEW','你的模型网关，运行状态一目了然。'],accounts:['账号池','ACCOUNT POOL','在一个入口，管理每一份模型算力。'],models:['模型目录','MODEL DIRECTORY','发现可用能力，为每次请求选择合适的模型。'],agents:['Agent 接入','AGENT WIRING','让本机 Agent 直接使用账号池：选模型、写配置、一键还原。'],groups:['路由分组','GROUPS','分组是聚合池的边界：每组账号、聚合模型与独立的 Base URL。'],usage:['用量统计','USAGE INSIGHTS','让每个账号的调用与消耗清晰可见。'],sessions:['会话管理','SESSIONS','按会话追踪每次调用、请求内容与 Token 消耗。'],connect:['接口接入','API CONNECTION','一个 Base URL，接入你常用的工具与工作流。'],redaction:['脱敏','REDACTION','敏感内容出网前替换为稳定占位符，返回时自动还原。']};
 
   // The console has no login screen: the gateway hands this page an HttpOnly
   // same-origin session cookie when it serves /admin/. If the gateway restarts
@@ -180,40 +180,6 @@ function connectView() {
       <section class="client-credential" aria-labelledby="client-key-title"><div class="credential-heading"><h2 id="client-key-title">代理访问 Key</h2><span class="tag">客户端调用</span></div><code id="client-key-value" class="credential-value" aria-label="代理访问 Key" aria-live="polite">${clientKey?esc(clientKey):'••••••••••••••••••••••••'}</code><div class="credential-actions"><button class="button secondary" data-action="toggle-client-key" aria-pressed="${!!clientKey}" ${disabled}>${icon('key')}${clientKey?'隐藏 Key':'显示 Key'}</button><button class="button secondary" data-action="copy-client-key" ${disabled}>${icon('copy')}复制 Key</button></div><p class="credential-hint">使用此 Key 调用网关。可在启动环境变量 <code>GATEWAY_API_KEY</code> 中设置，修改后重启服务生效。</p></section>
       <p class="connect-note">客户端填写上方 Base URL 与代理访问 Key，网关自动选择上游账号。复制示例会填入当前代理 Key。可请求 <code>GET /v1/models</code> 检查接入。默认分组不带路径前缀；选中分组后示例使用 <code>/groups/组名/v1</code>，也可改用 <code>X-Group</code> 请求头。</p><label class="sr-only" for="connect-group">示例分组</label><select id="connect-group" aria-label="示例分组" style="margin-bottom:10px"><option value="">默认分组</option>${groups.filter(g=>g!==defaultGroup).map(g=>`<option value="${esc(g)}" ${connectGroup===g?'selected':''}>${esc(g)}</option>`).join('')}</select><pre class="code-block">${esc(connectionCode())}</pre></div></section><section class="panel"><div class="panel-header"><div class="panel-title">支持的接口</div><span class="tag">PASSTHROUGH</span></div><div class="panel-body">${[['GET','/v1/models','聚合模型'],['POST','/v1/chat/completions','OpenAI'],['POST','/v1/responses','Responses'],['POST','/v1/messages','Anthropic'],['POST','/v1/images/generations','图片生成'],['POST','/v1/images/edits','JSON 图片编辑']].map(([m,p,d])=>`<div class="endpoint-row"><span class="method">${m}</span><span class="mono">${p}</span><small>${d}</small></div>`).join('')}<p class="connect-note">支持其他 /v1/* HTTP 路径原样透传。复用 <code>X-Session-ID</code> 关联整个会话；未传时从响应头读取网关生成的 ID，再用于后续请求。</p></div></section></div>`;
   }
-  // ---- 路由决策 (M3) ----
-  let routingUI = {data:null,busy:false,error:''};
-  async function loadRouting() {
-    routingUI.busy=true; routingUI.error='';
-    try { routingUI.data = await api('/routing?limit=120'); }
-    catch(error){ routingUI.error=error.message; }
-    finally { routingUI.busy=false; if(page==='routing') render(); }
-  }
-  function hopChain(d) {
-    if (!d.hops || !d.hops.length) return '<span class="sub-line">网关本地响应</span>';
-    return d.hops.map((h,i)=>`<span class="hop ${h.status>=400?'hop-error':h.retry?'hop-retry':'hop-ok'}">#${i+1} ${esc(h.account||'—')} ${h.status?('HTTP '+h.status):''}${h.reason?' <small>'+esc(h.reason)+'</small>':''}</span>`).join(' → ');
-  }
-  function routingView() {
-    if (routingUI.error) return `<section class="panel"><div class="panel-header"><div class="panel-title">路由决策</div></div><div class="empty"><div class="empty-icon">${icon('route')}</div><h3>读取失败</h3><p>${esc(routingUI.error)}</p><button class="button secondary" data-action="routing-refresh">重试</button></div></section>`;
-    const d = routingUI.data;
-    if (!d) return `<section class="panel"><div class="empty"><div class="empty-icon">${icon('route')}</div><h3>正在读取路由决策…</h3></div></section>`;
-    const cools = d.cooldowns||[];
-    const modelCools = Object.entries(d.model_cooldowns||{});
-    const waits = [
-      ['正在等待请求', d.wait_active||0],
-      ['冷却中的账号', cools.length],
-      ['模型级限流', modelCools.reduce((n,[,list])=>n+list.length,0)]
-    ];
-    const metrics = `<div class="metrics" style="grid-template-columns:repeat(3,minmax(0,1fr))">${waits.map(([l,v])=>`<article class="metric"><div class="metric-label">${l}</div><span class="metric-icon">${icon('clock')}</span><div class="metric-value">${v}<small>项</small></div></article>`).join('')}</div>`;
-    const coolPanel = `<section class="panel"><div class="panel-header"><div class="panel-title">冷却与等待 <small>限流恢复时间</small></div><span class="live-label">${cools.length||modelCools.length?'实时':'当前无'}</span></div><div class="panel-body">${cools.length?`<div class="detail-list">${cools.map(c=>`<div class="detail-row"><span>账号 <code>${esc(c.account)}</code></span><b>冷却至 ${dateTime(c.until)}</b></div>`).join('')}</div>`:''}${modelCools.length?`<div class="detail-list" style="margin-top:14px">${modelCools.map(([m,list])=>`<div class="detail-row"><span>模型 <code>${esc(m)}</code></span><b>${list.map(x=>esc(x.account)+' '+dateTime(x.until)).join('；')}</b></div>`).join('')}</div>`:''}${!cools.length&&!modelCools.length?'<p class="model-count-note">没有账号处于冷却。429 后网关会自动等待冷却结束并重试，恢复期间每个受限范围每分钟只放行一个请求。</p>':''}</div></section>`;
-    const rows = (d.decisions||[]).filter(x=>!routingGroupFilter || (x.group||'default')===routingGroupFilter);
-    const emptyRoute = `<div class="empty compact"><div class="empty-icon">${icon('route')}</div><h3>还没有路由记录</h3><p>发出请求后，这里会展示每次请求选了哪个账号、跳过了谁。</p></div>`;
-    const table = rows.length?`<div class="table-scroll"><table><thead><tr><th>时间 / 请求</th><th>分组</th><th>模型</th><th>尝试链</th><th>等待</th><th>结果</th></tr></thead><tbody>${rows.map(x=>`<tr><td><b>${dateTime(x.started_at)}</b><div class="sub-line mono">${esc(x.request_id)}</div><div class="sub-line">${esc(x.path)}</div></td><td><b class="mono">${esc(x.model||'—')}</b><div class="sub-line">${esc(x.provider||'')}</div></td><td><button class="tag group-tag" data-action="routing-group" data-group="${esc(x.group||'default')}">${esc(x.group||'default')}</button></td><td>${hopChain(x)}</td><td>${x.pool_waits?(x.pool_wait_ms+' ms · '+x.pool_waits+' 次'):'—'}</td><td><span class="badge ${x.status>=400?'red':x.status>=300?'amber':'green'}">HTTP ${x.status||'—'}</span>${x.failure?`<div class="sub-line">${esc(x.failure)}</div>`:''}</td></tr>`).join('')}</tbody></table></div>`:emptyRoute;
-    const groupSel = `<select id="routing-group-filter" aria-label="分组筛选"><option value="">全部分组</option>${groups.map(g=>`<option value="${esc(g)}" ${routingGroupFilter===g?'selected':''}>${esc(g)}</option>`).join('')}</select>`;
-    const strategySel = `<select id="routing-strategy" aria-label="全局默认调度策略" title="未单独设置策略的分组使用的默认调度方式"><option value="round_robin" ${middlewareUI.routing!=='smart'?'selected':''}>轮询</option><option value="smart" ${middlewareUI.routing==='smart'?'selected':''}>智能</option></select>`;
-    const controls = `<div class="table-toolbar"><div class="tabs"><span class="toolbar-label">分组</span></div><div class="toolbar-filters">${groupSel}<span class="toolbar-label">全局默认</span>${strategySel}<button class="button secondary" data-action="routing-refresh">${icon('refresh')}刷新</button></div></div>`;
-    return `${controls}${metrics}<div class="split-grid" style="grid-template-columns:1fr 2fr;align-items:start"><section>${coolPanel}</section><section class="panel"><div class="panel-header"><div class="panel-title">决策时间线 <small>最近 ${rows.length} 条</small></div><button class="button secondary" data-action="routing-refresh">${icon('refresh')}刷新</button></div>${table}</section></div>`;
-  }
-
   // ---- 用量知情页 (M3) ----
   let usageUI = {window:'24h',data:null,busy:false,error:''};
   async function loadUsage() {
@@ -487,7 +453,7 @@ function render() {
     $('#heading-actions').hidden = !overview;
     $('#metrics').hidden = !overview;
     if (overview) renderMetrics(); else $('#metrics').innerHTML = '';
-    $('#page-content').innerHTML = ({accounts:accountsView,models:modelsView,usage:usageView,overview:overviewView,connect:connectView,sessions:sessionsView,redaction:redactionView,agents:agentsView,routing:routingView})[page]();
+    $('#page-content').innerHTML = ({accounts:accountsView,models:modelsView,usage:usageView,overview:overviewView,connect:connectView,sessions:sessionsView,redaction:redactionView,agents:agentsView})[page]();
     if (page==='usage') $('#page-content').lastElementChild?.classList.add('usage-detail');
     if (selected) renderDrawer();
   }
@@ -628,7 +594,8 @@ function render() {
   // Platform catalog comes from the gateway (/admin/v1/info), so a new
   // registered provider shows up here without touching this file.
   let platforms = [];
-  const platformOf = id => platforms.find(p => p.id===id) || {id, name:id, credential:'API Key', placeholder:'', hint:'', auth:'api_key', requires_uid:false, base_url:''};
+  const platformOf = id => platforms.find(p => p.id===id) || {id, name:id, credential:'API Key', placeholder:'', hint:'', auth:'api_key', requires_uid:false, base_url:'', id_prefix:''};
+  const platformNeedsUID = p => !!(p.uid_field || (p.auth==='oauth' && p.id !== 'workbuddy'));
   const platformName = id => platformOf(id).name;
   const platformLetters = id => (platformOf(id).name || id || '?').replace(/[^A-Za-z\u4e00-\u9fa5]/g,'').slice(0,1).toUpperCase() || '?';
   function platformTile(p, selected, locked) {
@@ -650,7 +617,9 @@ function render() {
   }
   function setProviderUI(prov, keepBase=false) {
     const p = platformOf(prov);
-    const wb = p.auth==='oauth' || p.requires_uid;
+    // OAuth or an identity header means the account form needs the UID and
+    // token fields; built-ins declare it as uid_field / auth="oauth".
+    const wb = p.auth==='oauth' || platformNeedsUID(p);
     $('#workbuddy-fields').hidden = !wb;
     const panel = $('#oauth-panel'); if (panel) panel.hidden = !wb;
     wbOAuthReset(true);
@@ -771,9 +740,7 @@ function render() {
     // through delegation like #account-search so the page can load without it.
     if (event.target && event.target.id==='provider-filter'){ providerFilter=event.target.value; render(); }
     if (event.target && (event.target.id==='group-filter' || event.target.id==='model-group-filter')){ groupFilter=event.target.value; render(); }
-    if (event.target && event.target.id==='routing-group-filter'){ routingGroupFilter=event.target.value; render(); }
     if (event.target && event.target.id==='connect-group'){ connectGroup=event.target.value; render(); }
-    if (event.target && event.target.id==='routing-strategy' && event.target.value!==middlewareUI.routing){ api('/routing',{method:'PUT',body:{strategy:event.target.value}}).then(()=>{ middlewareUI.routing=event.target.value; render(); toast('调度策略已热更新：'+(event.target.value==='smart'?'智能':'轮询')); }).catch(error=>toast(error.message,true)); }
   });
   $('#account-form').addEventListener('submit',async event=>{    event.preventDefault(); const button=$('#account-save'); button.disabled=true; $('#account-error').textContent='';
     const payload={id:$('#account-id').value.trim(),name:$('#account-name').value.trim(),provider:$('#account-provider').value,group:$('#account-group').value.trim(),base_url:$('#account-base').value.trim(),max_in_flight:Number($('#account-concurrency').value),models:$('#account-models').value.split(/[,，\n]+/).map(v=>v.trim()).filter(Boolean)};
@@ -838,7 +805,7 @@ function render() {
     await loadMiddleware(); if (page==='models') render();
   }
 document.addEventListener('click',async event=>{
-    const nav=event.target.closest('[data-page]'); if(nav){if(page!==nav.dataset.page)clearClientKey(); if(page!==nav.dataset.page)++sessionEpoch; page=nav.dataset.page; render();if(page==='sessions')await loadSessions();else if(page==='redaction'){await loadRedaction();if(redaction?.enabled)await loadRedactionSpans();}else if(page==='agents')await loadAgents();else if(page==='routing'){await loadRouting();await loadMiddleware();}else if(page==='usage')await loadUsage();else if(page==='overview'){await Promise.all([loadGroupStats(), loadMiddleware()]); if(page==='overview')render();}else if(page==='models')await loadMiddleware();}
+    const nav=event.target.closest('[data-page]'); if(nav){if(page!==nav.dataset.page)clearClientKey(); if(page!==nav.dataset.page)++sessionEpoch; page=nav.dataset.page; render();if(page==='sessions')await loadSessions();else if(page==='redaction'){await loadRedaction();if(redaction?.enabled)await loadRedactionSpans();}else if(page==='agents')await loadAgents();else if(page==='usage')await loadUsage();else if(page==='overview'){await Promise.all([loadGroupStats(), loadMiddleware()]); if(page==='overview')render();}else if(page==='models')await loadMiddleware();}
     const reveal=event.target.closest('.reveal'); if(reveal){const input=$('#'+reveal.dataset.target); input.type=input.type==='password'?'text':'password';}
     const close=event.target.closest('.close-dialog'); if(close)close.closest('dialog').close();
     const action=event.target.closest('[data-action]'); if(!action)return; const id=action.dataset.id;
@@ -880,7 +847,6 @@ document.addEventListener('click',async event=>{
       case 'agents-check': { agentsUI.busy=true; render(); try { const res=await api(`/agents/${encodeURIComponent(id)}/check`,{method:'POST',body:{}}); toast(res.ok?'自检通过：'+res.note:'自检失败：'+res.note, !res.ok); await loadAgents(); } catch(error){ toast(error.message,true); await loadAgents(); } break; }
       case 'agents-restore': { try { await api(`/agents/${encodeURIComponent(id)}/restore`,{method:'POST',body:{}}); toast('配置已还原到备份版本'); await loadAgents(); } catch(error){ toast(error.message,true); } break; }
       case 'agent-preview': await agentPreview(); break;
-      case 'routing-refresh': await loadRouting(); break;
       case 'usage-refresh': await loadUsage(); break;
       case 'usage-window': usageUI.window=action.dataset.window; await loadUsage(); break;
       case 'profiles-save': {
@@ -916,7 +882,6 @@ document.addEventListener('click',async event=>{
       case 'copy-client-key': await useClientKey(async key=>{await navigator.clipboard.writeText(key); toast('代理访问 Key 已复制');}); break;
       case 'copy-code': await useClientKey(async key=>{await navigator.clipboard.writeText(connectionCode(key)); toast('调用示例已复制，已包含代理访问 Key');}); break;
       case 'group-jump': groupFilter = action.dataset.group; render(); break;
-      case 'routing-group': routingGroupFilter = action.dataset.group; render(); break;
       case 'group-default': { await api('/groups/default', {method:'PUT', body:{name: action.dataset.group}}); defaultGroup = action.dataset.group; await Promise.all([loadAccounts(), loadGroupStats()]); if (page==='overview') render(); toast('默认分组已改为：'+action.dataset.group); break; }
       case 'group-strategy': {
         const g=action.dataset.group;

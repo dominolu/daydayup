@@ -1,4 +1,4 @@
-module daydayup
+module safuno
 
 go 1.23
 

@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
-	"daydayup/internal/store"
+	"safuno/internal/config"
+	"safuno/internal/provider"
+	"safuno/internal/store"
 )
 
 type Usage struct {

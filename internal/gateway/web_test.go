@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func TestClientKeyRequiresAdminAndIsNotIncludedInOtherResponses(t *testing.T) {

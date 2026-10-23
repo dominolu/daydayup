@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/pool"
+	"safuno/internal/provider"
 )
 
 // LoadAccounts replaces the account pool. Runtime settings installed at

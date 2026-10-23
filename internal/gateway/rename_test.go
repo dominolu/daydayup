@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 // A canonical client model that a platform renames from its own upstream id

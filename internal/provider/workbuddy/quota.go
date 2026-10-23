@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"daydayup/internal/config"
-	wbp "daydayup/internal/provider"
+	"safuno/internal/config"
+	wbp "safuno/internal/provider"
 )
 
 const resourcePath = "/v2/billing/meter/get-user-resource"

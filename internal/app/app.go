@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/gateway"
+	"safuno/internal/config"
+	"safuno/internal/gateway"
 )
 
 // Runtime is a running gateway instance.
@@ -36,6 +36,11 @@ type Runtime struct {
 // Runtime owns the server and must be shut down by the caller.
 func Start(ctx context.Context, cfg config.Config) (*Runtime, error) {
 	started := time.Now()
+	// Publishing the platform names before any configuration or account is
+	// validated keeps config.Registered (the validation gate) equal to the
+	// compiled-in platform set even for callers that never construct a
+	// gateway.
+	config.SetRegisteredProviders(gateway.BuiltinProviderNames())
 	s := gateway.New(cfg)
 	if err := s.StoreError(); err != nil {
 		return nil, fmt.Errorf("storage initialization failed: %w", err)

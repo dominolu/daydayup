@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/provider"
 )
 
 func QuotaFresh(q *provider.Quota, now time.Time) bool {

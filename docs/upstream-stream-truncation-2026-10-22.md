@@ -1,6 +1,6 @@
 # 上游流式响应中断分析（tokenplan / deepseek-v4.1-flash-1017，2026-10-22）
 
-本文档整理 2026-10-21 23:50 至 2026-10-22 16:24 期间，DayDayUp 网关会话记录里出现的
+本文档整理 2026-10-21 23:50 至 2026-10-22 16:24 期间，Safuno 安诺网关会话记录里出现的
 `response_incomplete · response ended before completion` 与 `client_cancelled · client cancelled the request`
 两类记录的证据、归因和待办。结论基于网关归档（`data/gateway.db`）、网关运行日志
 （`logs/gateway.log`）与 DSH 客户端会话记录三方对齐。

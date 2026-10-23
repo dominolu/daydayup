@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 // cliBodyDropFields are the Chat-Completions fields the official CLI never
@@ -23,14 +23,14 @@ func (WorkBuddy) TransformRequestBody(method, path string, contentType string, b
 	if method != http.MethodPost || path != "/v1/chat/completions" {
 		return body, nil
 	}
-	p := config.DefaultProduct(a)
-	if p != config.ProductCLI && p != config.ProductVSCode {
+	p := defaultProduct(a)
+	if p != ProductCLI && p != ProductVSCode {
 		return body, nil
 	}
 	if ct, _, _ := strings.Cut(contentType, ";"); !strings.EqualFold(ct, "application/json") {
 		return body, nil
 	}
-	if p == config.ProductCLI {
+	if p == ProductCLI {
 		var payload map[string]json.RawMessage
 		if json.Unmarshal(body, &payload) == nil && payload != nil {
 			for _, key := range cliBodyDropFields {
@@ -59,8 +59,8 @@ func gzipBytes(body []byte) ([]byte, error) {
 
 // BodyEncodingHeaders signals Content-Encoding for gzipped bodies.
 func (WorkBuddy) BodyEncodingHeaders(a config.Account) http.Header {
-	p := config.DefaultProduct(a)
-	if p == config.ProductCLI || p == config.ProductVSCode {
+	p := defaultProduct(a)
+	if p == ProductCLI || p == ProductVSCode {
 		h := http.Header{}
 		h.Set("Content-Encoding", "gzip")
 		return h

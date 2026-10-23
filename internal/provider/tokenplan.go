@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 // TokenPlan is the 书生·端砚 Intern InkStone model service (墨点计费).
@@ -26,6 +26,30 @@ import (
 type TokenPlan struct{}
 
 func (TokenPlan) Name() string { return "tokenplan" }
+
+func init() {
+	config.SetEndpoint("tokenplan", config.EndpointSpec{Origin: "https://discovery-api.intern-ai.org.cn"})
+}
+
+var _ Descriptor = TokenPlan{}
+
+// PlatformInfo is the admin-console description of Intern-ai (TokenPlan).
+func (TokenPlan) PlatformInfo() Info {
+	return Info{
+		ID:          "tokenplan",
+		Name:        "Intern-ai",
+		Tagline:     "书生·端砚 · 墨点额度",
+		Logo:        "logo-tokenplan",
+		IDPrefix:    "intern",
+		BaseURL:     "https://discovery-api.intern-ai.org.cn",
+		Credential:  "API Key",
+		Placeholder: "…",
+		Hint:        "在 Intern-ai（TokenPlan）控制台创建 API Key（墨点计费，单人最多 10 把）。",
+		Auth:        "api_key",
+		Quota:       "unsupported",
+	}
+}
+
 
 func (TokenPlan) Authorize(r *http.Request, a config.Account) {
 	r.Header.Set("Authorization", "Bearer "+a.APIKey)

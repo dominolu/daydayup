@@ -11,10 +11,10 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/observe"
-	"daydayup/internal/pool"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/observe"
+	"safuno/internal/pool"
+	"safuno/internal/provider"
 )
 
 // isGenerationPath reports the stateless generation endpoints whose explicit

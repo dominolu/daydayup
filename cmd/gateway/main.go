@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"daydayup/internal/app"
-	"daydayup/internal/config"
+	"safuno/internal/app"
+	"safuno/internal/config"
 )
 
 func main() {

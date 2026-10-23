@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/pool"
+	"safuno/internal/pool"
 )
 
 func contextCall(s *Server, ctx context.Context, method, path, body string, headers map[string]string) *httptest.ResponseRecorder {

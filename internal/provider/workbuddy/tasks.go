@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/provider"
 )
 
 // WorkBuddy / CodeBuddy daily bonus claiming, mirroring the workbuddy2api-hub

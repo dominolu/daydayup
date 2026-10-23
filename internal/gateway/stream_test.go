@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/sessions"
+	"safuno/internal/sessions"
 )
 
 type streamTransport func(*http.Request) (*http.Response, error)

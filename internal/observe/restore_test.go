@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/redact"
+	"safuno/internal/redact"
 )
 
 func sseRestoreEngine(t *testing.T) *redact.Engine {

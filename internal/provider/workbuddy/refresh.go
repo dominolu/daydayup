@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 const refreshPath = "/v2/plugin/auth/token/refresh"

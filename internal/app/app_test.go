@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func TestStartReadyAndShutdown(t *testing.T) {

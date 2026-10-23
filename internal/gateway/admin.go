@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/pool"
-	"daydayup/internal/provider"
+	"safuno/internal/pool"
+	"safuno/internal/provider"
 )
 
 func (s *Server) admin(w http.ResponseWriter, r *http.Request) {
@@ -23,6 +23,12 @@ func (s *Server) admin(w http.ResponseWriter, r *http.Request) {
 	if s.sessionAdmin(w, r) {
 		return
 	}
+	// Platform management is matched before the account routes: accountAdmin
+	// parses /admin/v1/accounts/{id}/{action}, and /admin/v1/providers/{name}
+	// would otherwise look like the account "providers" with action "name".
+	if s.providerAdmin(w, r) {
+		return
+	}
 	if s.accountAdmin(w, r) {
 		return
 	}
@@ -32,17 +38,13 @@ func (s *Server) admin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if path == "/admin/v1/platforms" && r.Method == http.MethodGet {
-		writeJSON(w, 200, map[string]any{"data": platformCatalog()})
+		writeJSON(w, 200, map[string]any{"data": s.platformCatalog()})
 		return
 	}
 	if s.groupsAdmin(w, r) {
 		return
 	}
 	if s.middlewareAdmin(w, r) {
-		return
-	}
-	if path == "/admin/v1/providers" && r.Method == http.MethodGet {
-		writeJSON(w, 200, map[string]any{"data": s.providers.Names(), "quota_sync": "external_snapshot", "official_quota_api": "unsupported"})
 		return
 	}
 	if path == "/admin/v1/redaction" && r.Method == http.MethodGet {

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"daydayup/internal/sessions"
+	"safuno/internal/sessions"
 )
 
 const dshTitleFrame = "Generate the session title from this JSON array of human messages:"

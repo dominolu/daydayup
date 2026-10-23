@@ -7,6 +7,26 @@ import (
 	"testing"
 )
 
+// TestMain declares the platform vocabulary the binary's built-ins install at
+// boot (provider and adapter init functions). config cannot import providers
+// (providers import config), so the declaration is repeated here.
+func TestMain(m *testing.M) {
+	registerTestPlatforms()
+	os.Exit(m.Run())
+}
+
+func registerTestPlatforms() {
+	SetRegisteredProviders([]string{"sensenova", "workbuddy", "tokenplan"})
+	SetEndpoint("sensenova", EndpointSpec{Origin: "https://token.sensenova.cn"})
+	SetEndpoint("tokenplan", EndpointSpec{Origin: "https://discovery-api.intern-ai.org.cn"})
+	SetEndpoint("workbuddy", EndpointSpec{Origin: "https://www.workbuddy.ai"})
+	// WorkBuddy's CN base-URL pattern is part of its adapter declaration; it
+	// is reproduced here because config cannot import the adapter package.
+	SetRealmPlatform("workbuddy", []string{"intl", "cn"}, []string{"desktop", "vscode", "cli"}, func(a Account) bool {
+		return HostLooksCN(a.BaseURL, []string{"copilot.tencent.com", "codebuddy.cn", "workbuddy.cn"})
+	})
+}
+
 func TestLoadValidation(t *testing.T) {
 	t.Setenv("GATEWAY_API_KEY", "client-key-at-least-16")
 	t.Setenv("GATEWAY_ADMIN_KEY", "admin-key-at-least-16")

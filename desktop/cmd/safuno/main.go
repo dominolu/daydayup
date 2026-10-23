@@ -1,6 +1,6 @@
 //go:build darwin
 
-// Command daydayup is the macOS desktop shell for the DayDayUp gateway.
+// Command safuno is the macOS desktop shell for the Safuno gateway.
 //
 // The shell is deliberately thin: the gateway keeps serving the same HTTP API
 // and admin console, while Wails supplies the native window, tray and
@@ -24,8 +24,8 @@ import (
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
 
-	"daydayup/desktop/internal/bootstrap"
-	gatewayapp "daydayup/internal/app"
+	"safuno/desktop/internal/bootstrap"
+	gatewayapp "safuno/internal/app"
 )
 
 //go:embed assets
@@ -35,7 +35,7 @@ var assets embed.FS
 var trayTemplate []byte
 
 func main() {
-	dataDirFlag := flag.String("data-dir", "", "application data directory (default: ~/Library/Application Support/DayDayUp)")
+	dataDirFlag := flag.String("data-dir", "", "application data directory (default: ~/Library/Application Support/Safuno)")
 	configFlag := flag.String("config", "", "gateway config.json path (default: <data-dir>/config.json)")
 	flag.Parse()
 
@@ -43,11 +43,11 @@ func main() {
 	// use them so a LaunchServices launch can take over an existing profile.
 	dataDir := *dataDirFlag
 	if dataDir == "" {
-		dataDir = os.Getenv("DAYDAYUP_DATA_DIR")
+		dataDir = bootstrap.Environment("DATA_DIR")
 	}
 	configPath := *configFlag
 	if configPath == "" {
-		configPath = os.Getenv("DAYDAYUP_CONFIG")
+		configPath = bootstrap.Environment("CONFIG")
 	}
 
 	paths, err := bootstrap.Resolve(dataDir, configPath)
@@ -95,8 +95,8 @@ func main() {
 
 	var wailsApp *application.App
 	wailsApp = application.New(application.Options{
-		Name:        "DayDayUp",
-		Description: "DayDayUp 模型网关",
+		Name:        "Safuno 安诺",
+		Description: "Safuno 安诺模型网关",
 		Logger:      logger,
 		LogLevel:    slog.LevelInfo,
 		Assets: application.AssetOptions{
@@ -110,7 +110,7 @@ func main() {
 			ApplicationShouldTerminateAfterLastWindowClosed: false,
 		},
 		SingleInstance: &application.SingleInstanceOptions{
-			UniqueID:      "dev.daydayup.gateway",
+			UniqueID:      "dev.safuno.gateway",
 			EncryptionKey: instanceKey(),
 			OnSecondInstanceLaunch: func(_ application.SecondInstanceData) {
 				if window != nil {
@@ -157,7 +157,7 @@ func main() {
 
 	window = wailsApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Name:             "dashboard",
-		Title:            "DayDayUp · 模型网关管理台",
+		Title:            "Safuno 安诺 · 模型网关管理台",
 		Width:            1440,
 		Height:           960,
 		MinWidth:         1080,
@@ -192,11 +192,11 @@ func main() {
 		_ = wailsApp.Browser.OpenFile(paths.LogPath)
 	})
 	menu.AddSeparator()
-	menu.Add("退出 DayDayUp").OnClick(func(_ *application.Context) {
+	menu.Add("退出 Safuno 安诺").OnClick(func(_ *application.Context) {
 		wailsApp.Quit()
 	})
 	tray.SetMenu(menu)
-	tray.SetTooltip("DayDayUp 网关")
+	tray.SetTooltip("Safuno 安诺网关")
 	tray.SetTemplateIcon(trayTemplate)
 	tray.OnClick(func() {
 		window.Show()
@@ -224,11 +224,11 @@ func main() {
 }
 
 func instanceKey() [32]byte {
-	return sha256.Sum256([]byte("dev.daydayup.gateway"))
+	return sha256.Sum256([]byte("dev.safuno.gateway"))
 }
 
 func fatal(err error) {
-	fmt.Fprintf(os.Stderr, "daydayup: %v\n", err)
+	fmt.Fprintf(os.Stderr, "safuno: %v\n", err)
 	// Finder-launched apps have no terminal; show a minimal native notice with
 	// the actual failure (usually a port conflict or a bad config).
 	msg := err.Error()
@@ -236,7 +236,7 @@ func fatal(err error) {
 		msg = string(runes[:500]) + "…"
 	}
 	script := `on run argv
-display dialog (item 1 of argv) with title "DayDayUp" buttons {"退出"} default button 1
+display dialog (item 1 of argv) with title "Safuno 安诺" buttons {"退出"} default button 1
 end run`
 	_ = exec.Command("/usr/bin/osascript", "-e", script, msg).Run()
 	os.Exit(1)

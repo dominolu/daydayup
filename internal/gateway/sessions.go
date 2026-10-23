@@ -14,9 +14,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
-	"daydayup/internal/sessions"
+	"safuno/internal/config"
+	"safuno/internal/pool"
+	"safuno/internal/sessions"
 )
 
 func (s *Server) LoadSessions() error {

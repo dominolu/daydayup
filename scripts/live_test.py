@@ -173,7 +173,7 @@ def main():
             sock.bind(('127.0.0.1', 0))
             port = sock.getsockname()[1]
         gateway = f'http://127.0.0.1:{port}'
-        with tempfile.TemporaryDirectory(prefix='daydaynew-live-') as temp:
+        with tempfile.TemporaryDirectory(prefix='safuno-live-') as temp:
             temp = pathlib.Path(temp)
             config = {'listen': f'127.0.0.1:{port}', 'state_file': str(temp / 'state.json'), 'refresh_interval_seconds': 3600, 'request_timeout_seconds': 180, 'max_attempts': 1, 'accounts': [{'id': 'sense-live', 'api_key_env': 'SENSENOVA_LIVE_KEY', 'max_in_flight': 4}]}
             (temp / 'config.json').write_text(json.dumps(config))

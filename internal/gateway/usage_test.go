@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func TestRoutingEndpoint(t *testing.T) {

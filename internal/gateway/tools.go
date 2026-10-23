@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"daydayup/internal/sessions"
+	"safuno/internal/sessions"
 )
 
 func (s *Server) toolReport(w http.ResponseWriter, r *http.Request) bool {

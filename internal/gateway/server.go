@@ -15,14 +15,14 @@ import (
 	"sync/atomic"
 	"time"
 
-	"daydayup/internal/accounts"
-	"daydayup/internal/agents"
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
-	"daydayup/internal/provider"
-	"daydayup/internal/provider/workbuddy"
-	"daydayup/internal/redact"
-	"daydayup/internal/sessions"
+	"safuno/internal/accounts"
+	"safuno/internal/agents"
+	"safuno/internal/config"
+	"safuno/internal/pool"
+	"safuno/internal/provider"
+	"safuno/internal/provider/workbuddy"
+	"safuno/internal/redact"
+	"safuno/internal/sessions"
 )
 
 type Server struct {
@@ -30,6 +30,12 @@ type Server struct {
 	Config                 config.Config
 	Pool                   *pool.Pool
 	providers              *provider.Registry
+	// providerMu serializes platform mutations (admin add/edit/remove and the
+	// boot replay). Ordinary provider lookups never take it.
+	providerMu sync.Mutex
+	// providersDirty is set by the registry change hooks and cleared once the
+	// account set and default platform have been re-derived from the registry.
+	providersDirty atomic.Bool
 	client                 *http.Client
 	refreshGate            chan struct{}
 	accountsMu             sync.Mutex
@@ -63,16 +69,24 @@ type Server struct {
 
 func New(c config.Config) *Server {
 	reg := provider.NewRegistry()
-	_ = reg.Register("sensenova", provider.SenseNova{})
-	_ = reg.Register("workbuddy", workbuddy.WorkBuddy{})
-	_ = reg.Register("tokenplan", provider.TokenPlan{})
+	installBuiltins(reg)
 	return NewWithProviders(c, reg)
 }
 
 // NewWithProviders builds the gateway with an explicit provider registry.
 // The registry is the extension boundary: register additional upstream
-// platforms here instead of modifying the gateway itself.
+// platforms here instead of modifying the gateway itself. Platform
+// descriptions (tiles, default endpoints, realm/product vocabulary) travel
+// with the adapter through provider.Descriptor, so a new compiled-in platform
+// needs no gateway change.
 func NewWithProviders(c config.Config, providers *provider.Registry) *Server {
+	installBuiltins(providers)
+	// Operator-registered platforms from a previous run are available before
+	// any account is validated or routed; built-ins win a name clash.
+	applyProviderOverrides(providers, c.ProviderOverrides)
+	// Account validation accepts exactly what the registry holds, and it
+	// follows registry changes made later by the admin console.
+	syncRegisteredProviders(providers)
 	t := http.DefaultTransport.(*http.Transport).Clone()
 	t.DialContext = (&net.Dialer{Timeout: 10 * time.Second, KeepAlive: 30 * time.Second}).DialContext
 	t.ResponseHeaderTimeout = 90 * time.Second
@@ -104,6 +118,10 @@ func NewWithProviders(c config.Config, providers *provider.Registry) *Server {
 		}},
 	}
 	s.configurePool()
+	// A platform added or removed while the gateway runs: reload the effective
+	// account set, drop persisted defaults naming a removed platform, and
+	// re-probe accounts whose adapter was just installed or swapped.
+	providers.OnChange(s.providerChanged)
 	s.adminSession = newAdminSession()
 	if c.Redaction != nil && c.Redaction.Enabled {
 		cfg := *c.Redaction
@@ -139,6 +157,146 @@ func newAdminSession() string {
 		return ""
 	}
 	return hex.EncodeToString(b)
+}
+
+// builtinProviders is the compiled-in platform set. A host embedding the
+// gateway may add its own adapters through NewWithProviders.
+func builtinProviders() map[string]provider.Provider {
+	return map[string]provider.Provider{
+		"sensenova": provider.SenseNova{},
+		"workbuddy": workbuddy.WorkBuddy{},
+		"tokenplan": provider.TokenPlan{},
+	}
+}
+
+// BuiltinProviderNames lists the compiled-in platform names in catalog order.
+func BuiltinProviderNames() []string {
+	reg := provider.NewRegistry()
+	installBuiltins(reg)
+	return reg.Names()
+}
+
+// installBuiltins registers the built-ins that the given registry lacks, in a
+// stable order. Adapters describe themselves (provider.Descriptor), so no
+// display table lives here.
+func installBuiltins(reg *provider.Registry) {
+	for _, name := range []string{"sensenova", "workbuddy", "tokenplan"} {
+		if reg.Has(name) {
+			continue
+		}
+		if p, ok := builtinProviders()[name]; ok {
+			_ = reg.Register(name, p)
+		}
+	}
+}
+
+// applyProviderOverrides replays operator-registered platforms onto the
+// registry and declares their endpoints and realm vocabulary. A name that is
+// already taken (a built-in, or an adapter a host installed) is left alone.
+func applyProviderOverrides(reg *provider.Registry, overrides []config.ProviderOverride) {
+	for _, o := range overrides {
+		if o.ID == "" || reg.Has(o.ID) {
+			continue
+		}
+		if provider.ValidateName(o.ID) != nil {
+			continue
+		}
+		if err := reg.Register(o.ID, provider.Generic{}); err != nil {
+			continue
+		}
+		info := provider.Info{
+			ID:          o.ID,
+			Name:        o.Name,
+			Tagline:     o.Tagline,
+			Logo:        o.Logo,
+			IDPrefix:    o.IDPrefix,
+			BaseURL:     o.BaseURL,
+			Credential:  o.Credential,
+			Placeholder: o.Placeholder,
+			Hint:        o.Hint,
+			Auth:        o.Auth,
+			UIDField:    o.UIDField,
+			Realms:      o.Realms,
+			Quota:       o.Quota,
+			Hot:         true,
+		}
+		if info.Name == "" {
+			info.Name = o.ID
+		}
+		if info.Credential == "" {
+			info.Credential = "API Key"
+		}
+		if info.Auth == "" {
+			info.Auth = "api_key"
+		}
+		if info.Quota == "" {
+			info.Quota = "unsupported"
+		}
+		reg.SetInfo(info)
+		installDeclaration(info)
+	}
+}
+
+// providerChanged runs after any registry mutation (boot, admin registration,
+// adapter swap): it republishes the platform names to config — the gate
+// account validation consults — and marks the running state as stale.
+//
+// It must never recover that state itself. Registry mutations call their
+// hooks synchronously, ordinarily on a request goroutine that already holds
+// providerMu (the admin page calling itself) or in the middle of
+// NewWithProviders; reloading accounts from inside the hook would either
+// deadlock or, when the mutation came from a helper goroutine, race the admin
+// transaction that has not even registered its platform yet.
+func (s *Server) providerChanged() {
+	syncRegisteredProviders(s.providers)
+	s.markProvidersStale()
+}
+
+// markProvidersStale flags the effective account set for re-derivation. The
+// next platform operation (the end of every admin mutation, or the boot
+// path) calls refreshProviders once it has committed.
+func (s *Server) markProvidersStale() {
+	s.providersDirty.Store(true)
+}
+
+// refreshProviders recovers the running state from the registry after a
+// platform change: the effective account set (a managed account of a removed
+// platform is no longer routed, because the account store refuses accounts
+// whose platform is not registered) and the default platform.
+//
+// It runs under providerMu and leaves the dirty flag set when the lock is
+// contended instead of blocking: the holder is the mutation that owns the
+// change and calls it again before returning.
+func (s *Server) refreshProviders() {
+	if !s.providerMu.TryLock() {
+		return
+	}
+	defer s.providerMu.Unlock()
+	s.refreshProvidersLocked()
+}
+
+func (s *Server) refreshProvidersLocked() {
+	s.providersDirty.Store(false)
+	// A managed account of a removed platform disappears from routing because
+	// the account store refuses accounts whose platform is not registered.
+	if s.accountStore == nil {
+		return
+	}
+	if err := s.LoadAccounts(); err != nil {
+		slog.Warn("account reload after provider change failed", "error", err)
+	}
+	if !s.providers.Has(s.Config.DefaultProvider) {
+		s.Config.DefaultProvider = "sensenova"
+		if err := s.writeConfigField("default_provider", s.Config.DefaultProvider); err != nil {
+			slog.Warn("default_provider fallback could not be persisted", "error", err)
+		}
+	}
+}
+
+// syncRegisteredProviders publishes the registry's names to config, the gate
+// account validation consults.
+func syncRegisteredProviders(reg *provider.Registry) {
+	config.SetRegisteredProviders(reg.Names())
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {

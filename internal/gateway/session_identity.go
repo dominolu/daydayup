@@ -10,8 +10,8 @@ import (
 	"strings"
 	"unicode"
 
-	"daydayup/internal/observe"
-	"daydayup/internal/sessions"
+	"safuno/internal/observe"
+	"safuno/internal/sessions"
 )
 
 type sessionHeader struct{ Name, Namespace, Client string }

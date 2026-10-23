@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"daydayup/internal/sessions"
+	"safuno/internal/sessions"
 )
 
 // TitleObservation collects generated title text from the same bounded

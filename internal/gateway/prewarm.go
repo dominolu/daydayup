@@ -17,8 +17,8 @@ import (
 	"net/url"
 	"time"
 
-	"daydayup/internal/pool"
-	"daydayup/internal/provider"
+	"safuno/internal/pool"
+	"safuno/internal/provider"
 )
 
 // prewarmHour returns the configured hour with the WorkBuddy reset default.

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 // MigrateDB imports the legacy agents.json (plaintext JSON) into the shared

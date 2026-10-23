@@ -16,7 +16,7 @@ import (
 	"sync"
 	"testing"
 
-	"daydayup/internal/redact"
+	"safuno/internal/redact"
 )
 
 func TestRedactionPreservesProtocolAndMedia(t *testing.T) {

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/pool"
-	"daydayup/internal/provider"
+	"safuno/internal/pool"
+	"safuno/internal/provider"
 )
 
 // WorkBuddy daily-bonus tasks, mirroring the workbuddy2api-hub scheduler:

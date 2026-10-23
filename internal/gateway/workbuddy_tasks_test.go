@@ -11,9 +11,9 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
-	"daydayup/internal/provider/workbuddy"
+	"safuno/internal/config"
+	"safuno/internal/pool"
+	"safuno/internal/provider/workbuddy"
 )
 
 func newTaskGateway(t *testing.T, dir string, accounts []config.Account) *Server {

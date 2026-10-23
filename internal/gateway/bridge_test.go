@@ -12,8 +12,8 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/config"
-	"daydayup/internal/redact"
+	"safuno/internal/config"
+	"safuno/internal/redact"
 )
 
 var placeholderRegex = regexp.MustCompile(`{{\w+_[a-z]{6}}}`)

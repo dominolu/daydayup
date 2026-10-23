@@ -1,9 +1,14 @@
 package gateway
 
-import "testing"
+import (
+	"testing"
+
+	"safuno/internal/config"
+)
 
 func TestPlatformCatalogCoversRegistered(t *testing.T) {
-	cat := platformCatalog()
+	s := New(config.Config{})
+	cat := s.platformCatalog()
 	if len(cat) == 0 {
 		t.Fatal("platform catalog must not be empty")
 	}
@@ -38,8 +43,9 @@ func TestPlatformCatalogCoversRegistered(t *testing.T) {
 }
 
 func TestPlatformCatalogTokenPlan(t *testing.T) {
+	s := New(config.Config{})
 	var tp PlatformInfo
-	for _, p := range platformCatalog() {
+	for _, p := range s.platformCatalog() {
 		if p.ID == "tokenplan" {
 			tp = p
 		}
@@ -53,7 +59,7 @@ func TestPlatformCatalogTokenPlan(t *testing.T) {
 	if tp.Logo != "logo-tokenplan" || tp.Auth != "api_key" || tp.Quota != "unsupported" {
 		t.Fatalf("tokenplan metadata = %+v", tp)
 	}
-	if tp.RequiresUID {
+	if tp.UIDField != "" {
 		t.Fatal("tokenplan must not require a uid field")
 	}
 }

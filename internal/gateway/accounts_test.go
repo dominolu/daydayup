@@ -11,7 +11,7 @@ import (
 	"strings"
 	"testing"
 
-	"daydayup/internal/pool"
+	"safuno/internal/pool"
 )
 
 func adminCall(s *Server, method, path, body string) *httptest.ResponseRecorder {

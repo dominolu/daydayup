@@ -15,3 +15,5 @@ __pycache__/
 .DS_Store
 /.swift-cache/
 /tmp/
+# 本地离线 Go 1.26 工具链（scripts/install-go126.sh 生成，约 258 MB，不入库）
+/desktop/vendor/

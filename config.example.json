@@ -35,6 +35,18 @@
     },
     "custom_words": {}
   },
+  "provider_overrides": [
+    {
+      "id": "example",
+      "name": "示例 OpenAI 兼容平台",
+      "tagline": "热注册示例",
+      "id_prefix": "ex",
+      "base_url": "https://api.example.com",
+      "credential": "API Key",
+      "auth": "api_key",
+      "quota": "unsupported"
+    }
+  ],
   "accounts": [
     {
       "id": "wb-intl-1",

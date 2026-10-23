@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"daydayup/internal/config"
-	"daydayup/internal/pool"
+	"safuno/internal/config"
+	"safuno/internal/pool"
 )
 
 // configWriteMu serializes atomic config-file write-backs from the admin UI.

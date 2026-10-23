@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func TestWriteDefaultConfigLoadsWithEmptyAccounts(t *testing.T) {
@@ -45,17 +45,17 @@ func TestNormalizePaths(t *testing.T) {
 		AgentStoreFile:   "data/agents.json",
 		StateFile:        "data/state.json",
 	}
-	got := normalizePaths(cfg, "/tmp/daydayup")
-	if got.DBFile != "/tmp/daydayup/data/gateway.db" {
+	got := normalizePaths(cfg, "/tmp/safuno")
+	if got.DBFile != "/tmp/safuno/data/gateway.db" {
 		t.Fatalf("db = %q", got.DBFile)
 	}
-	if got.AccountStoreFile != "/tmp/daydayup/data/accounts.enc" {
+	if got.AccountStoreFile != "/tmp/safuno/data/accounts.enc" {
 		t.Fatalf("accounts = %q", got.AccountStoreFile)
 	}
-	if got.AgentStoreFile != "/tmp/daydayup/data/agents.json" {
+	if got.AgentStoreFile != "/tmp/safuno/data/agents.json" {
 		t.Fatalf("agents = %q", got.AgentStoreFile)
 	}
-	if got.StateFile != "/tmp/daydayup/data/state.json" {
+	if got.StateFile != "/tmp/safuno/data/state.json" {
 		t.Fatalf("state = %q", got.StateFile)
 	}
 }

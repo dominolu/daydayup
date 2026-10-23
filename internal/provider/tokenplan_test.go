@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func TestTokenPlanAuthorizeSetsBearer(t *testing.T) {

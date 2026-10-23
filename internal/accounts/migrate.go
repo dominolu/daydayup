@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 // MigrateDB imports the legacy whole-file account store (accounts.enc, AES

@@ -13,8 +13,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"daydayup/internal/accounts"
-	"daydayup/internal/config"
+	"safuno/internal/accounts"
+	"safuno/internal/config"
 )
 
 // newWorkBuddyGateway builds a gateway whose default provider is workbuddy

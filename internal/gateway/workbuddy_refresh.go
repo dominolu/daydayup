@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
-	"daydayup/internal/provider/workbuddy"
+	"safuno/internal/config"
+	"safuno/internal/provider"
+	"safuno/internal/provider/workbuddy"
 )
 
 // tokenLocks serializes token refresh per account: the upstream rotates the

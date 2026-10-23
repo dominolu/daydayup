@@ -15,9 +15,9 @@ import (
 	"time"
 
 	"context"
-	"daydayup/internal/accounts"
+	"safuno/internal/accounts"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func tokenWithExp(access, refresh string, expUnix int64) (string, string) {

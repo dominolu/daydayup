@@ -12,7 +12,7 @@ import (
 	"strconv"
 	"strings"
 
-	"daydayup/internal/redact"
+	"safuno/internal/redact"
 )
 
 type textTemplate struct {

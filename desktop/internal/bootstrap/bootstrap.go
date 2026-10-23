@@ -1,5 +1,5 @@
 // Package bootstrap prepares the on-disk state and credentials used by the
-// DayDayUp desktop shell. It is intentionally macOS-first: the first desktop
+// Safuno desktop shell. It is intentionally macOS-first: the first desktop
 // release targets macOS, while the gateway itself stays cross-platform.
 package bootstrap
 
@@ -15,13 +15,13 @@ import (
 	"path/filepath"
 	"strings"
 
-	"daydayup/internal/config"
-	"daydayup/internal/redact"
+	"safuno/internal/config"
+	"safuno/internal/redact"
 )
 
 const (
-	appName     = "DayDayUp"
-	keychain    = "DayDayUp"
+	appName     = "Safuno"
+	keychain    = "Safuno"
 	envAdmin    = "GATEWAY_ADMIN_KEY"
 	envGateway  = "GATEWAY_API_KEY"
 	secretFile  = "secrets.json"
@@ -56,7 +56,7 @@ func Resolve(dataDirFlag, configFlag string) (Paths, error) {
 		if configPath != "" {
 			dataDir = filepath.Dir(configPath)
 		} else {
-			dataDir = filepath.Join(home, "Library", "Application Support", appName)
+			dataDir = defaultDataDir(home)
 		}
 	}
 	dataDir, err = filepath.Abs(dataDir)
@@ -201,13 +201,16 @@ func normalizePaths(cfg config.Config, base string) config.Config {
 	if cfg.Redaction != nil {
 		cfg.Redaction.StoreFile = abs(cfg.Redaction.StoreFile)
 	}
+	if cfg.InstanceName == legacyAppName+" 网关" {
+		cfg.InstanceName = "Safuno 安诺网关"
+	}
 	return cfg
 }
 
 func writeDefaultConfig(path, dataDir string) error {
 	failClosed := true
 	cfg := config.Config{
-		InstanceName:           "DayDayUp 网关",
+		InstanceName:           "Safuno 安诺网关",
 		SessionStoreDir:        filepath.Join(dataDir, "sessions"),
 		AccountStoreFile:       filepath.Join(dataDir, "accounts.enc"),
 		AgentStoreFile:         filepath.Join(dataDir, "agents.json"),
@@ -277,7 +280,7 @@ func generateKey() string {
 // returns zero values when nothing is stored.
 func loadSecrets(paths Paths) Keys {
 	var keys Keys
-	if os.Getenv("DAYDAYUP_DISABLE_KEYCHAIN") != "1" {
+	if Environment("DISABLE_KEYCHAIN") != "1" {
 		if value, err := keychainGet("admin"); err == nil {
 			keys.Admin = value
 		}
@@ -306,7 +309,7 @@ func loadSecrets(paths Paths) Keys {
 }
 
 func saveSecrets(paths Paths, keys Keys) error {
-	if os.Getenv("DAYDAYUP_DISABLE_KEYCHAIN") != "1" {
+	if Environment("DISABLE_KEYCHAIN") != "1" {
 		if err := saveKeychain(keys); err == nil {
 			return nil
 		}
@@ -332,15 +335,17 @@ func saveKeychain(keys Keys) error {
 }
 
 func keychainGet(account string) (string, error) {
-	out, err := exec.Command(keychainBin, "find-generic-password", "-s", keychain, "-a", account, "-w").Output()
-	if err != nil {
-		return "", err
-	}
-	value := strings.TrimSpace(string(out))
-	if value == "" {
-		return "", errors.New("empty keychain value")
-	}
-	return value, nil
+	return readKeychainWithFallback(account, func(service, account string) (string, error) {
+		out, err := exec.Command(keychainBin, "find-generic-password", "-s", service, "-a", account, "-w").Output()
+		if err != nil {
+			return "", err
+		}
+		value := strings.TrimSpace(string(out))
+		if value == "" {
+			return "", errors.New("empty keychain value")
+		}
+		return value, nil
+	})
 }
 
 func keychainSet(account, value string) error {

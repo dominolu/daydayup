@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 // TestMigrateLegacySessionDir builds a pre-database session archive (encrypted

@@ -11,8 +11,8 @@ import (
 	"os"
 	"sort"
 
-	"daydayup/internal/config"
-	"daydayup/internal/store"
+	"safuno/internal/config"
+	"safuno/internal/store"
 )
 
 type record struct {
@@ -43,7 +43,19 @@ func (s *Store) Close() error { return s.db.Close() }
 // Load reads stored accounts from the database and merges them over the
 // config-declared base accounts (env-backed credentials win for their env
 // fields). A missing database row set is valid.
+//
+// Every call starts from an empty index: Load is also called at runtime after
+// a platform change, and re-reading the rows into the existing index would
+// trip the duplicate-id guard on behalf of the rows that are already there.
 func (s *Store) Load(base []config.Account) ([]config.Account, error) {
+	return s.LoadWithUnbound(base, nil)
+}
+
+// LoadWithUnbound is Load, additionally reporting the stored accounts whose
+// platform is not registered: they remain persisted (re-registering the
+// platform brings them back) but are excluded from the routable set.
+func (s *Store) LoadWithUnbound(base []config.Account, unbound *[]string) ([]config.Account, error) {
+	s.records = map[string]record{}
 	rows, err := s.db.SQL().Query(`SELECT id, record FROM accounts ORDER BY id`)
 	if err != nil {
 		return nil, fmt.Errorf("accounts: read: %w", err)
@@ -71,12 +83,12 @@ func (s *Store) Load(base []config.Account) ([]config.Account, error) {
 	if err := rows.Err(); err != nil {
 		return nil, fmt.Errorf("accounts: iterate: %w", err)
 	}
-	return s.merge(base)
+	return s.merge(base, unbound)
 }
 
 // merge overlays stored records over the config base accounts (existing
 // behavior preserved).
-func (s *Store) merge(base []config.Account) ([]config.Account, error) {
+func (s *Store) merge(base []config.Account, unbound *[]string) ([]config.Account, error) {
 	merged := map[string]config.Account{}
 	order := []string{}
 	for _, a := range base {
@@ -95,6 +107,16 @@ func (s *Store) merge(base []config.Account) ([]config.Account, error) {
 			continue
 		}
 		a := r.Account
+		if !config.Registered(a.Provider) {
+			// The platform was removed at runtime (or its adapter is absent).
+			// The account stays stored but is not routed; validation (which
+			// would reject the unregistered platform) is skipped and the id is
+			// reported so the caller can say why it is inactive.
+			if unbound != nil {
+				*unbound = append(*unbound, id)
+			}
+			continue
+		}
 		a.Managed = true
 		a.APIKey = r.APIKey
 		a.QuotaFeedKey = r.QuotaFeedKey

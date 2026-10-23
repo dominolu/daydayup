@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 // newAgentTestGateway builds a gateway with the agents layer enabled but no

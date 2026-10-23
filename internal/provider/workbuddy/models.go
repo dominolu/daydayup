@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"strings"
 
-	"daydayup/internal/config"
-	wbp "daydayup/internal/provider"
+	"safuno/internal/config"
+	wbp "safuno/internal/provider"
 )
 
 const remoteConfigPath = "/v3/config"

@@ -17,8 +17,8 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"daydayup/internal/config"
-	"daydayup/internal/redact"
+	"safuno/internal/config"
+	"safuno/internal/redact"
 )
 
 func redactionTestConfig(t *testing.T, storeDir string) *redact.Config {

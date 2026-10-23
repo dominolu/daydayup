@@ -5,8 +5,8 @@ import (
 	"strings"
 	"time"
 
-	"daydayup/internal/config"
-	"daydayup/internal/provider"
+	"safuno/internal/config"
+	"safuno/internal/provider"
 )
 
 // dailyKey returns the guard window key for now: the calendar date shifted by

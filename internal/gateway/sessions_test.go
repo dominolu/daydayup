@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/sessions"
+	"safuno/internal/sessions"
 )
 
 func enableSessions(t *testing.T, s *Server) {

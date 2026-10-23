@@ -10,7 +10,7 @@ import (
 	"sync"
 	"testing"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 func intentTestGateway(t *testing.T, classifyErr bool, configInt intentCfg) (*httptest.Server, string, *sync.Mutex, *[]string) {

@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 func TestMigrateLegacyAgentsStore(t *testing.T) {

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"daydayup/internal/sessions"
+	"safuno/internal/sessions"
 )
 
 func TestToolReportAPIBoundariesAndSessionMetrics(t *testing.T) {

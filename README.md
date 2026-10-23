@@ -1,8 +1,10 @@
-# DayDayUp · 多账号模型 API 代理
+# Safuno 安诺 · 多账号模型 API 代理
 
 Go 标准库实现的单实例代理。已接入 SenseNova、WorkBuddy / CodeBuddy 与 Intern-ai（Intern / TokenPlan，书生·端砚），将账号轮询、模型发现、用量统计、额度观测放在统一网关后面。客户端只需要一个网关 Key 和 Base URL。
 
-**新增平台**：实现 `provider.Provider` → 在 `gateway.New` 注册 → 加入 `config.RegisteredProviders` 与 `gateway/platforms.go` 的展示元数据表。管理台的平台选择器由 `/admin/v1/info` 下发的平台目录驱动，新增平台会自动出现，前端无需改动。
+**新增平台（两种方式）**：
+- **运行时热注册，无需重启（供 App 自动更新，不对个人用户开放界面）**：`POST /admin/v1/providers` 注册任意 OpenAI 兼容平台（Base URL、名称、简介、身份头、区域、账号 ID 前缀），保存即生效——立即纳入路由与账号校验、出现于平台选择器、可马上添加账号并发现模型；`DELETE` 停止调度并解绑其账号（账号仍加密保存，重新注册同名平台即恢复）。注册持久化在 config.json 的 `provider_overrides`，重启后自动重放。管理台**不提供**平台管理页面，这是给自动更新流程使用的管理 API。
+- **编译内置**：实现 `provider.Provider`（可选 `provider.Descriptor` 自描述平台卡片），包内 `init` 可声明默认源站与区域词表（`config.SetEndpoint` / `config.SetRealmPlatform`）；适配器自己描述自己，网关以实时注册表渲染平台目录，不再需要额外的展示元数据表。运行时注册使用通用适配器 `provider.Generic`；OAuth 登录、协议改写、额度接口等平台特有能力仍需编译内置适配器。
 
 **定位**：对标 [CC Switch](https://github.com/farion1231/cc-switch)（管配置）与 [Magpie](https://github.com/yetone/magpie)（管网关），并在两者都不覆盖的**内容出口**上融合脱敏与还原能力。完整说明见 [融合脱敏的个人 AI 代理网关](docs/agent-gateway-guide-zh.md)。
 
@@ -250,12 +252,12 @@ go run ./cmd/gateway -config config.json
 第一版桌面壳使用 Wails v3 提供原生窗口和菜单栏，网关仍在同一进程内启动；Dashboard 直接加载网关自己的 `/admin/`，管理台前端零改动。
 
 ```bash
-make app          # 编译 bin/daydayup
-make app-package  # 生成 dist/DayDayUp.app（本地 ad-hoc 签名）
-open dist/DayDayUp.app
+make app          # 编译 bin/safuno
+make app-package  # 生成 dist/Safuno.app（本地 ad-hoc 签名）
+open dist/Safuno.app
 ```
 
-首次启动会在 `~/Library/Application Support/DayDayUp/` 生成空账号池配置和随机 Key，Key 存入 macOS Keychain。要接管现有 `config.json` 和 `.env`，先停掉占用 8080 的 CLI 网关，再运行 `make app-start-existing`。详见 [desktop/README.md](desktop/README.md)。
+首次启动会在 `~/Library/Application Support/Safuno/` 生成空账号池配置和随机 Key，Key 存入 macOS Keychain。要接管现有 `config.json` 和 `.env`，先停掉占用 8080 的 CLI 网关，再运行 `make app-start-existing`。详见 [desktop/README.md](desktop/README.md)。
 
 当前限制：仅 macOS、未签名/未公证、没有自动更新（管理台已免登录）；Windows/Linux 壳后续按同一架构扩展。
 
@@ -472,7 +474,7 @@ curl -X POST http://127.0.0.1:8080/gateway/v1/sessions/chat-001/tool-events \
 
 ## 路由决策与用量知情（M3 · 已实现）
 
-- **路由页**：实时展示每次请求的决策时间线——请求→尝试链（每个账号的 HTTP 状态/原因/重试）→等待时长；以及当前冷却中的账号/模型与恢复时间、正在等待的请求数。数据来自网关内存环形记录（最多 512 条），会话归档仍是持久记录。
+- **路由决策数据**：`GET /admin/v1/routing` 返回每次请求的决策时间线——请求→尝试链（每个账号的 HTTP 状态/原因/重试）→等待时长，以及当前冷却中的账号/模型与恢复时间、正在等待的请求数。数据来自网关内存环形记录（最多 512 条），会话归档仍是持久记录。**管理台不提供路由决策页面**，该数据供脚本与自动诊断使用。
 - **用量页升级**：按客户端（DSH/Claude Code/Codex/OpenCode…，来自会话身份识别）、模型、账号三个维度聚合 token，并给出**花费估算**：配置 `pricing` 中的价格表（每 1M token，人民币）优先；WorkBuddy 模型无价格时按官方积分倍率近似估算并标注“估算”；两者皆无则标注“未计价”，绝不编造。
 
 ```json
@@ -536,7 +538,9 @@ curl -X POST http://127.0.0.1:8080/gateway/v1/sessions/chat-001/tool-events \
 | `/admin/v1/sessions/{id}/requests/{request_id}` | GET | 请求、尝试明细与正文预览（最多 64 KiB） | 管理 Key |
 | `/admin/v1/sessions/{id}/requests/{request_id}/request` | GET | 完整原始请求正文下载 | 管理 Key |
 | `/admin/v1/sessions/{id}/requests/{request_id}/response` | GET | 完整最终响应正文下载；进行中返回 409 | 管理 Key |
-| `/admin/v1/providers` | GET | 平台列表与额度接入能力 | 管理 Key |
+| `/admin/v1/providers` | GET | 平台目录（即实时注册表：内置 + 热注册，含额度能力） | 管理 Key |
+| `/admin/v1/providers` | POST | 热注册 OpenAI 兼容平台 `{"id","name","tagline","base_url","auth","uid_field","realms","id_prefix","credential","placeholder","hint","quota"}`；写回 `provider_overrides`，失败回滚 | 管理 Key |
+| `/admin/v1/providers/{id}` | GET / PUT / DELETE | 查看 / 修改描述（部分字段；平台 ID 不可改）/ 移除平台（停止调度、解绑其账号；进行中请求存在时 409） | 管理 Key |
 | `/admin/v1/refresh` | POST | 立即刷新模型和已配置的额度 Feed | 管理 Key |
 | `/admin/v1/accounts/{id}/enabled` | PUT | `{"enabled":false}` 停用或 `true` 启用 | 管理 Key |
 | `/admin/v1/accounts/{id}/quota` | PUT / DELETE | 设置／清除额度快照 | 管理 Key |
@@ -552,12 +556,12 @@ curl -X POST http://127.0.0.1:8080/gateway/v1/sessions/chat-001/tool-events \
 | `/admin/v1/agents/profiles/{name}` | DELETE | 删除方案 | 管理 Key |
 | `/admin/v1/agents/profiles/{name}/apply` | POST | 一键应用方案（预检全部 Agent 后才写入，漂移/失败整体中止）；`preview:true` 只预览 | 管理 Key |
 | `/admin/v1/agents/{id}/version` | POST | 探测本机该 CLI 的版本（5 秒超时，缓存 1 小时） | 管理 Key |
-| `/admin/v1/routing` | GET | 最近路由决策（请求→尝试链→原因）+ 实时冷却/等待状态 | 管理 Key |
+| `/admin/v1/routing` | GET | 最近路由决策（请求→尝试链→原因）+ 实时冷却/等待状态；控制台不展示，供脚本诊断 | 管理 Key |
 | `/admin/v1/usage` | GET | 按客户端/模型/账号聚合用量与花费估算（`window=24h|7d|all`） | 管理 Key |
 | `/metrics` | GET | Prometheus 指标 | 管理 Key |
 | `/healthz` | GET | 进程存活检查，不代表上游可用 | 无 |
 
-普通 `/v1/*` 请求也可通过 `X-Provider: sensenova` 选择平台。统一的是入口、鉴权和调度；请求及响应保留所用协议，第一版不跨协议转换。扩展平台只需实现 `internal/provider.Provider`，并在 `gateway.New` 注册，在配置校验中允许对应名称。
+普通 `/v1/*` 请求也可通过 `X-Provider: sensenova` 选择平台。统一的是入口、鉴权和调度；请求及响应保留所用协议，第一版不跨协议转换。扩展平台有两种方式（见文首）：管理 API 热注册 OpenAI 兼容平台，生效即可用、无需重启（界面不暴露，供 App 自动更新使用）；平台特有能力（OAuth 身份、路径/请求体改写、额度接口）则实现 `internal/provider.Provider` 编译内置。
 
 ## 额度监控
 
@@ -741,4 +745,4 @@ make build     # go build -trimpath -o bin/gateway ./cmd/gateway
 
 `internal/sessions` 负责会话元数据、完整正文的加密归档及持久化账号绑定。会话详情接口返回 `data`（汇总）、`requests`、`total`、`offset`、`limit`；记录中的 `reported_fields` 标记确实观测到的 Token 字段，`usage_complete` 说明各次尝试的输入／输出统计是否完整。
 
-平台是插件式注册的：`internal/provider.Registry` 维护名称到实现的映射，`gateway.New` 注册内置的 `sensenova` 与 `workbuddy`，`gateway.NewWithProviders` 允许注入自定义注册表，扩展平台无需改动网关代码。
+平台是插件式、可热更新的注册表：`internal/provider.Registry` 维护名称到实现与展示描述的映射（并发安全，支持 Register/Swap/Replace/Remove，并在变更后触发网关重新发布平台词表、重载有效账号集）。`gateway.New` 注册内置 `sensenova`、`workbuddy`、`tokenplan`，`gateway.NewWithProviders` 允许注入自定义注册表；管理 API 的增删平台走同一注册表，热注册的平台在进程内使用 `provider.Generic`（OpenAI 兼容）适配器，也可通过 `Swap` 换成重新构建的适配器而中断在途请求。账号校验（`config.Registered`）、默认源站（`config.DefaultBaseURL`）与区域／客户端身份词表（`config.RealmValues`/`Products`）都由注册表在启动和变更时发布，`config` 不再硬编码平台名。

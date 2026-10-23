@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"daydayup/internal/config"
+	"safuno/internal/config"
 )
 
 // supports reports whether the account can serve the requested model. The

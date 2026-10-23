@@ -18,7 +18,7 @@ import (
 	"strings"
 	"sync"
 
-	"daydayup/internal/store"
+	"safuno/internal/store"
 )
 
 var idPattern = regexp.MustCompile(`^[A-Za-z0-9_.:-]{1,128}$`)
