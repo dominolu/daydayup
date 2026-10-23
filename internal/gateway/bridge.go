@@ -101,6 +101,10 @@ func (b *bridgeWriter) WriteHeader(status int) {
 // cascades to the inner writer so a chain (chatRewrite -> bridge) all switch
 // to passthrough together — otherwise the outer layer would pass the JSON
 // through into the inner SSE encoder, which would swallow it.
+// Unwrap exposes the wrapped writer so layered writers can be searched for the
+// gateway's trace holder.
+func (b *bridgeWriter) Unwrap() http.ResponseWriter { return b.ResponseWriter }
+
 func (b *bridgeWriter) setRaw() {
 	b.forceRaw = true
 	if inner, ok := b.ResponseWriter.(rawSwitcher); ok {

@@ -17,6 +17,7 @@ func TestLoadValidation(t *testing.T) {
 	}{
 		{"valid", `{"accounts":[{"id":"a","api_key_env":"SENSE_TEST_KEY"}]}`, true},
 		{"web-bootstrap", `{"accounts":[]}`, true},
+		{"empty-workbuddy-bootstrap", `{"accounts":[],"default_provider":"workbuddy"}`, true},
 		{"waiting-limit", `{"accounts":[],"max_waiting_requests":32}`, true},
 		{"bad-waiting-limit", `{"accounts":[],"max_waiting_requests":-1}`, false},
 		{"oversized-waiting-limit", `{"accounts":[],"max_waiting_requests":10001}`, false},
@@ -24,6 +25,9 @@ func TestLoadValidation(t *testing.T) {
 		{"plaintext-credential", `{"accounts":[{"id":"a","api_key":"secret"}]}`, false},
 		{"unknown-provider", `{"accounts":[{"id":"a","api_key_env":"SENSE_TEST_KEY","provider":"other"}]}`, false},
 		{"duplicate-key", `{"accounts":[{"id":"a","api_key_env":"SENSE_TEST_KEY"},{"id":"b","api_key_env":"SENSE_TEST_KEY"}]}`, false},
+		{"group-routing-valid", `{"accounts":[],"group_routing":{"default":"smart","worker-a":"round_robin"}}`, true},
+		{"group-routing-bad-mode", `{"accounts":[],"group_routing":{"default":"weird"}}`, false},
+		{"group-routing-bad-name", `{"accounts":[],"group_routing":{"bad name!":"smart"}}`, false},
 		{"extra-json", `{"accounts":[{"id":"a","api_key_env":"SENSE_TEST_KEY"}]} {}`, false},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
@@ -194,5 +198,37 @@ func TestGroupNormalization(t *testing.T) {
 	}
 	if cfg.Accounts[0].Group != "default" {
 		t.Fatalf("account group default: %q", cfg.Accounts[0].Group)
+	}
+}
+
+// Pool waiting shares the request budget with generation; without a separate
+// cap a rate-limited account can consume the whole window. The budget must be
+// explicit, bounded and configurable (including disabled for legacy setups).
+func TestPoolWaitBudgetDefaultAndValidation(t *testing.T) {
+	t.Setenv("GATEWAY_API_KEY", "client-key-at-least-16")
+	t.Setenv("GATEWAY_ADMIN_KEY", "admin-key-at-least-16")
+	for _, tt := range []struct {
+		name, body string
+		valid      bool
+		want       int
+	}{
+		{"default", `{"accounts":[]}`, true, DefaultPoolWaitTimeoutSeconds},
+		{"explicit", `{"accounts":[],"pool_wait_timeout_seconds":30}`, true, 30},
+		{"disabled", `{"accounts":[],"pool_wait_timeout_seconds":-1}`, true, -1},
+		{"invalid", `{"accounts":[],"pool_wait_timeout_seconds":-2}`, false, 0},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.json")
+			if err := os.WriteFile(path, []byte(tt.body), 0600); err != nil {
+				t.Fatal(err)
+			}
+			c, err := Load(path)
+			if (err == nil) != tt.valid {
+				t.Fatalf("valid=%t err=%v", tt.valid, err)
+			}
+			if tt.valid && c.PoolWaitTimeoutSeconds != tt.want {
+				t.Fatalf("pool_wait_timeout_seconds=%d want %d", c.PoolWaitTimeoutSeconds, tt.want)
+			}
+		})
 	}
 }

@@ -13,6 +13,7 @@ Go 标准库实现的单实例代理。已接入 SenseNova、WorkBuddy / CodeBud
 - 429 按 `Retry-After` 冷却；明确的模型 TPM/RPM 限流仅冷却该号的对应模型，其他额度限制冷却整个账号。5xx 短暂冷却。明确拒绝的生成请求可切换账号，已开始的流式响应和结果不确定的 POST 不重放。
 - 从非流式 JSON 和 SSE 的 `usage` 统计每号实际输入、输出、缓存、总 Token，兼容三种协议；没有 `usage` 时记录未知，不假设消耗为零。
 - 内置 `/admin/` Web 管理台，支持添加、编辑、移除、启停、单号检查、搜索筛选、模型目录、用量及额度观测。
+- 第一版 macOS 桌面壳（Wails v3）：同进程启动网关，原生窗口 + 菜单栏；Dashboard 直接加载 `/admin/`，管理台前端零改动。
 - 管理 API、Prometheus 指标、每号额度快照及可选的外部额度 Feed 轮询。
 - 会话归档、输入／输出／缓存 Token、TTFT／TPS、客户端工具耗时上报；识别常用智能体的原生会话标识，缺失时支持有证据的工具调用链续接。
 - 统计、额度、管理端启停状态原子持久化；配置账号支持环境变量凭证，网页新增凭证使用 AES-256-GCM 加密，不进入管理响应或统计状态文件。
@@ -21,7 +22,7 @@ Go 标准库实现的单实例代理。已接入 SenseNova、WorkBuddy / CodeBud
 
 ## 本地启动
 
-需要 Go 1.23 或更新版本，无第三方 Go 依赖。
+需要 Go 1.23 或更新版本；网关二进制不需要 Node 或前端构建步骤。macOS 桌面壳见后文「macOS 桌面 App」。
 
 ```bash
 cp config.example.json config.json
@@ -90,7 +91,7 @@ go run ./cmd/gateway -config config.json
 }
 ```
 
-也可以从空账号池启动，在管理台“账号池 → 添加账号”选择 **WorkBuddy / CodeBuddy** 平台：可点“**浏览器授权登录**”一键完成官方登录并自动入库（推荐，见上节），或直接粘贴 UID、Access Token、Refresh Token（留空则无法自动续期）。批量导入走 `POST /admin/v1/accounts/import`：
+也可以从空账号池启动，在管理台“概览 → 添加账号”选择 **WorkBuddy / CodeBuddy** 平台：可点“**浏览器授权登录**”一键完成官方登录并自动入库（推荐，见上节），或直接粘贴 UID、Access Token、Refresh Token（留空则无法自动续期）。批量导入走 `POST /admin/v1/accounts/import`：
 
 ```bash
 curl -X POST http://127.0.0.1:8080/admin/v1/accounts/import \
@@ -103,7 +104,7 @@ curl -X POST http://127.0.0.1:8080/admin/v1/accounts/import \
 
 ### 浏览器 OAuth 授权登录
 
-管理台打开“账号池 → 添加账号”，平台选 **WorkBuddy / CodeBuddy** 后出现“**浏览器授权登录**”面板：点“开始浏览器授权”会打开官方登录页，网关负责把 `uid`、`access_token`、`refresh_token` 和有效期自动提取出来并加密入库，全程不需要复制粘贴任何凭证。流程与 workbuddy2api-hub 的看板 OAuth 一致：
+管理台在“概览 → 添加账号”打开“接入新的账号”，平台选 **WorkBuddy / CodeBuddy** 后出现“**浏览器授权登录**”面板：点“开始浏览器授权”会打开官方登录页，网关负责把 `uid`、`access_token`、`refresh_token` 和有效期自动提取出来并加密入库，全程不需要复制粘贴任何凭证。流程与 workbuddy2api-hub 的看板 OAuth 一致：
 
 1. 网关请求 `POST {chat_upstream}/v2/plugin/auth/state?platform=...`（带该区域官方浏览器头族），拿到一次性 `state` 与官方 `authUrl`；
 2. 网页打开 `authUrl`，用户扫码/账号密码登录；
@@ -225,13 +226,27 @@ export GATEWAY_ADMIN_KEY='替换为至少16字符且不同的随机管理密钥'
 go run ./cmd/gateway -config config.json
 ```
 
-打开 `http://127.0.0.1:8080/admin/`，输入 `GATEWAY_ADMIN_KEY` 登录。已有编译产物时，可直接运行 `./bin/gateway -config config.json`，无需 Node 或前端构建步骤。
+打开 `http://127.0.0.1:8080/admin/` 即可直接进入管理台，无需登录；`GATEWAY_ADMIN_KEY` 只用于 curl、脚本等外部管理调用。已有编译产物时，可直接运行 `./bin/gateway -config config.json`，无需 Node 或前端构建步骤。
 
-管理台包含概览、账号池、模型目录、会话管理、用量统计和接口接入页。添加账号后会调用模型发现接口检查连接，不发起生成请求。账号名称、并发、源站和模型白名单可在线修改；编辑时 API Key 留空保留当前凭证，也可输入新 Key 轮换。网页保存无需重启。检查结果展示成功或失败的时间，失效凭证、冷却、停用和权限限制单独呈现。存在进行中的业务请求时，修改和移除返回 409，可先停用，等待请求结束后重试。
+### macOS 桌面 App（第一版）
 
-管理密钥只保留在当前页面内存，不写入 localStorage、sessionStorage 或 Cookie；刷新页面后需要重新登录。所有管理 API 仍要求独立管理密钥，客户端调用使用另一个网关 Key。页面本身可公开加载，但不包含账户数据或凭证。
+第一版桌面壳使用 Wails v3 提供原生窗口和菜单栏，网关仍在同一进程内启动；Dashboard 直接加载网关自己的 `/admin/`，管理台前端零改动。
 
-在“接口接入”页点击“显示 Key”或“复制 Key”可取得当前生效的客户端网关 Key；“复制示例”会填入该 Key。默认隐藏，离开此页或退出登录后清除页面内存中的 Key。客户端密钥由启动环境变量 `GATEWAY_API_KEY` 设置，修改后需重新加载启动环境并重启网关；本机启动时使用的值保存在忽略提交的 `.env`。Base URL 是 SDK 配置项，检查接入可调用 `GET /v1/models`。
+```bash
+make app          # 编译 bin/daydayup
+make app-package  # 生成 dist/DayDayUp.app（本地 ad-hoc 签名）
+open dist/DayDayUp.app
+```
+
+首次启动会在 `~/Library/Application Support/DayDayUp/` 生成空账号池配置和随机 Key，Key 存入 macOS Keychain。要接管现有 `config.json` 和 `.env`，先停掉占用 8080 的 CLI 网关，再运行 `make app-start-existing`。详见 [desktop/README.md](desktop/README.md)。
+
+当前限制：仅 macOS、未签名/未公证、没有自动更新（管理台已免登录）；Windows/Linux 壳后续按同一架构扩展。
+
+管理台包含概览、账号池、模型目录、会话管理、用量统计和接口接入页。概览页集中展示接入账号、可用账号、累计请求、Token 总用量以及「刷新状态 / 添加账号」入口；其余页面只保留各自的业务内容，不再重复这些汇总指标和操作。添加账号后会调用模型发现接口检查连接，不发起生成请求。账号名称、并发、源站和模型白名单可在线修改；编辑时 API Key 留空保留当前凭证，也可输入新 Key 轮换。网页保存无需重启。检查结果展示成功或失败的时间，失效凭证、冷却、停用和权限限制单独呈现。存在进行中的业务请求时，修改和移除返回 409，可先停用，等待请求结束后重试。
+
+管理台不需要登录：网关返回 `/admin/` 时自动设置一个 HttpOnly、SameSite=Strict 的同源会话 Cookie，打开页面即可管理账号池。所有管理 API 仍接受 `GATEWAY_ADMIN_KEY`，curl、脚本和远程自动化继续用 Bearer Key 调用；会话 Cookie 由网关进程随机生成，网关重启后页面会自动刷新取得新会话。由于打开页面就能获得管理权限，请保持默认的 `127.0.0.1` 监听，或自行在反向代理层加访问控制。
+
+在“接口接入”页点击“显示 Key”或“复制 Key”可取得当前生效的客户端网关 Key；“复制示例”会填入该 Key。默认隐藏，离开此页后清除页面内存中的 Key。客户端密钥由启动环境变量 `GATEWAY_API_KEY` 设置，修改后需重新加载启动环境并重启网关；本机启动时使用的值保存在忽略提交的 `.env`。Base URL 是 SDK 配置项，检查接入可调用 `GET /v1/models`。
 
 网页账号及对配置账号的修改保存到 `account_store_file`，默认 `data/accounts.enc`。默认首次保存时生成 `data/accounts.enc.key`，两者权限均为 `0600`。部署时应一起备份，或通过 `account_store_key_env` 指定的环境变量 `GATEWAY_ACCOUNT_STORE_KEY` 提供固定的 **32 字节标准 Base64 编码**主密钥；丢失或更换主密钥后将无法解密旧账号存储。加密密钥不会通过 API 返回。环境变量账号仅保存变量引用，未轮换为网页凭证时不会复制其明文到账号记录。
 
@@ -460,6 +475,7 @@ curl -X POST http://127.0.0.1:8080/gateway/v1/sessions/chat-001/tool-events \
 ```json
 {
   "routing": "smart",
+  "model_rename": { "sensenova": { "deepseek-flash": "deepseek-v4.1-flash-1017" } },
   "middleware": {
     "model_map": { "fast": "deepseek-v4.1-flash" },
     "system_prompt": [ { "match_agent": "claude-code", "text": "你是接入网关后的助手。" } ],
@@ -476,8 +492,9 @@ curl -X POST http://127.0.0.1:8080/gateway/v1/sessions/chat-001/tool-events \
 }
 ```
 
-- **smart 路由**（`routing: "smart"`）：账号排序从轮询升级为"额度窗口快重置的优先"，减少窗口重置时的浪费（参考 Magpie smart 语义）。无窗口信息的账号保持轮询顺序。
+- **smart 路由**（`routing: "smart"`）：账号排序从轮询升级为"额度窗口快重置的优先"，减少窗口重置时的浪费（参考 Magpie smart 语义）。无窗口信息的账号保持轮询顺序。策略可按分组覆盖：`group_routing: {"分组名": "smart" | "round_robin"}`，未列出的分组跟随全局 `routing`；概览页每个分组卡片上的开关就是设置这个值（热更新并写回 config.json）。
 - **中间件**（New API 语义）：`model_map` 把客户端模型名换名发出（响应里改回客户端别名）；`system_prompt` 按客户端/模型注入系统提示词（幂等，不重复注入）；`think_tags.strip` 在 Chat 透传/桥接响应里去掉 `reasoning_content`。中间件在桥接转换之后、provider 之前生效，对四协议客户端一致。
+- **模型改名**（`model_rename`）：按平台把上游模型 id 改成客户端要用的规范名。`{"sensenova": {"deepseek-flash": "deepseek-v4.1-flash-1017"}}` 表示 SenseNova 的 `deepseek-flash` 对外以 `deepseek-v4.1-flash-1017` 出现。路由、`GET /v1/models`、响应里的 `model` 都用规范名；发给 SenseNova 的请求体仍改写回它自己的 `deepseek-flash`。因此同组内 TokenPlan 原生的 `deepseek-v4.1-flash-1017` 会和它自动聚合成同一个模型、一起参与轮询，客户端只需要一个名字。旧名字仍然可用（会被归一成规范名）。链式改名、同一原名改成不同规范名会被拒绝。管理接口：`GET /admin/v1/middleware` 查看，`PUT /admin/v1/middleware/model_rename` 热更新并写回 config.json。
 - **每日预热**（`prewarm`）：每个窗口重置时刻（默认 04:00 本地，对齐 WorkBuddy 5 小时窗口）对每个可用账号发一个 `max_tokens=1` 的直连请求，让额度窗口提前开启；不占用池并发、不污染统计。
 - **意图路由**（`intent`）：客户端请求 `intent` 模型时，网关先用 `classifier_model` 做一次小模型分类（走同一网关，会话 `intent-classifier`），把请求路由到 `simple_models[0]` 或 `strong_models[0]`；分类失败自动回退强模型。`GET /v1/models` 会列出 `intent` 入口。分类器模型禁止出现在 `intent.models`（防递归）。
 - **Agent 版本提示**：Agents 页每行"CLI 版本"列可手动探测（`POST /admin/v1/agents/{id}/version`，5 秒超时、内存缓存 1 小时），支持 opencode / claude / codex。
@@ -580,15 +597,17 @@ Feed 使用独立密钥，不会收到 SenseNova API Key，也不跟随跳转。
 
 实际调用明确返回“当前套餐不支持该模型”时，网关将该号的对应模型排除 15 分钟，并从聚合模型列表过滤；管理员可查看 `unavailable_models`。普通 403 权限／策略错误不触发这一判断。`model_cooldowns` 展示按模型的临时限流状态，发现接口刷新不会提前结束冷却。
 
-如果全部相关账号都被已确认的套餐模型权限限制排除，后续请求直接返回 `403 model_not_in_token_plan`，提示从 `GET /v1/models` 选择可用模型。存在冷却、恢复节流或并发占满的候选账号时，在原请求中等待；停用、凭证无效、模型不支持、已知额度耗尽等没有可恢复候选的情况仍返回 `503 pool_unavailable`。日志按原因给出账号计数，例如 `model_cooldown=1`。
+该拒绝只否定当前账号，不否定整个路由组：同一请求会继续在组内尝试其他候选账号（可跨平台），确认没有可用候选后才向客户端返回 `403 model_not_in_token_plan`。这类 403 未产生生成结果，重放安全，因此不占用 `max_attempts` 生成重试预算。账号级风控 403（如 WorkBuddy `11140`）不属于模型权限，仍按账号级冷却处理、不换号。
+
+同组全部候选账号都被已确认的套餐模型权限限制排除后（含 15 分钟缓存命中），请求直接返回 `403 model_not_in_token_plan`，提示从 `GET /v1/models` 选择可用模型。存在冷却、恢复节流或并发占满的候选账号时，在原请求中等待；停用、凭证无效、模型不支持、已知额度耗尽等没有可恢复候选的情况仍返回 `503 pool_unavailable`。日志按原因给出账号计数，例如 `model_cooldown=1`。
 
 ### 限流等待与重试（v0.5.1）
 
-已知生成接口或 GET／HEAD 在上游明确返回 HTTP 429、且尚未向客户端提交响应时，先释放账号并发槽，再优先尝试其他可用账号；没有其他可用账号时等待共享冷却结束，可再次使用原账号。等待和所有尝试共用 `request_timeout_seconds` 总预算，默认 300 秒，客户端取消立即停止，不会每次重试重置超时。网关无法预先获知客户端自己的超时；客户端可设置合适的读取超时，网关预算也可在配置中调整。
+已知生成接口或 GET／HEAD 在上游明确返回 HTTP 429、且尚未向客户端提交响应时，先释放账号并发槽，再优先尝试其他可用账号；没有其他可用账号时等待共享冷却结束，可再次使用原账号。等待和所有尝试共用 `request_timeout_seconds` 总预算，默认 600 秒，客户端取消立即停止，不会每次重试重置超时。等待另有独立预算 `pool_wait_timeout_seconds`，默认 120 秒，`-1` 表示关闭该独立预算、只受总预算约束；预算按整个请求累计，不因换号或重试重置。这样限流排队不会吞掉生成本身的时间窗口（客户端常见的读取／空闲超时通常在 300 秒量级，总预算应大于它）。网关无法预先获知客户端自己的超时；客户端可设置合适的读取超时，两个预算也可在配置中调整。
 
 优先遵守 `Retry-After`；缺失或无效时连续 429 使用 30／60／120 秒退避，后续最多 120 秒，最短等待 1 秒，避免 `Retry-After: 0` 形成紧密重试。冷却由账号池共享，不为每个等待请求分别计时。冷却结束后的 60 秒恢复期内，该受限账号／模型范围每次只放行一个请求，发起间隔至少 1 秒，避免并发等待者同时重试；这是恢复节流策略，不代表推算出了官方 RPM／TPM。
 
-`max_waiting_requests` 默认 128，可配置 1–10000；队列满返回 `503 pool_queue_full`。总预算到期返回 `504 pool_wait_timeout`；客户端取消记录为 `client_cancelled`。等待时不提前发送 200 或 SSE 心跳，最终响应仍保持原协议。普通状态相关资源、未知写接口、流已开始、POST 网络错误及 5xx 不因本策略自动重放；已知生成接口的状态续接在明确 429 后只重试原所属账号。
+`max_waiting_requests` 默认 128，可配置 1–10000；队列满返回 `503 pool_queue_full`。等待预算耗尽返回 `503 pool_wait_budget_exhausted`（`Retry-After: 5`），不必等到总预算到期；总预算到期返回 `504 pool_wait_timeout`；客户端取消记录为 `client_cancelled`。等待时不提前发送 200 或 SSE 心跳，最终响应仍保持原协议。普通状态相关资源、未知写接口、流已开始、POST 网络错误及 5xx 不因本策略自动重放；已知生成接口的状态续接在明确 429 后只重试原所属账号。
 
 日志增加 `pool_wait_started`／`pool_wait_finished`，最终日志与会话请求详情保存 `pool_wait_ms` 和 `pool_waits`；上游每次 429 和最终成功分别作为尝试保存，已报告的 usage 均计入会话，等待本身不增加 Token。
 
@@ -596,12 +615,12 @@ Feed 使用独立密钥，不会收到 SenseNova API Key，也不跟随跳转。
 |---|---|
 | 401 | 标记 Key 无效；已知无状态生成接口可换号 |
 | 429 | 明确的模型 TPM/RPM 错误仅冷却该模型；其他情况冷却账号；已知生成接口优先换可用号，否则等待冷却后重试；有状态续接只重试原账号 |
-| 403 / 400 / 404 | 原样返回，不自动换号重放；明确套餐不支持的 403 会记录该号的模型不可用状态 |
+| 403 / 400 / 404 | 已知生成接口上明确套餐不支持的 403：记录该号模型不可用并换号，全部候选排除后返回 `403 model_not_in_token_plan`；其他 403 / 400 / 404 原样返回，不换号重放 |
 | 5xx | 冷却；GET / HEAD 的 502、503、504 可换号；POST 原样返回 |
 | 网络失败 | GET / HEAD 可换号；POST 返回 502／504 |
 | 流中断／流内错误 | 记录失败，不重试；截断流中止下游连接 |
 
-有上游状态依赖的会话请求不使用表中的跨账号重试。非 429 的失败切换受 `max_attempts` 限制，不重复选择已失败账号；HTTP 429 的安全重试受整个请求的截止时间约束，可在共享冷却后重用账号。失败尝试也计入 `requests`；模型探测不计入业务请求统计。流结束只统计一次累计 usage，避免重复计算。观察缓冲上限 4 MiB，超大 JSON／SSE 单事件、压缩响应或上游不返回 usage 时可能无法记账，见 `requests_without_usage` 指标。
+有上游状态依赖的会话请求不使用表中的跨账号重试。非 429 的失败切换受 `max_attempts` 限制，不重复选择已失败账号（已确认的模型权限 403 除外：它会一直换号到候选耗尽，再返回模型不可用）；HTTP 429 的安全重试受整个请求的截止时间约束，可在共享冷却后重用账号。失败尝试也计入 `requests`；模型探测不计入业务请求统计。流结束只统计一次累计 usage，避免重复计算。观察缓冲上限 4 MiB，超大 JSON／SSE 单事件、压缩响应或上游不返回 usage 时可能无法记账，见 `requests_without_usage` 指标。
 
 ## 请求日志与排查
 
@@ -641,11 +660,13 @@ v0.5.3 起，每条 `upstream_attempt` 还保存以下限流分析字段；即�
 | `upstream` / `model_rate_limit` | 上游明确报告模型 TPM/RPM 限制，通常为 429 |
 | `upstream` / `upstream_rate_or_quota_limit` | 其他 429，不能直接断言余额为零 |
 | `gateway` / `pool_unavailable` | 调度时没有符合条件的账号 |
-| `gateway` / `model_not_in_token_plan` | 全部账号均命中已确认的模型权限缓存，直接返回 403 |
-| `stream` / `response_incomplete` | 响应中断或 SSE 未结束 |
-| `client` / `client_cancelled` | 客户端取消或断开 |
+| `gateway` / `model_not_in_token_plan` | 同组全部候选账号均被确认的模型权限限制排除（含缓存命中），直接返回 403 |
+| `stream` / `response_incomplete` | 上游在协议终止事件前结束了流（干净关闭、重置或 GOAWAY） |
+| `timeout` / `upstream_timeout` | 响应读到一半时网关自己的 `request_timeout_seconds` 到期；不是上游断流，需调大预算或排查上游卡顿 |
+| `pool` / `pool_wait_budget_exhausted` | 限流排队超过 `pool_wait_timeout_seconds`，快速失败以便客户端重试 |
+| `client` / `client_cancelled` | 客户端取消或断开（含客户端自身的读取／空闲超时） |
 
-流内错误即使 HTTP 状态为 200，也记录 `outcome=error`。错误响应的 `error.type`、`error.code` 会在可解析时记录；消息只保留已识别的固定错误文本或安全摘要，不记录任意上游原始错误消息。请求正文、生成内容、鉴权头、Cookie 和查询参数均不写入日志；已知凭证及常见 Key 格式会从诊断元数据中脱敏。脱敏拦截的 `redaction span` 日志（见「隐私脱敏层」）是刻意保留的例外：它按命中规则记录每条涉密记录与占位符的完整映射，原文同样经过凭证脱敏与长度截断，用于核对拦截与还原。
+流内错误即使 HTTP 状态为 200，也记录 `outcome=error`。错误响应的 `error.type`、`error.code` 会在可解析时记录；消息只保留已识别的固定错误文本或安全摘要，不记录任意上游原始错误消息。请求正文、生成内容、鉴权头、Cookie 和查询参数均不写入日志；已知凭证及常见 Key 格式会从诊断元数据中脱敏。脱敏拦截的 `redaction span` 日志（见「隐私脱敏层」）是刻意保留的例外：它按命中规则记录每条涉密记录与占位符的完整映射，原文同样经过凭证脱敏与长度截断，用于核对拦截与还原。响应在协议终止事件前结束时额外记录一条 `stream_copy_failed`：`read_error` 给出稳定分类（`upstream_closed`／`eof`／`unexpected_eof`／`deadline_exceeded`／`canceled`／`network_timeout`／`network_error`／`http2_goaway`），`read_error_message` 是经过脱敏截断的读取错误原文；据此可直接区分上游断流、网关超时与网络重置。
 
 调度失败日志额外记录 `pool_rejections`，列出每个相关账号被跳过的首要原因，包括 `model_not_in_token_plan`、`model_cooldown`、`account_cooldown`、`concurrency_limit`、`model_not_supported`、`quota_exhausted` 等；无需再根据通用的 503 文本猜测。
 

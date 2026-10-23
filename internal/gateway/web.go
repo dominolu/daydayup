@@ -12,7 +12,12 @@ import (
 //go:embed web/*
 var webFiles embed.FS
 
-func serveAdminUI(w http.ResponseWriter, r *http.Request) bool {
+// adminSessionCookie is the HttpOnly, same-site cookie that lets the console
+// call /admin/v1 without asking for GATEWAY_ADMIN_KEY. It is set by the HTML
+// response itself, so opening /admin/ is the whole "login" flow.
+const adminSessionCookie = "daydayup_admin_session"
+
+func (s *Server) serveAdminUI(w http.ResponseWriter, r *http.Request) bool {
 	if r.Method != http.MethodGet && r.Method != http.MethodHead {
 		return false
 	}
@@ -35,6 +40,15 @@ func serveAdminUI(w http.ResponseWriter, r *http.Request) bool {
 	if err != nil {
 		http.NotFound(w, r)
 		return true
+	}
+	if name == "index.html" && s.adminSession != "" {
+		http.SetCookie(w, &http.Cookie{
+			Name:     adminSessionCookie,
+			Value:    s.adminSession,
+			Path:     "/admin",
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		})
 	}
 	w.Header().Set("Content-Type", mime.TypeByExtension(path.Ext(name)))
 	w.Header().Set("Cache-Control", "no-store")

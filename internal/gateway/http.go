@@ -29,6 +29,24 @@ func authorized(r *http.Request, key string) bool {
 	return key != "" && subtle.ConstantTimeCompare([]byte(value), []byte(key)) == 1
 }
 
+// adminAuthorized accepts either the explicit Bearer admin key (scripts, curl,
+// remote automation) or the automatic same-origin console session. The session
+// cookie is HttpOnly and SameSite=Strict, so a page on another origin cannot
+// read it or drive the admin API with it.
+func (s *Server) adminAuthorized(r *http.Request) bool {
+	if authorized(r, s.Config.AdminKey) {
+		return true
+	}
+	if s.adminSession == "" {
+		return false
+	}
+	c, err := r.Cookie(adminSessionCookie)
+	if err != nil || c.Value == "" {
+		return false
+	}
+	return subtle.ConstantTimeCompare([]byte(c.Value), []byte(s.adminSession)) == 1
+}
+
 // remoteIP returns the direct peer address (no X-Forwarded-For: the admin
 // surface is single-process and trusting client-supplied IPs would let an
 // attacker spoof the OAuth rate limit).

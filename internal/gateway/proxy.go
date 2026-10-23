@@ -11,10 +11,21 @@ import (
 	"strings"
 	"time"
 
+	"daydayup/internal/config"
 	"daydayup/internal/observe"
 	"daydayup/internal/pool"
 	"daydayup/internal/provider"
 )
+
+// isGenerationPath reports the stateless generation endpoints whose explicit
+// upstream rejections may be replayed on another account or candidate.
+func isGenerationPath(path string) bool {
+	switch path {
+	case "/v1/chat/completions", "/v1/responses", "/v1/messages", "/v1/images/generations", "/v1/images/edits":
+		return true
+	}
+	return false
+}
 
 // Only stateless generation endpoints may fail over after an explicit rejection.
 // Transport errors and 5xx on POST are ambiguous and may already be billable.
@@ -25,7 +36,7 @@ func canRetry(method, path string, status int) bool {
 	if method != http.MethodPost || (status != 401 && status != 429) {
 		return false
 	}
-	return path == "/v1/chat/completions" || path == "/v1/responses" || path == "/v1/messages" || path == "/v1/images/generations" || path == "/v1/images/edits"
+	return isGenerationPath(path)
 }
 
 // nextLocalReset returns the next 04:00 local wall clock, when the WorkBuddy
@@ -43,7 +54,7 @@ func nextLocalReset() time.Time {
 func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string, body []byte) {
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(s.Config.RequestTimeoutSeconds)*time.Second)
 	defer cancel()
-	model := modelFrom(r, body)
+	model := config.CanonicalModel(s.Config.ModelRename, modelFrom(r, body))
 	trace := traceFrom(r)
 	trace.Model = model
 	trace.RequestOutputLimits = requestOutputLimits(r, body)
@@ -63,6 +74,15 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string
 			if errors.Is(err, errWaitQueueFull) {
 				w.Header().Set("Retry-After", "1")
 				apiError(w, 503, "pool_queue_full", err.Error())
+				return
+			}
+			if errors.Is(err, errPoolWaitTimeout) {
+				// Stop paying for a rate-limited account out of the generation
+				// budget: fail fast so the client can retry once capacity
+				// returns instead of timing out mid-request.
+				w.Header().Set("Retry-After", "5")
+				apiError(w, 503, "pool_wait_budget_exhausted", "no upstream capacity or rate-limit recovery within the pool wait budget; retry later")
+				trace.Failure.Layer = "pool"
 				return
 			}
 			var selection *pool.AcquireError
@@ -86,19 +106,28 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string
 		// global routing the same model may be served by any platform, so the
 		// trace (and this attempt) records which platform actually answered.
 		trace.Provider = a.Provider
-		trace.UpstreamID, trace.Failure, trace.Usage = "", diagnostic{}, pool.Usage{}
+		trace.UpstreamID, trace.UpstreamModel, trace.Failure, trace.Usage = "", "", diagnostic{}, pool.Usage{}
 		trace.UsageFields = nil
 		trace.Timing = nil
 		trace.RateLimitHeaders, trace.RateLimitHeadersTruncated = nil, false
 		trace.credentials = append(trace.credentials, a.APIKey, a.QuotaFeedKey, a.RefreshToken)
 		p, _ := s.providers.Get(a.Provider)
+		// model_rename: the answering platform receives the id it actually
+		// advertises while the client keeps the canonical name in requests,
+		// routing, /v1/models and response model fields.
+		upstreamModel := config.UpstreamModel(s.Config.ModelRename, a.Provider, model)
+		trace.UpstreamModel = upstreamModel
+		attemptBody := body
+		if upstreamModel != model {
+			attemptBody = rewriteModelField(body, upstreamModel)
+		}
 		// Optional per-provider request body rewrite (e.g. WorkBuddy gzip for
 		// the CLI/VSCode identities). Deterministic per input, so each retry
 		// attempt rebuilds it safely.
-		upstreamBody := body
+		upstreamBody := attemptBody
 		transformer, transformable := p.(provider.BodyTransformer)
 		if transformable {
-			upstreamBody, err = transformer.TransformRequestBody(r.Method, path, r.Header.Get("Content-Type"), body, a)
+			upstreamBody, err = transformer.TransformRequestBody(r.Method, path, r.Header.Get("Content-Type"), attemptBody, a)
 			if err != nil {
 				s.Pool.Finish(a.ID, 0, pool.Usage{}, true, 0, model)
 				trace.Failure = diagnostic{Layer: "gateway", Reason: "body_transform_failed", Message: "request body could not be transformed for the upstream identity"}
@@ -167,12 +196,17 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string
 			}
 			status := 502
 			code := "upstream_unreachable"
-			if ctx.Err() != nil {
-				status = 504
-				code = "upstream_timeout"
+			message := "upstream request failed"
+			switch {
+			case r.Context().Err() != nil:
+				// The client went away. 499 says so and avoids blaming our own
+				// deadline when both fired at the same moment.
+				status, code, message = 499, "client_cancelled", "client cancelled the request"
+			case ctx.Err() != nil:
+				status, code, message = 504, "upstream_timeout", "request deadline exceeded while waiting for the upstream response"
 			}
 			failure := trace.Failure
-			apiError(w, status, code, "upstream request failed")
+			apiError(w, status, code, message)
 			trace.Failure = failure
 			return
 		}
@@ -186,6 +220,12 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string
 		if trace.UpstreamID == "" {
 			trace.UpstreamID = resp.Header.Get("Request-ID")
 		}
+		// modelDenied marks the one 403 family that is scoped to (account,
+		// model) instead of to the credential: this account proved it cannot
+		// serve the model, but another candidate in the routing group (possibly
+		// on another platform) still can. It is handled as a routing
+		// rejection below instead of being forwarded to the client.
+		modelDenied := false
 		if resp.StatusCode >= 400 {
 			// Inspect a bounded copy and restore every byte before forwarding.
 			original := resp.Body
@@ -201,14 +241,20 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string
 				s.Pool.ThrottleModel(a.ID, model, delay)
 				delay = 0
 			}
-			if model != "" && resp.StatusCode == http.StatusForbidden && readErr == nil && p.ModelUnavailable(prefix) {
-				s.Pool.DenyModel(a.ID, model, 15*time.Minute)
-			}
 			if resp.StatusCode == http.StatusForbidden && readErr == nil {
+				restricted := false
 				if restricter, ok := p.(provider.Restriction); ok && restricter.Restriction(prefix) {
+					restricted = true
 					// WorkBuddy 11140: an account-level abuse restriction
 					// implicates the whole realm through the derived device.
 					s.Pool.HoldRealm(a.Provider, pool.Realm(a), 30*time.Minute)
+				}
+				if model != "" && p.ModelUnavailable(prefix) {
+					s.Pool.DenyModel(a.ID, model, 15*time.Minute)
+					// An account-level restriction is not a model-permission
+					// verdict, and unknown write paths are never replayed, so
+					// only generation requests fail over on this rejection.
+					modelDenied = !restricted && isGenerationPath(path)
 				}
 			}
 			if resp.StatusCode == http.StatusPaymentRequired && readErr == nil {
@@ -231,6 +277,24 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string
 				// Keep the pinned id so the retry reuses the fresh account.
 				trace.RefreshRetryID = a.ID
 			}
+		}
+		// A confirmed model-permission rejection rules out this account only.
+		// The request produced no generation, so retrying it on another
+		// candidate is safe and must not consume the generation retry budget:
+		// model_not_in_token_plan is reported to the client only after every
+		// candidate in the routing group has been ruled out.
+		if modelDenied {
+			// Bound draining so an error response cannot hold a slot indefinitely.
+			_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 64<<10))
+			resp.Body.Close()
+			s.Pool.Finish(a.ID, resp.StatusCode, trace.Usage, true, delay, model)
+			// The account is now in the model-permission cache, so dropping the
+			// per-request exclusion cannot reselect it; it only keeps the final
+			// scheduling error reason at model_not_in_token_plan.
+			delete(excluded, a.ID)
+			boundedAttempts--
+			s.logAttempt(r, resp.StatusCode, started, true)
+			continue
 		}
 		if rateRetry || failover || refreshRetry {
 			// Bound draining so an error response cannot hold a slot indefinitely.
@@ -333,20 +397,25 @@ func (s *Server) proxy(w http.ResponseWriter, r *http.Request, prov, path string
 		trace.Usage = o.Usage()
 		trace.UsageFields = o.Reported()
 		trace.ResponseID = o.ResponseID()
-		trace.Incomplete = copyErr != nil || (o.IsSSE() && !o.Terminal())
+		truncated := copyErr != nil || (o.IsSSE() && !o.Terminal())
+		trace.Incomplete = truncated
 		if resp.StatusCode < 400 && o.Failed() {
 			trace.Failure = upstreamDiagnostic(resp.StatusCode, o.Error())
 		}
-		if trace.Failure.Reason == "" && (copyErr != nil || (o.IsSSE() && !o.Terminal())) {
-			trace.Failure = diagnostic{Layer: "stream", Reason: "response_incomplete", Message: "response ended before completion"}
-			if r.Context().Err() != nil {
-				trace.Failure.Layer, trace.Failure.Reason = "client", "client_cancelled"
-			}
+		if trace.Failure.Reason == "" && truncated {
+			trace.Failure = streamStopDiagnostic(r, ctx)
+			// The protocol terminal never arrived. Keep the concrete read error
+			// (EOF vs reset vs our own deadline) out of the client-facing
+			// message but in the log: without it "response ended before
+			// completion" cannot be triaged.
+			s.logRecord(r, "stream_copy_failed", resp.StatusCode, time.Since(started), trace.Failure,
+				"read_error", streamErrorClass(copyErr),
+				"read_error_message", s.logSanitizer(trace.credentials...)(streamErrorMessage(copyErr)))
 		}
 		s.logAttempt(r, resp.StatusCode, started, false)
 		// A partial response must terminate the downstream connection. Returning
 		// normally could make a truncated SSE or JSON payload look successful.
-		if copyErr != nil || (o.IsSSE() && !o.Terminal()) {
+		if truncated {
 			panic(http.ErrAbortHandler)
 		}
 		return

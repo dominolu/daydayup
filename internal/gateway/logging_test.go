@@ -196,8 +196,8 @@ func TestCachedModelDenialReturns403WithoutRequestingUpstream(t *testing.T) {
 	}), 1)
 	logs := captureLogs(s)
 	first := call(s, "POST", "/v1/chat/completions", `{"model":"denied"}`)
-	if first.Code != 403 || !strings.Contains(first.Body.String(), `"code":"7"`) {
-		t.Fatal("initial upstream permission error was changed")
+	if first.Code != 403 || !strings.Contains(first.Body.String(), `"code":"model_not_in_token_plan"`) || first.Header().Get("Retry-After") != "" || upstreamCalls.Load() != 1 {
+		t.Fatalf("the only candidate's denial should be normalized only after it was ruled out: %d %s", first.Code, first.Body)
 	}
 	cached := call(s, "POST", "/v1/chat/completions", `{"model":"denied"}`)
 	if cached.Code != 403 || !strings.Contains(cached.Body.String(), `"code":"model_not_in_token_plan"`) || cached.Header().Get("Retry-After") != "" || upstreamCalls.Load() != 1 {

@@ -54,6 +54,11 @@ type Server struct {
 	wbLoginMu  sync.Mutex
 	wbLogins   map[string]wbLoginRecord
 	wbLoginIPs map[string]wbLoginStamp
+	// adminSession is the per-process secret behind the console's automatic
+	// same-origin session. GET /admin/ hands the browser this HttpOnly value,
+	// and the admin API accepts it alongside the Bearer GATEWAY_ADMIN_KEY that
+	// scripts and remote clients keep using. No credential prompt is shown.
+	adminSession string
 }
 
 func New(c config.Config) *Server {
@@ -98,8 +103,8 @@ func NewWithProviders(c config.Config, providers *provider.Registry) *Server {
 			return http.ErrUseLastResponse
 		}},
 	}
-	s.Pool.SetGuards(c.Guards)
-	s.Pool.SetRouting(c.Routing)
+	s.configurePool()
+	s.adminSession = newAdminSession()
 	if c.Redaction != nil && c.Redaction.Enabled {
 		cfg := *c.Redaction
 		// The redaction reverse index lives in the shared database now.
@@ -124,8 +129,20 @@ func NewWithProviders(c config.Config, providers *provider.Registry) *Server {
 	return s
 }
 
+// newAdminSession returns the random, restart-scoped token the console uses
+// as an automatic same-origin credential. An empty value (the only failure
+// mode of crypto/rand) simply disables auto-login and leaves the Bearer admin
+// key as the sole admin credential.
+func newAdminSession() string {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	return hex.EncodeToString(b)
+}
+
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if serveAdminUI(w, r) {
+	if s.serveAdminUI(w, r) {
 		return
 	}
 	id := make([]byte, 12)
@@ -151,7 +168,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if strings.HasPrefix(r.URL.Path, "/admin/") || r.URL.Path == "/metrics" {
-		if !authorized(r, s.Config.AdminKey) {
+		if !s.adminAuthorized(r) {
 			apiError(w, 401, "unauthorized", "admin credential required")
 			return
 		}
@@ -348,6 +365,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var mw *chatRewriteWriter
 	if s.middlewareResponseActive() {
 		mw = newChatRewriteWriter(w, requestStream, s.middlewareShouldStripReasoning(), func(model string) string {
+			// model_rename renames the answering platform's upstream id back to
+			// the canonical client name; middleware.model_map aliases are the
+			// fallback (and handle every other response model).
+			if tr := traceFrom(r); tr != nil && tr.UpstreamModel != "" && tr.UpstreamModel != tr.Model && model == tr.UpstreamModel {
+				return tr.Model
+			}
 			return s.middlewareClientFor(model)
 		})
 		w = mw

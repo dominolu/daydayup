@@ -177,12 +177,14 @@ func (p *Pool) ModelListGroup(group string, ttl time.Duration) ([]provider.Model
 // GroupInfo describes one routing group for the admin console: account
 // counts, the distinct discovered model surface and cumulative traffic.
 type GroupInfo struct {
-	Name     string `json:"name"`
-	Accounts int    `json:"accounts"`
-	Enabled  int    `json:"enabled"`
-	Models   int    `json:"models"` // distinct discovered model ids in the group
-	Requests uint64 `json:"requests"`
-	Failures uint64 `json:"failures"`
+	Name            string `json:"name"`
+	Accounts        int    `json:"accounts"`
+	Enabled         int    `json:"enabled"`
+	Models          int    `json:"models"` // distinct discovered model ids in the group
+	Requests        uint64 `json:"requests"`
+	Failures        uint64 `json:"failures"`
+	Routing         string `json:"routing"`                    // effective selection mode for this group
+	RoutingOverride string `json:"routing_override,omitempty"` // explicit per-group value ("round_robin"|"smart"); empty means inherit global
 }
 
 // Groups lists every routing group with account counts in stable sorted
@@ -208,7 +210,7 @@ func (p *Pool) Groups() []GroupInfo {
 		a.failures += e.state.Stats.Failures
 		for _, m := range e.state.Models {
 			if id, _ := m["id"].(string); id != "" {
-				a.models[id] = true
+				a.models[config.CanonicalModel(p.modelRename, id)] = true
 			}
 		}
 	}
@@ -231,7 +233,13 @@ func (p *Pool) Groups() []GroupInfo {
 				enabled++
 			}
 		}
-		out = append(out, GroupInfo{Name: g, Accounts: accounts, Enabled: enabled, Models: len(a.models), Requests: a.requests, Failures: a.failures})
+		mode := p.routing
+		override := ""
+		if v, ok := p.groupRouting[g]; ok {
+			mode = v
+			override = v
+		}
+		out = append(out, GroupInfo{Name: g, Accounts: accounts, Enabled: enabled, Models: len(a.models), Requests: a.requests, Failures: a.failures, Routing: mode, RoutingOverride: override})
 	}
 	return out
 }
@@ -305,22 +313,31 @@ func (p *Pool) modelList(ttl time.Duration, include func(*entry) bool) ([]provid
 		discovered = true
 		for _, m := range s.Models {
 			id, _ := m["id"].(string)
-			if !e.supports(id) {
+			// model_rename presents a platform's upstream id under the
+			// client-facing canonical name, so the aggregated model directory
+			// lists one entry even when every platform names the model
+			// differently.
+			canonical := id
+			if renamed := p.modelRename[e.config.Provider][id]; renamed != "" {
+				canonical = renamed
+			}
+			if !e.supports(canonical, p.modelRename) {
 				continue
 			}
-			if _, ok := all[id]; !ok {
+			if _, ok := all[canonical]; !ok {
 				c := provider.Model{}
 				for k, v := range m {
 					c[k] = v
 				}
+				c["id"] = canonical
 				c["object"] = "model"
 				c["owned_by"] = e.config.Provider
-				all[id] = c
+				all[canonical] = c
 			}
-			if platforms[id] == nil {
-				platforms[id] = map[string]bool{}
+			if platforms[canonical] == nil {
+				platforms[canonical] = map[string]bool{}
 			}
-			platforms[id][e.config.Provider] = true
+			platforms[canonical][e.config.Provider] = true
 		}
 	}
 	ids := make([]string, 0, len(all))

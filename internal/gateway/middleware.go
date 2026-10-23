@@ -165,6 +165,10 @@ type chatRewriteWriter struct {
 // setRaw implements rawSwitcher for the proxy's non-SSE detection. It
 // cascades to the inner writer (the protocol bridge or the logged writer) so
 // the whole chain passes the upstream's non-SSE body through untouched.
+// Unwrap exposes the wrapped writer so layered writers can be searched for the
+// gateway's trace holder.
+func (c *chatRewriteWriter) Unwrap() http.ResponseWriter { return c.ResponseWriter }
+
 func (c *chatRewriteWriter) setRaw() {
 	c.raw = true
 	if inner, ok := c.ResponseWriter.(rawSwitcher); ok {
@@ -366,6 +370,6 @@ func (c *chatRewriteWriter) rewriteNonStreaming(body []byte) ([]byte, error) {
 // middlewareResponseActive reports whether the Chat response post-processor is
 // needed.
 func (s *Server) middlewareResponseActive() bool {
-	return s.middlewareShouldRename() || s.middlewareShouldStripReasoning()
+	return s.middlewareShouldRename() || s.middlewareShouldStripReasoning() || len(s.Config.ModelRename) > 0
 }
 

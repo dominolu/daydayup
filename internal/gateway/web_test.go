@@ -54,3 +54,53 @@ func TestClientKeyRequiresAdminAndIsNotIncludedInOtherResponses(t *testing.T) {
 		t.Fatal("client key endpoint must be read only")
 	}
 }
+
+// TestAdminConsoleNeedsNoLogin pins the no-login contract: loading /admin/
+// issues the same-origin session automatically, the page contains no login
+// form, and the admin API stays closed for requests without either the
+// session or the explicit Bearer key.
+func TestAdminConsoleNeedsNoLogin(t *testing.T) {
+	s := New(config.Config{
+		GatewayKey: "gateway-client-secret-1234",
+		AdminKey:   "gateway-admin-secret-5678",
+	})
+
+	page := httptest.NewRequest(http.MethodGet, "/admin/", nil)
+	w := httptest.NewRecorder()
+	s.ServeHTTP(w, page)
+	if w.Code != http.StatusOK {
+		t.Fatalf("console page: HTTP %d", w.Code)
+	}
+	if strings.Contains(w.Body.String(), "login-overlay") || strings.Contains(w.Body.String(), "admin-key") {
+		t.Fatal("console page still renders the login form")
+	}
+	var session *http.Cookie
+	for _, c := range w.Result().Cookies() {
+		if c.Name == adminSessionCookie {
+			session = c
+		}
+	}
+	if session == nil || session.Value == "" || !session.HttpOnly || session.Path != "/admin" {
+		t.Fatalf("console page did not issue the expected session cookie: %+v", session)
+	}
+	if strings.Contains(w.Body.String(), session.Value) {
+		t.Fatal("session value leaked into the page body")
+	}
+
+	// No credential and no session: still unauthorized.
+	anonymous := httptest.NewRequest(http.MethodGet, "/admin/v1/info", nil)
+	w = httptest.NewRecorder()
+	s.ServeHTTP(w, anonymous)
+	if w.Code != http.StatusUnauthorized {
+		t.Fatalf("anonymous admin call: HTTP %d, want 401", w.Code)
+	}
+
+	// The automatic same-origin session is enough; no key prompt.
+	console := httptest.NewRequest(http.MethodGet, "/admin/v1/info", nil)
+	console.AddCookie(session)
+	w = httptest.NewRecorder()
+	s.ServeHTTP(w, console)
+	if w.Code != http.StatusOK {
+		t.Fatalf("console session admin call: HTTP %d, want 200", w.Code)
+	}
+}

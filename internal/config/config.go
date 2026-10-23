@@ -8,10 +8,15 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"daydayup/internal/redact"
 )
+
+// DefaultPoolWaitTimeoutSeconds bounds rate-limit waiting when the config does
+// not set pool_wait_timeout_seconds.
+const DefaultPoolWaitTimeoutSeconds = 120
 
 type Account struct {
 	ID              string   `json:"id"`
@@ -71,33 +76,47 @@ type Config struct {
 	// DBFile is the single local SQLite database holding accounts, pool state,
 	// session archives, redaction rules and agent bindings. The legacy
 	// per-domain storage fields below are kept only as migration inputs.
-	DBFile                 string           `json:"db_file"`
-	DBKeyEnv               string           `json:"db_key_env,omitempty"`
-	DefaultProvider        string           `json:"default_provider"`
-	DefaultGroup           string           `json:"default_group,omitempty"` // routing group when the client sends none
-	DefaultRealm           string           `json:"default_realm,omitempty"` // workbuddy scheduling preference: intl|cn
-	GatewayKeyEnv          string           `json:"gateway_key_env"`
-	AdminKeyEnv            string           `json:"admin_key_env"`
-	StateFile              string           `json:"state_file"`
-	RequestTimeoutSeconds  int              `json:"request_timeout_seconds"`
-	RefreshIntervalSeconds int              `json:"refresh_interval_seconds"`
-	MaxRequestBytes        int64            `json:"max_request_bytes"`
-	MaxAttempts            int              `json:"max_attempts"`
-	MaxWaitingRequests     int              `json:"max_waiting_requests"`
-	Routing                string           `json:"routing,omitempty"` // "round_robin" (default) | "smart"
-	Accounts               []Account        `json:"accounts"`
-	Guards                 Guards           `json:"guards,omitempty"`
-	Sessions               SessionsConfig   `json:"sessions,omitempty"`
-	Redaction              *redact.Config   `json:"redaction,omitempty"`
-	Agents                 AgentsConfig     `json:"agents,omitempty"`
-	Bridges                BridgesConfig    `json:"bridges,omitempty"`
-	Pricing                PricingConfig    `json:"pricing,omitempty"`
-	Middleware             MiddlewareConfig `json:"middleware,omitempty"`
-	Prewarm                PrewarmConfig    `json:"prewarm,omitempty"`
-	Intent                 IntentConfig     `json:"intent,omitempty"`
-	GatewayKey             string           `json:"-"`
-	AdminKey               string           `json:"-"`
-	SourcePath             string           `json:"-"`
+	DBFile                string `json:"db_file"`
+	DBKeyEnv              string `json:"db_key_env,omitempty"`
+	DefaultProvider       string `json:"default_provider"`
+	DefaultGroup          string `json:"default_group,omitempty"` // routing group when the client sends none
+	DefaultRealm          string `json:"default_realm,omitempty"` // workbuddy scheduling preference: intl|cn
+	GatewayKeyEnv         string `json:"gateway_key_env"`
+	AdminKeyEnv           string `json:"admin_key_env"`
+	StateFile             string `json:"state_file"`
+	RequestTimeoutSeconds int    `json:"request_timeout_seconds"`
+	// PoolWaitTimeoutSeconds caps how much of the request budget may be spent
+	// waiting for upstream capacity or rate-limit recovery. Without a separate
+	// cap a 429 cools account selection for minutes and the wait silently
+	// consumes the generation window, which the client then sees as a
+	// truncated or cancelled stream. Zero means the default (120s); -1
+	// disables the separate budget and keeps the legacy
+	// request_timeout_seconds-only behavior.
+	PoolWaitTimeoutSeconds int               `json:"pool_wait_timeout_seconds"`
+	RefreshIntervalSeconds int               `json:"refresh_interval_seconds"`
+	MaxRequestBytes        int64             `json:"max_request_bytes"`
+	MaxAttempts            int               `json:"max_attempts"`
+	MaxWaitingRequests     int               `json:"max_waiting_requests"`
+	Routing                string            `json:"routing,omitempty"`       // global "round_robin" (default) | "smart"
+	GroupRouting           map[string]string `json:"group_routing,omitempty"` // per-group override: group -> "round_robin" | "smart"; absent groups use Routing
+	Accounts               []Account         `json:"accounts"`
+	Guards                 Guards            `json:"guards,omitempty"`
+	Sessions               SessionsConfig    `json:"sessions,omitempty"`
+	Redaction              *redact.Config    `json:"redaction,omitempty"`
+	Agents                 AgentsConfig      `json:"agents,omitempty"`
+	Bridges                BridgesConfig     `json:"bridges,omitempty"`
+	Pricing                PricingConfig     `json:"pricing,omitempty"`
+	Middleware             MiddlewareConfig  `json:"middleware,omitempty"`
+	// ModelRename maps, per platform, an upstream model id to the client-facing
+	// canonical name. Routing, GET /v1/models and response model fields use the
+	// canonical name, while each platform still receives the id it advertises.
+	// Example: {"sensenova": {"deepseek-flash": "deepseek-v4.1-flash-1017"}}.
+	ModelRename map[string]map[string]string `json:"model_rename,omitempty"`
+	Prewarm     PrewarmConfig                `json:"prewarm,omitempty"`
+	Intent      IntentConfig                 `json:"intent,omitempty"`
+	GatewayKey  string                       `json:"-"`
+	AdminKey    string                       `json:"-"`
+	SourcePath  string                       `json:"-"`
 }
 
 // AgentsConfig controls the agent-adaptation layer (M1/M2 of the product
@@ -218,6 +237,12 @@ func Load(path string) (Config, error) {
 	if c.MaxWaitingRequests < 1 || c.MaxWaitingRequests > 10000 {
 		return c, fmt.Errorf("max_waiting_requests must be between 1 and 10000")
 	}
+	if c.PoolWaitTimeoutSeconds == 0 {
+		c.PoolWaitTimeoutSeconds = DefaultPoolWaitTimeoutSeconds
+	}
+	if c.PoolWaitTimeoutSeconds < -1 {
+		return c, fmt.Errorf("pool_wait_timeout_seconds must be -1 (disabled) or a positive number of seconds")
+	}
 	c.GatewayKey = os.Getenv(c.GatewayKeyEnv)
 	c.AdminKey = os.Getenv(c.AdminKeyEnv)
 	if len(c.GatewayKey) < 16 || len(c.AdminKey) < 16 || c.GatewayKey == c.AdminKey {
@@ -248,11 +273,24 @@ func Load(path string) (Config, error) {
 	if c.Routing != "" && c.Routing != "round_robin" && c.Routing != "smart" {
 		return c, fmt.Errorf("routing must be round_robin or smart")
 	}
+	for group, mode := range c.GroupRouting {
+		if _, err := NormalizeGroup(group); err != nil {
+			return c, fmt.Errorf("group_routing %q: %v", group, err)
+		}
+		if mode != "" && mode != "round_robin" && mode != "smart" {
+			return c, fmt.Errorf("group_routing %q: must be round_robin or smart", group)
+		}
+	}
 	for client, upstream := range c.Middleware.ModelMap {
 		if strings.TrimSpace(client) == "" || strings.TrimSpace(upstream) == "" {
 			return c, fmt.Errorf("middleware.model_map keys and values must be non-empty")
 		}
 	}
+	rename, err := NormalizeModelRename(c.ModelRename)
+	if err != nil {
+		return c, err
+	}
+	c.ModelRename = rename
 	for _, rule := range c.Middleware.SystemPrompt {
 		if strings.TrimSpace(rule.Text) == "" {
 			return c, fmt.Errorf("middleware.system_prompt rules need non-empty text")
@@ -368,7 +406,7 @@ func Load(path string) (Config, error) {
 			found = true
 		}
 	}
-	if !found && c.DefaultProvider != "sensenova" {
+	if len(c.Accounts) > 0 && !found && c.DefaultProvider != "sensenova" {
 		return c, fmt.Errorf("default provider has no accounts")
 	}
 	return c, nil
@@ -457,4 +495,95 @@ func NormalizeAccount(a *Account) error {
 		}
 	}
 	return nil
+}
+
+// CanonicalModel returns the client-facing canonical name for a model id: the
+// rename target configured on any platform, or the id itself when no platform
+// renames it. Renames are validated so a source id has at most one target
+// across platforms; the provider order only makes the lookup deterministic.
+func CanonicalModel(rename map[string]map[string]string, model string) string {
+	if len(rename) == 0 || model == "" {
+		return model
+	}
+	providers := make([]string, 0, len(rename))
+	for provider := range rename {
+		providers = append(providers, provider)
+	}
+	sort.Strings(providers)
+	for _, provider := range providers {
+		if canonical := rename[provider][model]; canonical != "" {
+			return canonical
+		}
+	}
+	return model
+}
+
+// UpstreamModel returns the model id a given platform must receive for the
+// canonical client model: the renamed source id when that platform renames one
+// of its ids to canonical, otherwise canonical itself (the platform's native
+// id). When several sources on one platform map to the same canonical, the
+// lexicographically first source wins deterministically.
+func UpstreamModel(rename map[string]map[string]string, provider, canonical string) string {
+	if len(rename) == 0 || canonical == "" {
+		return canonical
+	}
+	entries := rename[provider]
+	if len(entries) == 0 {
+		return canonical
+	}
+	source := ""
+	for upstream, target := range entries {
+		if target == canonical && (source == "" || upstream < source) {
+			source = upstream
+		}
+	}
+	if source == "" {
+		return canonical
+	}
+	return source
+}
+
+// NormalizeModelRename validates the per-platform rename table and returns a
+// trimmed copy. Rejected: empty provider/source/target values, the same source
+// mapping to different targets on different platforms, and chained renames
+// (a target that is itself a renamed source), which would make canonical names
+// order-dependent. Identity entries are dropped.
+func NormalizeModelRename(raw map[string]map[string]string) (map[string]map[string]string, error) {
+	out := map[string]map[string]string{}
+	targets := map[string]string{}
+	for provider, entries := range raw {
+		name := strings.TrimSpace(provider)
+		if name == "" {
+			return nil, fmt.Errorf("model_rename 的平台名不能为空")
+		}
+		next := map[string]string{}
+		for source, target := range entries {
+			from, to := strings.TrimSpace(source), strings.TrimSpace(target)
+			if from == "" || to == "" {
+				return nil, fmt.Errorf("model_rename[%s] 的原模型名与新模型名都不能为空", name)
+			}
+			if from == to {
+				continue
+			}
+			if previous, ok := targets[from]; ok && previous != to {
+				return nil, fmt.Errorf("模型 %q 在多个平台被改成不同名称（%q / %q）", from, previous, to)
+			}
+			targets[from] = to
+			next[from] = to
+		}
+		if len(next) > 0 {
+			out[name] = next
+		}
+	}
+	for _, entries := range out {
+		for _, target := range entries {
+			if _, ok := targets[target]; ok {
+				return nil, fmt.Errorf("模型改名不能链式（%q 已经是另一个改名的原模型名）", target)
+			}
+		}
+	}
+	if len(out) == 0 {
+		return nil, nil
+	}
+	return out, nil
 }

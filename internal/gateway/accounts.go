@@ -12,6 +12,17 @@ import (
 	"daydayup/internal/pool"
 )
 
+// configurePool (re)installs the runtime settings that live outside the pool's
+// persisted state. LoadAccounts replaces the pool value, so every construction
+// path must reinstall them — otherwise guards, routing strategy, per-group
+// routing and model_rename silently fall back to defaults after boot.
+func (s *Server) configurePool() {
+	s.Pool.SetGuards(s.Config.Guards)
+	s.Pool.SetRouting(s.Config.Routing)
+	s.Pool.SetGroupRoutingMap(s.Config.GroupRouting)
+	s.Pool.SetModelRename(s.Config.ModelRename)
+}
+
 func (s *Server) LoadAccounts() error {
 	s.accountsMu.Lock()
 	defer s.accountsMu.Unlock()
@@ -20,6 +31,7 @@ func (s *Server) LoadAccounts() error {
 		return err
 	}
 	s.Pool = pool.New(accounts)
+	s.configurePool()
 	return nil
 }
 

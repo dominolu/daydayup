@@ -132,6 +132,49 @@ func TestRetryPolicy(t *testing.T) {
 	}
 }
 
+// A confirmed model-permission 403 rules out one account, not the whole
+// routing group: the same request must fail over to another candidate instead
+// of surfacing model_not_in_token_plan immediately.
+func TestModelPermissionDenialFailsOverWithinGroup(t *testing.T) {
+	var calls atomic.Int32
+	s, _ := newTestGateway(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		if r.Header.Get("Authorization") == "Bearer upstream-secret-0" {
+			w.WriteHeader(http.StatusForbidden)
+			_, _ = io.WriteString(w, `{"error":{"type":"permission_denied_error","code":"7","message":"model is not available in the current token plan"}}`)
+			return
+		}
+		_, _ = io.WriteString(w, `{"id":"ok","usage":{"total_tokens":1}}`)
+	}), 2)
+	w := call(s, "POST", "/v1/chat/completions", `{"model":"deepseek-v4.1-flash"}`)
+	if w.Code != 200 || calls.Load() != 2 {
+		t.Fatalf("model-permission denial did not fail over within the group: status=%d calls=%d body=%s", w.Code, calls.Load(), w.Body)
+	}
+	// The ruled-out account stays out of rotation for this model; the cached
+	// denial sends the next request straight to the remaining candidate.
+	if again := call(s, "POST", "/v1/chat/completions", `{"model":"deepseek-v4.1-flash"}`); again.Code != 200 || calls.Load() != 3 {
+		t.Fatalf("cached denial did not stay out of rotation: status=%d calls=%d body=%s", again.Code, calls.Load(), again.Body)
+	}
+}
+
+// model_not_in_token_plan is reported only after every candidate in the
+// routing group was tried. These rejections produced no generation, so they
+// must not consume the max_attempts generation budget either.
+func TestModelPermissionDenialTriesEveryCandidate(t *testing.T) {
+	var calls atomic.Int32
+	s, _ := newTestGateway(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusForbidden)
+		_, _ = io.WriteString(w, `{"error":{"type":"permission_denied_error","code":"7","message":"model is not available in the current token plan"}}`)
+	}), 4)
+	w := call(s, "POST", "/v1/chat/completions", `{"model":"denied-everywhere"}`)
+	if w.Code != 403 || !strings.Contains(w.Body.String(), `"code":"model_not_in_token_plan"`) || !strings.Contains(w.Body.String(), "select an available model") || calls.Load() != 4 {
+		t.Fatalf("expected every group candidate to be tried before answering: status=%d calls=%d body=%s", w.Code, calls.Load(), w.Body)
+	}
+}
+
 func TestModelsDiscoveryAggregationAndAccountRouting(t *testing.T) {
 	var chosen string
 	s, _ := newTestGateway(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

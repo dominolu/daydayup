@@ -8,9 +8,9 @@
   const time = t => !t || new Date(t).getFullYear() < 2000 ? '尚未检查' : new Date(t).toLocaleTimeString('zh-CN', {hour12:false});
   const dateTime = t => !t || new Date(t).getFullYear() < 2000 ? '—' : new Date(t).toLocaleString('zh-CN', {hour12:false});
   const future = t => t && new Date(t) > new Date();
-  let token = '', accounts = [], info = {}, page = 'accounts', filter = 'all', search = '', providerFilter = '', connected = false;
+  let accounts = [], info = {}, page = 'overview', filter = 'all', search = '', providerFilter = '', connected = false;
   let editing = null, selected = null, drawerTab = 'overview', deleteID = null, quotaID = null, polling = false;
-  let groups = [], groupFilter = '', defaultGroup = 'default', groupStats = [], modelDetail = '', routingGroupFilter = '', connectGroup = '', middlewareUI = {model_map:{}, routing:'', loaded:false};
+  let groups = [], groupFilter = '', defaultGroup = 'default', groupStats = [], modelDetail = '', routingGroupFilter = '', connectGroup = '', middlewareUI = {model_map:{}, model_rename:{}, routing:'', loaded:false};
   let clientKey = '', clientKeyBusy = false, clientKeyEpoch = 0;
   // WorkBuddy browser OAuth login: only the state string is held client-side;
   // uid/tokens are extracted and persisted by the gateway on poll completion.
@@ -18,12 +18,29 @@
   const checking = new Set();
   const titles = {overview:['概览','OVERVIEW','你的模型网关，运行状态一目了然。'],accounts:['账号池','ACCOUNT POOL','在一个入口，管理每一份模型算力。'],models:['模型目录','MODEL DIRECTORY','发现可用能力，为每次请求选择合适的模型。'],agents:['Agent 接入','AGENT WIRING','让本机 Agent 直接使用账号池：选模型、写配置、一键还原。'],routing:['路由决策','ROUTING','每次请求选了谁、跳过谁、为什么，一目了然。'],groups:['路由分组','GROUPS','分组是聚合池的边界：每组账号、聚合模型与独立的 Base URL。'],usage:['用量统计','USAGE INSIGHTS','让每个账号的调用与消耗清晰可见。'],sessions:['会话管理','SESSIONS','按会话追踪每次调用、请求内容与 Token 消耗。'],connect:['接口接入','API CONNECTION','一个 Base URL，接入你常用的工具与工作流。'],redaction:['脱敏','REDACTION','敏感内容出网前替换为稳定占位符，返回时自动还原。']};
 
+  // The console has no login screen: the gateway hands this page an HttpOnly
+  // same-origin session cookie when it serves /admin/. If the gateway restarts
+  // while the page is open the cookie becomes stale, so reload once to obtain
+  // a fresh one instead of prompting for a key.
+  let reconnecting = false;
+  function reconnect() {
+    if (reconnecting) return;
+    reconnecting = true;
+    setTimeout(() => location.reload(), 300);
+  }
+
   async function api(path, options = {}) {
-    const response = await fetch('/admin/v1' + path, {method:options.method || 'GET', cache:'no-store', credentials:'omit', signal:AbortSignal.timeout(35000), headers:{'Authorization':'Bearer ' + token, ...(options.body !== undefined ? {'Content-Type':'application/json'} : {})}, ...(options.body !== undefined ? {body:JSON.stringify(options.body)} : {})});
+    const response = await fetch('/admin/v1' + path, {method:options.method || 'GET', cache:'no-store', credentials:'same-origin', signal:AbortSignal.timeout(35000), ...(options.body !== undefined ? {headers:{'Content-Type':'application/json'}, body:JSON.stringify(options.body)} : {})});
     const result = await response.json().catch(() => ({}));
     if (!response.ok) {
-      if (response.status === 401 && connected) logout();
-      throw new Error(response.status === 401 ? '管理密钥无效，请检查 GATEWAY_ADMIN_KEY。' : result.error?.message || `请求失败（${response.status}）`);
+      if (response.status === 401) {
+        // Only a session that used to work is worth reloading for. A first
+        // load without any session (for example, cookies blocked) would
+        // otherwise reload forever.
+        if (connected) reconnect();
+        throw new Error(connected ? '管理会话已失效，正在重新连接…' : '无法建立管理会话，请检查浏览器是否允许本站 Cookie。');
+      }
+      throw new Error(result.error?.message || `请求失败（${response.status}）`);
     }
     return result;
   }
@@ -53,11 +70,10 @@
       ['Token 总用量',compact(t.tokens),'chart','统计经过本代理的实际用量', t.unknown ? `${t.unknown} 次未返回 usage` : '输入与输出合计']
     ];
     $('#metrics').innerHTML = items.map(([label,value,i,foot,right],index) => `<article class="metric"><div class="metric-label">${label}</div><span class="metric-icon ${index===1?'teal':''}">${icon(i)}</span><div class="metric-value" title="${index===3?number(t.tokens):index===2?number(t.requests):value}">${value}${index===0||index===1?'<small>个</small>':''}</div><div class="metric-foot"><span class="${index===1?'positive':''}">${esc(foot)}</span></div><div class="sub-line">${esc(right)}</div></article>`).join('');
-    $('#nav-count').textContent = accounts.length;
   }
   function empty(title, text, action = '') { return `<div class="empty"><div class="empty-icon">${icon('server')}</div><h3>${esc(title)}</h3><p>${esc(text)}</p>${action}</div>`; }
   function quotaCell(a) {
-    if (!a.quota || a.quota_status === 'stale') return `<div class="quota-unknown">${icon(a.quota_status==='stale'?'clock':'info')}${a.quota_status==='stale'?'快照已过期':'尚未接入额度'}</div><div class="sub-line">${a.quota_status==='stale'?'等待更新观测值':'不将未知余额视为零'}</div>`;
+    if (!a.quota || a.quota_status === 'stale') return `<div class="quota-unknown">${icon(a.quota_status==='stale'?'clock':'info')}${a.quota_status==='stale'?'快照已过期':'尚未接入额度'}</div>`;
     const q = a.quota, b = q.buckets?.find(b=>b.pool==='general') || q.buckets?.[0];
     if (q.remaining_tokens !== null && q.remaining_tokens !== undefined) return `<span class="quota-value">${number(q.remaining_tokens)} <span class="tag">Token</span></span><div class="sub-line">最近一次额度观测</div>`;
     if (!b) return '<span class="quota-unknown">未提供余额</span>';
@@ -69,15 +85,32 @@
     const tabs = [['all','全部账号'],['healthy','可用'],['attention','需关注'],['disabled','已停用']];
     const toolbar = `<div class="table-toolbar"><div class="tabs">${tabs.map(([key,label])=>`<button class="tab ${filter===key?'active':''}" data-action="filter" data-filter="${key}">${label}<span>${count(key)}</span></button>`).join('')}</div><div class="toolbar-filters"><label class="search-box">${icon('search')}<input id="account-search" placeholder="搜索账号、ID 或模型…" value="${esc(search)}" aria-label="搜索账号"></label><select id="provider-filter" aria-label="平台筛选"><option value="">全部平台</option>${platforms.map(p=>`<option value="${esc(p.id)}" ${providerFilter===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}</select><select id="group-filter" aria-label="分组筛选"><option value="">全部组</option>${groups.map(g=>`<option value="${esc(g)}" ${groupFilter===g?'selected':''}>${esc(g)}</option>`).join('')}</select></div></div>`;
     const ver = id => { const v=agentsUI.versions[id]; return v?(v.detected?`<b class="mono">${esc(v.version)}</b>`:`<span class="quota-unknown">${esc((v.error||'未安装').slice(0,20))}</span>`)+(v.update_hint?`<div class="sub-line" title="${esc(v.update_hint)}">${esc(v.update_hint.slice(0,18))}</div>`:'')+'<button class="button text" data-action="agents-version" data-id="'+esc(id)+'">重测</button>':'<span class="sub-line">未探测</span><button class="button text" data-action="agents-version" data-id="'+esc(id)+'">探测</button>'; };
-    const table = rows.length ? `<div class="table-scroll"><table><thead><tr><th>账号</th><th>运行状态</th><th>分组</th><th>剩余额度 <span title="显示最近一次上报的快照">ⓘ</span></th><th>累计用量</th><th>最近检查</th><th>操作</th></tr></thead><tbody>${rows.map(a=>`<tr><td><div class="account-cell">${avatar(a)}<div><button class="account-name" data-action="details" data-id="${esc(a.id)}">${esc(a.name||a.id)}</button><div class="account-sub"><span class="provider-mini">${esc(platformName(a.provider))}</span><span class="divider">/</span><span>${esc(a.id)}</span></div></div></div></td><td>${checking.has(a.id)?'<span class="badge blue">检查中…</span>':badge(a)}<div class="sub-line">并发 ${a.in_flight} / ${a.max_in_flight}${Object.keys(a.unavailable_models||{}).length?` · ${Object.keys(a.unavailable_models).length} 个模型无权限`:''}</div></td><td><button class="tag group-tag" data-action="group-jump" data-group="${esc(a.group||'default')}" title="查看该分组">${esc(a.group||'default')}</button>${(a.group||'default')===defaultGroup?'<div class="sub-line">默认分组</div>':''}</td><td>${quotaCell(a)}</td><td><span class="number" title="${number(a.stats.total_tokens)} Token">${compact(a.stats.total_tokens)} <span class="sub-line">Token</span></span><div class="sub-line">${number(a.stats.requests)} 次请求</div></td><td><span class="mono">${time(a.last_checked_at||a.models_checked_at)}</span><div class="sub-line">${a.models.length ? `${a.models.filter(m=>!a.unavailable_models?.[m.id]).length} 个候选模型` : '等待模型发现'}</div></td><td><div class="row-actions"><button class="check-button" data-action="check" data-id="${esc(a.id)}" ${checking.has(a.id)?'disabled':''}>${icon('refresh')}检查</button><button class="icon-button" data-action="edit" data-id="${esc(a.id)}" aria-label="编辑 ${esc(a.name||a.id)}" title="编辑账号">${icon('edit')}</button><button class="icon-button" data-action="details" data-id="${esc(a.id)}" aria-label="查看 ${esc(a.name||a.id)} 详情">${icon('arrow')}</button></div></td></tr>`).join('')}</tbody></table></div>` : empty(accounts.length?'没有匹配的账号':'还没有接入账号',accounts.length?'调整搜索词或状态筛选，再试一次。':'接入第一个平台账号（支持 '+platforms.map(p=>p.name).join(' / ')+'），开始构建你的账号池。',accounts.length?'<button class="button secondary" data-action="clear-filter">清除筛选</button>':'<button class="button primary" data-action="add">'+icon('plus')+'添加第一个账号</button>');
-    return `<section class="panel"><div class="panel-header"><div class="panel-title">账号管理 <small>统一管理各平台的额度主体</small></div><span class="live-label">每 10 秒同步</span></div>${toolbar}${table}<div class="table-footer"><span>共 <b>${accounts.length}</b> 个账号${rows.length!==accounts.length?`，显示 ${rows.length} 个`:''}</span><span>调度策略 <b>${middlewareUI.routing==='smart'?'智能（额度窗口优先）':'轮询 · 自动跳过不可用账号'}</b></span></div></section>${quotaNote()}`;
+    const table = rows.length ? `<div class="table-scroll"><table><thead><tr><th>账号</th><th>运行状态</th><th>分组</th><th>剩余额度</th><th>累计用量</th><th>最近检查</th><th>操作</th></tr></thead><tbody>${rows.map(a=>`<tr><td><div class="account-cell">${avatar(a)}<div><button class="account-name" data-action="details" data-id="${esc(a.id)}">${esc(a.name||a.id)}</button><div class="account-sub"><span class="provider-mini">${esc(platformName(a.provider))}</span><span class="divider">/</span><span>${esc(a.id)}</span></div></div></div></td><td>${checking.has(a.id)?'<span class="badge blue">检查中…</span>':badge(a)}<div class="sub-line">并发 ${a.in_flight} / ${a.max_in_flight}${Object.keys(a.unavailable_models||{}).length?` · ${Object.keys(a.unavailable_models).length} 个模型无权限`:''}</div></td><td><button class="tag group-tag" data-action="group-jump" data-group="${esc(a.group||'default')}" title="查看该分组">${esc(a.group||'default')}</button>${(a.group||'default')===defaultGroup?'<div class="sub-line">默认分组</div>':''}</td><td>${quotaCell(a)}</td><td><span class="number" title="${number(a.stats.total_tokens)} Token">${compact(a.stats.total_tokens)} <span class="sub-line">Token</span></span><div class="sub-line">${number(a.stats.requests)} 次请求</div></td><td><span class="mono">${time(a.last_checked_at||a.models_checked_at)}</span><div class="sub-line">${a.models.length ? `${a.models.filter(m=>!a.unavailable_models?.[m.id]).length} 个候选模型` : '等待模型发现'}</div></td><td><div class="row-actions"><button class="check-button" data-action="check" data-id="${esc(a.id)}" ${checking.has(a.id)?'disabled':''}>${icon('refresh')}检查</button><button class="icon-button" data-action="edit" data-id="${esc(a.id)}" aria-label="编辑 ${esc(a.name||a.id)}" title="编辑账号">${icon('edit')}</button><button class="icon-button" data-action="details" data-id="${esc(a.id)}" aria-label="查看 ${esc(a.name||a.id)} 详情">${icon('arrow')}</button></div></td></tr>`).join('')}</tbody></table></div>` : empty(accounts.length?'没有匹配的账号':'还没有接入账号',accounts.length?'调整搜索词或状态筛选，再试一次。':'接入第一个平台账号（支持 '+platforms.map(p=>p.name).join(' / ')+'），开始构建你的账号池。',accounts.length?'<button class="button secondary" data-action="clear-filter">清除筛选</button>':'<button class="button primary" data-action="add">'+icon('plus')+'添加第一个账号</button>');
+    return `<section class="panel"><div class="panel-header"><div class="panel-title">账号管理 <small>统一管理各平台的额度主体</small></div><span class="live-label">每 10 秒同步</span></div>${toolbar}${table}<div class="table-footer"><span>共 <b>${accounts.length}</b> 个账号${rows.length!==accounts.length?`，显示 ${rows.length} 个`:''}</span><span>调度策略 <b>${middlewareUI.routing==='smart'?'智能（额度窗口优先）':'轮询 · 自动跳过不可用账号'}</b></span></div></section>`;
   }
-  function quotaNote() { return `<div class="quota-note">${icon('info')}<div><b>关于额度观测</b>　SenseNova 暂未公开积分余额查询 API。此处显示已上报的额度快照，未知余额不会被假设为 0；Token 用量来自响应中的 usage。<button class="help-link" data-action="quota-help">了解更多</button></div></div>`; }
+  // modelCanonical maps a platform's upstream model id to the client-facing
+  // name configured in model_rename (per platform, shared by all its accounts).
+  function modelCanonical(provider, id) {
+    const entries = (middlewareUI.model_rename || {})[provider] || {};
+    return entries[id] || id;
+  }
+  // modelPlatforms lists the platforms that rename one of their ids to canonical.
+  function modelOrigins(canonical) {
+    const out = [];
+    Object.entries(middlewareUI.model_rename || {}).forEach(([provider, entries]) => {
+      Object.entries(entries || {}).forEach(([id, renamed]) => { if (renamed === canonical) out.push({provider, model: id}); });
+    });
+    return out;
+  }
   // group === '' aggregates every group; otherwise only that group's accounts.
   function modelsData(group) {
     const map = new Map();
     accounts.filter(a=>!group || groupOf(a)===group).filter(a=>a.enabled && a.credential_status!=='invalid').forEach(a=>a.models.filter(m=>!a.unavailable_models?.[m.id] && (!a.models_allowlist?.length || a.models_allowlist.includes(m.id))).forEach(m=>{
-      if (!map.has(m.id)) map.set(m.id,{...m,accounts:[]}); map.get(m.id).accounts.push(a);
+      const id = modelCanonical(a.provider, m.id);
+      if (!map.has(id)) map.set(id,{...m, id, accounts:[], renames:[]});
+      const entry = map.get(id);
+      entry.accounts.push(a);
+      if (m.id !== id) entry.renames.push({provider:a.provider, model:m.id});
     }));
     return [...map.values()].sort((a,b)=>a.id.localeCompare(b.id));
   }
@@ -88,12 +121,12 @@
     const aliasesOf = m => Object.entries(middlewareUI.model_map||{}).filter(([,u])=>u===m.id).map(([c])=>`<span class="tag">别名 ${esc(c)}</span>`).join('');
     const detailRow = m => {
       if (modelDetail !== m.id) return '';
-      const serving = accounts.filter(a => a.enabled && a.credential_status!=='invalid' && (!group || groupOf(a)===group) && a.models.some(x=>x.id===m.id) && !a.unavailable_models?.[m.id]);
+      const serving = accounts.filter(a => a.enabled && a.credential_status!=='invalid' && (!group || groupOf(a)===group) && a.models.some(x=>modelCanonical(a.provider,x.id)===m.id) && !a.unavailable_models?.[m.id]);
       const scope = group ? esc(group) + ' 组' : '全部分组';
       const accRows = serving.map(a=>`<tr><td><b>${esc(a.name||a.id)}</b><div class="sub-line">${esc(platformName(a.provider))} / ${esc(a.id)}</div></td><td><span class="tag">${esc(groupOf(a))}</span></td><td>${badge(a)}</td><td>${a.model_cooldowns?.[m.id]?'<span class="badge amber">模型冷却中</span>':'<span class="badge green">可调度</span>'}</td></tr>`).join('');
       return `<tr class="model-detail-row"><td colspan="4"><div class="model-detail"><div class="model-detail-head"><b>聚合详情</b><span class="sub-line">${scope}内为 ${esc(m.id)} 提供服务的账号 · 轮询候选</span>${aliasesOf(m)?'<div>'+aliasesOf(m)+'</div>':''}</div>${serving.length?`<div class="table-scroll"><table class="model-serving"><thead><tr><th>账号</th><th>分组</th><th>状态</th><th>模型状态</th></tr></thead><tbody>${accRows}</tbody></table></div>`:'<p class="model-count-note">该范围内当前没有可用账号服务此模型。</p>'}</div></td></tr>`;
     };
-    const table = models.length ? `<div class="table-scroll"><table class="model-table"><thead><tr><th>模型</th><th>能力</th><th>上下文窗口</th><th>来源账号</th></tr></thead><tbody>${models.map(m=>`<tr><td><div class="model-cell"><span class="model-icon">${icon(m.output_modalities?.includes('image')?'grid':'cube')}</span><button class="account-name mono" data-action="model-detail" data-id="${esc(m.id)}">${esc(m.id)}</button>${aliasesOf(m)?'<span class="tag">别名</span>':''}</div></td><td>${[...(m.input_modalities||['text']),...(m.output_modalities?.includes('image')?['image generation']:[])].map(v=>`<span class="tag">${esc(v)}</span>`).join('')}${m.supported_features?.includes('tools')?'<span class="tag">tools</span>':''}</td><td><span class="number">${m.context_length?compact(m.context_length):'—'}</span></td><td><span class="model-count">${m.accounts.length}</span><span class="sub-line"> 个账号已发现</span></td></tr>${detailRow(m)}`).join('')}</tbody></table></div>` : empty('还没有发现模型','添加账号后，点击“检查”或“刷新状态”获取模型目录。');
+    const table = models.length ? `<div class="table-scroll"><table class="model-table"><thead><tr><th>模型</th><th>能力</th><th>上下文窗口</th><th>来源账号</th></tr></thead><tbody>${models.map(m=>`<tr><td><div class="model-cell"><span class="model-icon">${icon(m.output_modalities?.includes('image')?'grid':'cube')}</span><button class="account-name mono" data-action="model-detail" data-id="${esc(m.id)}">${esc(m.id)}</button>${aliasesOf(m)?'<span class="tag">别名</span>':''}${(m.renames||[]).map(r=>`<span class="tag" title="${esc(r.provider)} 的 ${esc(r.model)}">${esc(r.provider)}: ${esc(r.model)}</span>`).join('')}</div></td><td>${[...(m.input_modalities||['text']),...(m.output_modalities?.includes('image')?['image generation']:[])].map(v=>`<span class="tag">${esc(v)}</span>`).join('')}${m.supported_features?.includes('tools')?'<span class="tag">tools</span>':''}</td><td><span class="number">${m.context_length?compact(m.context_length):'—'}</span></td><td><span class="model-count">${m.accounts.length}</span><span class="sub-line"> 个账号已发现</span></td></tr>${detailRow(m)}`).join('')}</tbody></table></div>` : empty('还没有发现模型','添加账号后，点击“检查”或“刷新状态”获取模型目录。');
     const aliasForm = `<div class="alias-form"><input id="alias-client" placeholder="客户端模型名，如 fast" maxlength="64" spellcheck="false"><span class="sub-line">→</span><select id="alias-target"><option value="">选择上游模型…</option>${models.map(m=>`<option value="${esc(m.id)}">${esc(m.id)}</option>`).join('')}</select><button class="button secondary" data-action="alias-add">${icon('plus')}添加别名</button></div>`;
     const aliasRows = Object.entries(middlewareUI.model_map||{}).map(([client,upstream])=>{ const target = models.find(m=>m.id===upstream); return `<div class="alias-row"><b class="mono">${esc(client)}</b><span class="sub-line">→ ${esc(upstream)}${target?` · 组内聚合 ${target.accounts.length} 个账号`:''}</span><button class="button text" data-action="alias-del" data-client="${esc(client)}">${icon('trash')}删除</button></div>`; }).join('');
     const aliasPanel = `<section class="panel" style="margin-top:18px"><div class="panel-header"><div class="panel-title">模型别名 / 聚合名 <small>客户端写一个名字，网关映射到上游真实模型并回写</small></div><span class="tag">MODEL MAP</span></div><div class="panel-body">${aliasRows?aliasRows:'<p class="model-count-note">还没有别名。例如把 "fast" 指到 "deepseek-v4.1-flash"：客户端直接请求模型 fast，网关改写为真实模型，响应的模型名会回写为 fast。</p>'}${aliasForm}</div></section>`;
@@ -105,8 +138,7 @@ function usageView() {
     return `<div class="split-grid"><section class="panel"><div class="panel-header"><div class="panel-title">账号用量分布</div><span class="live-label">累计 Token</span></div><div class="panel-body">${sorted.length?sorted.map(a=>`<div class="usage-bar"><div class="bar-label"><span>${esc(a.name||a.id)}</span><span class="mono">${number(a.stats.total_tokens)}</span></div><progress max="${max}" value="${a.stats.total_tokens}"></progress></div>`).join(''):'<p class="model-count-note">接入账号后，将在此显示真实累计用量。</p>'}</div></section><section class="panel"><div class="panel-header"><div class="panel-title">用量构成</div><span class="tag">LIFETIME</span></div><div class="panel-body detail-list">${[['输入 Token',number(t.input)],['输出 Token',number(t.output)],['缓存命中输入',number(t.cached)],['已记录总量',number(t.tokens)],['未返回 usage 的请求',number(t.unknown)],['失败尝试',number(t.failures)]].map(([k,v])=>`<div class="detail-row"><span>${k}</span><b class="mono">${v}</b></div>`).join('')}<p class="model-count-note">仅统计经过本代理的调用，不包括其他客户端；缺失 usage 的请求单独记录，不估算为零用量。</p></div></section></div><section class="panel usage-detail"><div class="panel-header"><div class="panel-title">账号明细</div></div><div class="table-scroll"><table><thead><tr><th>账号</th><th>请求</th><th>输入 Token</th><th>输出 Token</th><th>合计</th><th>无 usage</th></tr></thead><tbody>${sorted.map(a=>`<tr><td><button class="account-name" data-action="details" data-id="${esc(a.id)}">${esc(a.name||a.id)}</button></td>${[a.stats.requests,a.stats.input_tokens,a.stats.output_tokens,a.stats.total_tokens,a.stats.requests_without_usage].map(v=>`<td class="mono">${number(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section>`;
   }
   function overviewView() {
-    const t = totals(), attention = accounts.filter(a=>status(a).key==='attention');
-    return `<div class="split-grid"><section class="panel"><div class="panel-header"><div class="panel-title">网关状态</div><span class="badge green"><i class="status-dot"></i>已连接</span></div><div class="panel-body detail-list">${[['实例名称',info.instance_name],['服务版本',`v${info.version||'0.2.0'}`],['默认平台',info.default_provider||'sensenova'],['当前进行中',`${t.inflight} 个请求`],['调度方式','轮询 / Round Robin'],['账号凭证存储','AES-256-GCM'],['后端检查周期',`${info.refresh_interval_seconds||60} 秒`]].map(([k,v])=>`<div class="detail-row"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}</div></section><section class="panel"><div class="panel-header"><div class="panel-title">需要关注 <small>${attention.length} 个账号</small></div></div>${attention.length?`<div class="panel-body">${attention.map(a=>`<div class="drawer-model"><button class="account-name" data-action="details" data-id="${esc(a.id)}">${esc(a.name||a.id)}</button><div class="sub-line">${esc(a.discovery_error||status(a).label)}</div></div>`).join('')}</div>`:empty('运行井然有序',accounts.length?'当前没有凭证失效或检查异常的账号。':'添加账号后开始检查网关状态。')}</section></div>${quotaNote()}`;
+    return `<div class="overview-section-title">路由分组 <small>组间隔离 · 专属 Base URL</small></div>${groupsView()}`;
   }
   function shellQuote(value) { return "'" + String(value).replace(/'/g, "'\\''") + "'"; }
   function connectionCode(key = '<GATEWAY_API_KEY>') {
@@ -120,11 +152,11 @@ function usageView() {
   function clearClientKey() { clientKey=''; clientKeyBusy=false; clientKeyEpoch++; }
   async function useClientKey(action) {
     if (clientKeyBusy) return;
-    const epoch=clientKeyEpoch, session=token;
+    const epoch=clientKeyEpoch;
     clientKeyBusy=true; render();
     try {
       const result=await api('/client-key');
-      if (!connected || token!==session || page!=='connect' || epoch!==clientKeyEpoch) return;
+      if (!connected || page!=='connect' || epoch!==clientKeyEpoch) return;
       if (typeof result.api_key!=='string' || !result.api_key) throw new Error('未能读取代理访问 Key。');
       await action(result.api_key);
     } finally {
@@ -177,8 +209,8 @@ function connectView() {
     const emptyRoute = `<div class="empty compact"><div class="empty-icon">${icon('route')}</div><h3>还没有路由记录</h3><p>发出请求后，这里会展示每次请求选了哪个账号、跳过了谁。</p></div>`;
     const table = rows.length?`<div class="table-scroll"><table><thead><tr><th>时间 / 请求</th><th>分组</th><th>模型</th><th>尝试链</th><th>等待</th><th>结果</th></tr></thead><tbody>${rows.map(x=>`<tr><td><b>${dateTime(x.started_at)}</b><div class="sub-line mono">${esc(x.request_id)}</div><div class="sub-line">${esc(x.path)}</div></td><td><b class="mono">${esc(x.model||'—')}</b><div class="sub-line">${esc(x.provider||'')}</div></td><td><button class="tag group-tag" data-action="routing-group" data-group="${esc(x.group||'default')}">${esc(x.group||'default')}</button></td><td>${hopChain(x)}</td><td>${x.pool_waits?(x.pool_wait_ms+' ms · '+x.pool_waits+' 次'):'—'}</td><td><span class="badge ${x.status>=400?'red':x.status>=300?'amber':'green'}">HTTP ${x.status||'—'}</span>${x.failure?`<div class="sub-line">${esc(x.failure)}</div>`:''}</td></tr>`).join('')}</tbody></table></div>`:emptyRoute;
     const groupSel = `<select id="routing-group-filter" aria-label="分组筛选"><option value="">全部分组</option>${groups.map(g=>`<option value="${esc(g)}" ${routingGroupFilter===g?'selected':''}>${esc(g)}</option>`).join('')}</select>`;
-    const strategySel = `<select id="routing-strategy" aria-label="调度策略"><option value="round_robin" ${middlewareUI.routing!=='smart'?'selected':''}>轮询</option><option value="smart" ${middlewareUI.routing==='smart'?'selected':''}>智能</option></select>`;
-    const controls = `<div class="table-toolbar"><div class="tabs"><span class="toolbar-label">分组</span></div><div class="toolbar-filters">${groupSel}<span class="toolbar-label">调度策略</span>${strategySel}<button class="button secondary" data-action="routing-refresh">${icon('refresh')}刷新</button></div></div>`;
+    const strategySel = `<select id="routing-strategy" aria-label="全局默认调度策略" title="未单独设置策略的分组使用的默认调度方式"><option value="round_robin" ${middlewareUI.routing!=='smart'?'selected':''}>轮询</option><option value="smart" ${middlewareUI.routing==='smart'?'selected':''}>智能</option></select>`;
+    const controls = `<div class="table-toolbar"><div class="tabs"><span class="toolbar-label">分组</span></div><div class="toolbar-filters">${groupSel}<span class="toolbar-label">全局默认</span>${strategySel}<button class="button secondary" data-action="routing-refresh">${icon('refresh')}刷新</button></div></div>`;
     return `${controls}${metrics}<div class="split-grid" style="grid-template-columns:1fr 2fr;align-items:start"><section>${coolPanel}</section><section class="panel"><div class="panel-header"><div class="panel-title">决策时间线 <small>最近 ${rows.length} 条</small></div><button class="button secondary" data-action="routing-refresh">${icon('refresh')}刷新</button></div>${table}</section></div>`;
   }
 
@@ -302,16 +334,16 @@ function connectView() {
     return `<section class="panel"><div class="panel-header session-heading"><form id="session-search-form" class="session-search"><label class="sr-only" for="session-search">搜索会话</label><input id="session-search" type="search" maxlength="128" placeholder="搜索 ID、名称、客户端或模型" value="${esc(u.query)}"><button class="button secondary" type="submit">${icon('search')}搜索</button></form><div class="session-actions"><button class="button ${u.archived?'primary':'secondary'}" data-action="session-show-archived">${u.archived?'查看活跃会话':'查看已归档'}</button><button class="button secondary" data-action="session-refresh" ${u.busy?'disabled':''}>${icon('refresh')}刷新</button></div></div>${notice}<div class="session-tip">自动识别常用智能体的原生会话标识；也可统一使用 <code>X-Session-ID</code>。响应头返回归档 ID 和识别来源。</div>${!u.loaded?empty('正在读取会话…','加载会话与 Token 用量。'):u.rows.length?`<div class="table-scroll"><table class="session-table"><thead><tr><th>会话</th><th>请求 / 失败</th><th>输入 → 输出</th><th>最近活动</th><th></th></tr></thead><tbody>${u.rows.map(s=>`<tr><td><button class="account-name" data-action="session-open" data-id="${esc(s.id)}">${esc(s.name)}</button><div class="sub-line mono">${esc(s.id)}</div><div class="sub-line">${esc(s.models.join(' · ')||'尚未指定模型')}</div><div class="sub-line">${s.name_info?.source==='model_title'?'<span class="tag">自动标题</span> ':s.title_requests&&s.name_info?.source==='id'?'<span class="tag">标题未采用</span> ':''}${esc((s.clients||[]).map(identityClient).join(' · ')||'历史客户端未知')} · ${esc((s.identity_sources||['legacy_unknown']).map(identitySource).join(' / '))}</div></td><td>${number(s.requests)} / <span class="${s.failures?'negative':''}">${number(s.failures)}</span>${s.in_flight?`<div class="sub-line">${s.in_flight} 次进行中</div>`:''}</td><td>${usageValue(s.usage,'input_tokens')} → ${usageValue(s.usage,'output_tokens')}<div class="sub-line">合计 ${usageValue(s.usage,'total_tokens')}${s.attempts_without_usage?' · 部分未知':''}</div></td><td>${dateTime(s.updated_at)}</td><td><button class="button text" data-action="session-open" data-id="${esc(s.id)}">查看会话 ${icon('arrow')}</button></td></tr>`).join('')}</tbody></table></div>`:empty(u.archived?'暂无归档会话':'还没有会话记录','新请求会自动归档。客户端复用 X-Session-ID，即可累计整个会话的用量。')}${sessionPager(u.offset,u.total,'session-page')}</section>${sessionAdaptersView()}<p class="session-usage-note">请求与最终响应加密保存在本机；保留每次上游尝试的状态和 usage。历史数据从本功能启用后开始记录。</p>`;
   }
   async function loadSessions(id=null, offset=0) {
-    const epoch=++sessionEpoch, credential=token;
+    const epoch=++sessionEpoch;
     sessionsUI.busy=true;sessionsUI.error='';render();
     try {
       const result=await api(id?`${sessionPath(id)}?offset=${offset}&limit=30`:`/sessions?q=${encodeURIComponent(sessionsUI.query)}&archived=${sessionsUI.archived}&offset=${offset}&limit=30`);
-      if(epoch!==sessionEpoch||credential!==token||!connected)return;
+      if(epoch!==sessionEpoch||!connected)return;
       sessionsUI.request=null;
       if(id){sessionsUI.detail=result;sessionsUI.requestOffset=offset;}
       else{sessionsUI.detail=null;sessionsUI.rows=result.data;sessionsUI.total=result.total;sessionsUI.offset=offset;sessionsUI.loaded=true;}
-    } catch(error) {if(epoch===sessionEpoch&&credential===token)sessionsUI.error=error.message;}
-    finally {if(epoch===sessionEpoch&&credential===token){sessionsUI.busy=false;if(page==='sessions')render();}}
+    } catch(error) {if(epoch===sessionEpoch)sessionsUI.error=error.message;}
+    finally {if(epoch===sessionEpoch){sessionsUI.busy=false;if(page==='sessions')render();}}
   }
   async function sessionAction(action,element) {
     const u=sessionsUI, id=u.detail?.data.id;
@@ -327,24 +359,38 @@ function connectView() {
       case 'session-archive': await api(sessionPath(id),{method:'PUT',body:{archived:!u.detail.data.archived}});toast(u.detail.data.archived?'会话已恢复':'会话已归档，仍可接收同 ID 的后续请求');await loadSessions(id,u.requestOffset);break;
       case 'session-close-request': ++sessionEpoch;u.busy=false;u.request=null;render();break;
       case 'session-request': {
-        const epoch=++sessionEpoch,credential=token;
+        const epoch=++sessionEpoch;
         const result=await api(`${sessionPath(id)}/requests/${encodeURIComponent(element.dataset.id)}`);
-        if(epoch!==sessionEpoch||credential!==token||!connected||page!=='sessions')return;
+        if(epoch!==sessionEpoch||!connected||page!=='sessions')return;
         u.request=result;render();$('.session-exchange')?.scrollIntoView({behavior:'smooth',block:'start'});break;
       }
       case 'session-download': {
-        const credential=token, epoch=sessionEpoch;
-        const response=await fetch('/admin/v1'+sessionPath(id)+'/requests/'+encodeURIComponent(element.dataset.id)+'/'+element.dataset.direction,{headers:{Authorization:'Bearer '+credential},credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(120000)});
-        if(!response.ok){if(response.status===401)logout();throw new Error('正文下载失败，请刷新会话状态后重试。');}
-        const blob=await response.blob();if(epoch!==sessionEpoch||credential!==token||!connected)return;
+        const epoch=sessionEpoch;
+        const response=await fetch('/admin/v1'+sessionPath(id)+'/requests/'+encodeURIComponent(element.dataset.id)+'/'+element.dataset.direction,{credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(120000)});
+        if(!response.ok){if(response.status===401)reconnect();throw new Error('正文下载失败，请刷新会话状态后重试。');}
+        const blob=await response.blob();if(epoch!==sessionEpoch||!connected)return;
         const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`${element.dataset.id}-${element.dataset.direction}.bin`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);break;
       }
     }
   }
   document.addEventListener('submit',async event=>{
+    if(event.target.id==='model-rename-form'){
+      event.preventDefault();
+      if (!modelRename) return;
+      const value = $('#model-rename-input').value.trim();
+      if (!value) { $('#model-rename-error').textContent = '新模型名不能为空'; return; }
+      const button = $('#model-rename-save'); button.disabled = true;
+      try {
+        await modelRenameSave(modelRename.provider, modelRename.model, value);
+        $('#model-rename-dialog').close();
+        renderDrawer();
+        toast(value === modelRename.model ? '已还原模型名' : `已改名：${modelRename.model} → ${value}`);
+      } catch (error) { $('#model-rename-error').textContent = error.message; }
+      finally { button.disabled = false; }
+    }
     if(event.target.id==='session-search-form'){event.preventDefault();sessionsUI.query=$('#session-search').value.trim();await loadSessions();}
-    if(event.target.id==='group-rename-form'){ event.preventDefault(); const name=$('#group-name').value.trim(); if(!name)return; const button=$('#group-rename-save'); button.disabled=true; try{ await api('/admin/v1/groups/'+encodeURIComponent(groupAction.name),{method:'PUT',body:{rename:name}}); $('#group-rename-dialog').close(); await loadAccounts(); await loadGroupStats(); if(page==='groups')render(); toast('分组已重命名：'+groupAction.name+' → '+name); }catch(error){ $('#group-rename-error').textContent=error.message; } finally{ button.disabled=false; } }
-      if(event.target.id==='group-delete-form'){ event.preventDefault(); const moveTo=$('#group-move-to').value; const button=$('#group-delete-save'); button.disabled=true; try{ await api('/admin/v1/groups/'+encodeURIComponent(groupAction.name),{method:'DELETE',body:{move_to:moveTo}}); $('#group-delete-dialog').close(); await loadAccounts(); await loadGroupStats(); if(page==='groups')render(); toast('分组已解散，账号移入：'+moveTo); }catch(error){ $('#group-delete-error').textContent=error.message; } finally{ button.disabled=false; } }
+    if(event.target.id==='group-rename-form'){ event.preventDefault(); const name=$('#group-name').value.trim(); if(!name)return; const button=$('#group-rename-save'); button.disabled=true; try{ await api('/admin/v1/groups/'+encodeURIComponent(groupAction.name),{method:'PUT',body:{rename:name}}); $('#group-rename-dialog').close(); await loadAccounts(); await loadGroupStats(); if(page==='overview')render(); toast('分组已重命名：'+groupAction.name+' → '+name); }catch(error){ $('#group-rename-error').textContent=error.message; } finally{ button.disabled=false; } }
+      if(event.target.id==='group-delete-form'){ event.preventDefault(); const moveTo=$('#group-move-to').value; const button=$('#group-delete-save'); button.disabled=true; try{ await api('/admin/v1/groups/'+encodeURIComponent(groupAction.name),{method:'DELETE',body:{move_to:moveTo}}); $('#group-delete-dialog').close(); await loadAccounts(); await loadGroupStats(); if(page==='overview')render(); toast('分组已解散，账号移入：'+moveTo); }catch(error){ $('#group-delete-error').textContent=error.message; } finally{ button.disabled=false; } }
       if(event.target.id==='session-edit-form'){
       event.preventDefault();const id=sessionsUI.detail?.data.id;if(!id)return;
       const button=$('#session-save');button.disabled=true;
@@ -412,8 +458,8 @@ function connectView() {
     catch (error) { groupStats = []; }
   }
   async function loadMiddleware() {
-    try { const r = await api('/middleware'); middlewareUI = {model_map: r.model_map || {}, routing: r.routing || '', loaded: true}; }
-    catch (error) { middlewareUI = {model_map: {}, routing: '', loaded: false, error: error.message}; }
+    try { const r = await api('/middleware'); middlewareUI = {model_map: r.model_map || {}, model_rename: r.model_rename || {}, routing: r.routing || '', loaded: true}; }
+    catch (error) { middlewareUI = {model_map: {}, model_rename: {}, routing: '', loaded: false, error: error.message}; }
   }
   const groupOf = a => (a && a.group) || 'default';
   function groupStat(name) { return groupStats.find(g => g.name === name) || {name, accounts: 0, enabled: 0, models: 0, requests: 0, failures: 0}; }
@@ -424,18 +470,24 @@ function connectView() {
     accounts.forEach(a => { const g = groupOf(a); (fallbackModels[g] = fallbackModels[g] || new Set()); a.models.forEach(m => fallbackModels[g].add(m.id)); });
     const cards = groups.map(g => {
       const s = groupStat(g), isDefault = g === defaultGroup, base = groupBase(g);
-      const models = Number.isFinite(s.models) && s.models > 0 ? s.models : (fallbackModels[g] ? fallbackModels[g].size : 0);
-      return `<article class="group-card"><div class="group-card-head"><b class="mono">${esc(g)}</b>${isDefault?'<span class="tag teal">默认分组</span>':''}</div><div class="group-card-stats"><span>${number(s.accounts)} 个账号</span><span>${number(s.enabled)} 启用</span><span>${number(models)} 个聚合模型</span><span>${number(s.requests)} 请求 · 失败 ${number(s.failures)}</span></div><div class="group-card-base">${icon('code')}<code>${esc(base)}</code><button class="button text" data-action="copy-text" data-text="${esc(base)}">${icon('copy')}复制</button></div><div class="group-card-actions">${isDefault?'':'<button class="button text" data-action="group-default" data-group="'+esc(g)+'">设为默认</button>'}<button class="button text" data-action="group-rename" data-group="${esc(g)}">${icon('edit')}重命名</button><button class="button text" data-action="group-delete" data-group="${esc(g)}">${icon('trash')}解散</button><button class="button text" data-action="group-accounts" data-group="${esc(g)}">查看账号</button></div></article>`;
+      const models = Number.isFinite(s.models) && s.models > 0 ? s.models : (fallbackModels[g] ? fallbackModels[g].size : 0); const smart = (s.routing_override || middlewareUI.routing || 'round_robin') === 'smart'; const smartTip = '智能（smart）：优先选择额度窗口最早重置、剩余额度最少的账号，减少窗口重置时的额度浪费；需要账号带有额度窗口信息。'; const roundTip = '轮询（round_robin）：组内同模型多账号按顺序均匀分发，自动跳过不可用账号，无额外开销。'; const tip = smart ? smartTip : roundTip;
+      return `<article class="group-card"><div class="group-card-head"><b class="mono">${esc(g)}</b>${isDefault?'<span class="tag teal">默认分组</span>':''}</div><div class="group-card-stats"><span>${number(s.accounts)} 个账号</span><span>${number(s.enabled)} 启用</span><span>${number(models)} 个聚合模型</span><span>${number(s.requests)} 请求 · 失败 ${number(s.failures)}</span></div><div class="group-card-base">${icon('code')}<code>${esc(base)}</code><button class="button text" data-action="copy-text" data-text="${esc(base)}">${icon('copy')}复制</button></div><div class="group-card-strategy"><span class="group-card-strategy-label" title="${tip}">调度策略<svg class="tip-dot" aria-hidden="true"><use href="#i-info"/></svg></span><label class="strategy-switch" title="${tip}"><input type="checkbox" data-action="group-strategy" data-group="${esc(g)}" ${smart?'checked':''} aria-label="分组 ${esc(g)} 调度策略"><span class="switch"></span><b>${smart?'智能':'轮询'}</b></label></div><div class="group-card-actions">${isDefault?'':'<button class="button text" data-action="group-default" data-group="'+esc(g)+'">设为默认</button>'}<button class="button text" data-action="group-rename" data-group="${esc(g)}">${icon('edit')}重命名</button><button class="button text" data-action="group-delete" data-group="${esc(g)}">${icon('trash')}解散</button><button class="button text" data-action="group-accounts" data-group="${esc(g)}">查看账号</button></div></article>`;
     }).join('');
-    return `<div class="group-hint">${icon('info')}<div><b>分组随账号出现</b>　新建分组只需在账号表单的「所属分组」中填新名字；解散分组会把组内账号移到所选分组。每个分组对应一个可直接复制的 Base URL。<button class="button secondary" data-action="add">${icon('plus')}添加账号并归组</button></div></div><div class="group-grid">${cards}</div><section class="panel" style="margin-top:18px"><div class="panel-header"><div class="panel-title">调度策略 <small>组内同模型多账号的选取顺序</small></div><span class="tag">ROUTING</span></div><div class="panel-body"><select id="routing-strategy" aria-label="调度策略"><option value="round_robin" ${middlewareUI.routing!=='smart'?'selected':''}>轮询（round_robin）· 均匀分发，自动跳过不可用账号</option><option value="smart" ${middlewareUI.routing==='smart'?'selected':''}>智能（smart）· 优先额度窗口最早重置的账号</option></select><p class="model-count-note">策略对所有分组生效；保存后立即热更新，并写回 config.json 的 routing 字段。</p></div></section>`;
+    return `<div class="group-hint">${icon('info')}<div><b>分组随账号出现</b>　新建分组只需在账号表单的「所属分组」中填新名字；解散分组会把组内账号移到所选分组。每个分组对应一个可直接复制的 Base URL。<button class="button secondary" data-action="add">${icon('plus')}添加账号并归组</button></div></div><div class="group-grid">${cards}</div>`;
   }
 
 function render() {
     const [title,english,subtitle] = titles[page];
     $('#breadcrumb-page').textContent = title; $('#page-title').innerHTML = `${title} <span>${english}</span>`; $('#page-subtitle').textContent = subtitle;
     document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.page===page));
-    renderMetrics();
-    $('#page-content').innerHTML = ({accounts:accountsView,models:modelsView,usage:usageView,overview:overviewView,connect:connectView,sessions:sessionsView,redaction:redactionView,agents:agentsView,routing:routingView,groups:groupsView})[page]();
+    $('#nav-count').textContent = accounts.length;
+    // Summary metrics and the add/refresh actions belong to the overview only;
+    // every other page shows just its own content.
+    const overview = page === 'overview';
+    $('#heading-actions').hidden = !overview;
+    $('#metrics').hidden = !overview;
+    if (overview) renderMetrics(); else $('#metrics').innerHTML = '';
+    $('#page-content').innerHTML = ({accounts:accountsView,models:modelsView,usage:usageView,overview:overviewView,connect:connectView,sessions:sessionsView,redaction:redactionView,agents:agentsView,routing:routingView})[page]();
     if (page==='usage') $('#page-content').lastElementChild?.classList.add('usage-detail');
     if (selected) renderDrawer();
   }
@@ -542,12 +594,37 @@ function render() {
     const stateDetails = [['账号 ID',a.id],['平台',platformName(a.provider)],['Base URL',a.base_url],['凭证来源',a.key_source==='encrypted_store'?'本地加密存储':'环境变量'],['最大并发',`${a.in_flight} / ${a.max_in_flight}`],['最近检查',dateTime(a.last_checked_at||a.models_checked_at)],['最近请求',dateTime(a.stats.last_request)],['最后响应',a.stats.last_status?`HTTP ${a.stats.last_status}`:'—']];
     let body = '';
     if (drawerTab==='overview') body = `<div class="drawer-metrics"><div class="drawer-metric"><span>累计请求</span><b>${number(a.stats.requests)}</b></div><div class="drawer-metric"><span>Token 用量</span><b>${compact(a.stats.total_tokens)}</b></div></div><div class="drawer-subheading">连接信息</div><div class="detail-list">${stateDetails.map(([k,v])=>`<div class="detail-row"><span>${k}</span><b class="${k==='Base URL'||k==='账号 ID'?'mono':''}">${esc(v)}</b></div>`).join('')}</div>${a.discovery_error?`<div class="drawer-error">${icon('info')} ${esc(a.discovery_error)}</div>`:''}${Object.keys(a.model_cooldowns||{}).length?`<div class="drawer-subheading">模型冷却</div>${Object.entries(a.model_cooldowns).map(([m,t])=>`<div class="drawer-model"><b>${esc(m)}</b><span class="sub-line">恢复时间 ${dateTime(t)}</span></div>`).join('')}`:''}${wbTasksSection(a)}<div class="drawer-subheading">账号操作</div><div class="drawer-actions"><button class="button secondary" data-action="toggle" data-id="${esc(a.id)}">${a.enabled?'停用账号':'启用账号'}</button><button class="button text" data-action="delete" data-id="${esc(a.id)}">${icon('trash')}移除账号</button></div>`;
-    if (drawerTab==='models') body = `<p class="model-count-note">来源：账号模型发现。权限以真实调用为准，已确认的限流或套餐限制会单独标记。</p>${a.models.length?a.models.map(m=>`<div class="drawer-model"><b>${esc(m.id)}</b>${a.unavailable_models?.[m.id]?'<span class="badge red">当前套餐不可用</span>':a.model_cooldowns?.[m.id]?'<span class="badge amber">模型冷却中</span>':'<span class="badge green">已发现</span>'} ${m.context_length?`<span class="tag">${compact(m.context_length)} context</span>`:''}${m.supported_features?.includes('tools')?'<span class="tag">tools</span>':''}</div>`).join(''):empty('暂无模型','先检查账号以获取模型目录。')}`;
-    if (drawerTab==='quota') body = `<div class="drawer-subheading">额度状态 <span class="badge ${a.quota_status==='reported'?'green':'gray'}">${a.quota_status==='reported'?'已上报':a.quota_status==='stale'?'快照过期':'尚未接入'}</span></div>${a.quota?`<div class="detail-list"><div class="detail-row"><span>来源</span><b>${esc(a.quota.source)}</b></div><div class="detail-row"><span>观测时间</span><b>${dateTime(a.quota.observed_at)}</b></div><div class="detail-row"><span>有效至</span><b>${dateTime(a.quota.valid_until)}</b></div></div><div class="drawer-subheading">积分与 Token</div>${a.quota.remaining_tokens!==null?`<div class="quota-bucket"><div class="bar-label"><span>剩余 Token</span><b>${number(a.quota.remaining_tokens)}</b></div></div>`:''}${(a.quota.buckets||[]).map(b=>`<div class="quota-bucket"><div class="bar-label"><span>${esc(b.name)}</span><b>${number(b.remaining)} ${esc(b.unit)}</b></div>${b.limit>0?`<progress class="quota-progress" value="${b.remaining}" max="${b.limit}"></progress>`:''}</div>`).join('')}`:empty('真实余额暂不可查询','SenseNova 尚未公开 API Key 可调用的余额接口。可在核实后手动上报额度快照。')}<div class="drawer-actions"><button class="button primary" data-action="quota" data-id="${esc(a.id)}">更新额度快照</button>${a.quota?`<button class="button secondary" data-action="clear-quota" data-id="${esc(a.id)}">清除快照</button>`:''}</div><p class="model-count-note">积分与 Token 是不同计量。上报值不是实时余额，到期后不会继续作为新鲜额度展示。</p>`;
+    if (drawerTab==='models') {
+      const renames = (middlewareUI.model_rename||{})[a.provider] || {};
+      body = `<p class="model-count-note">来源：账号模型发现。权限以真实调用为准，已确认的限流或套餐限制会单独标记。改名按平台生效（${esc(platformName(a.provider))} 的所有账号共用）：客户端与 GET /v1/models 看到新名字，发给平台时自动改回原 id。</p>${a.models.length?a.models.map(m=>{const renamed=renames[m.id];return `<div class="drawer-model"><b>${esc(m.id)}</b>${renamed?`<span class="tag">对外名称 ${esc(renamed)}</span>`:''}${a.unavailable_models?.[m.id]?'<span class="badge red">当前套餐不可用</span>':a.model_cooldowns?.[m.id]?'<span class="badge amber">模型冷却中</span>':'<span class="badge green">已发现</span>'} ${m.context_length?`<span class="tag">${compact(m.context_length)} context</span>`:''}${m.supported_features?.includes('tools')?'<span class="tag">tools</span>':''}<div class="row-actions"><button class="button text" data-action="model-rename" data-id="${esc(a.id)}" data-model="${esc(m.id)}">${icon('edit')}${renamed?'修改改名':'改名'}</button></div></div>`;}).join(''):empty('暂无模型','先检查账号以获取模型目录。')}`;
+    }
+    if (drawerTab==='quota') body = `<div class="drawer-subheading">额度状态 <span class="badge ${a.quota_status==='reported'?'green':'gray'}">${a.quota_status==='reported'?'已上报':a.quota_status==='stale'?'快照过期':'尚未接入'}</span></div>${a.quota?`<div class="detail-list"><div class="detail-row"><span>来源</span><b>${esc(a.quota.source)}</b></div><div class="detail-row"><span>观测时间</span><b>${dateTime(a.quota.observed_at)}</b></div><div class="detail-row"><span>有效至</span><b>${dateTime(a.quota.valid_until)}</b></div></div><div class="drawer-subheading">积分与 Token</div>${a.quota.remaining_tokens!==null?`<div class="quota-bucket"><div class="bar-label"><span>剩余 Token</span><b>${number(a.quota.remaining_tokens)}</b></div></div>`:''}${(a.quota.buckets||[]).map(b=>`<div class="quota-bucket"><div class="bar-label"><span>${esc(b.name)}</span><b>${number(b.remaining)} ${esc(b.unit)}</b></div>${b.limit>0?`<progress class="quota-progress" value="${b.remaining}" max="${b.limit}"></progress>`:''}</div>`).join('')}`:''}<div class="drawer-actions"><button class="button primary" data-action="quota" data-id="${esc(a.id)}">更新额度快照</button>${a.quota?`<button class="button secondary" data-action="clear-quota" data-id="${esc(a.id)}">清除快照</button>`:''}</div>`;
     $('#account-drawer').innerHTML = `<div class="drawer-header"><div class="drawer-toolbar"><span>ACCOUNT DETAILS</span><button class="icon-button" data-action="close-drawer" aria-label="关闭账号详情">${icon('close')}</button></div><div class="drawer-account">${avatar(a)}<div><h2>${esc(a.name||a.id)}</h2><small>${esc(a.id)}</small></div>${badge(a)}</div><div class="drawer-actions"><button class="button secondary" data-action="check" data-id="${esc(a.id)}" ${checking.has(a.id)?'disabled':''}>${icon('refresh')}${checking.has(a.id)?'检查中…':'检查状态'}</button><button class="button secondary" data-action="edit" data-id="${esc(a.id)}">${icon('edit')}编辑账号</button></div></div><div class="drawer-tabs">${[['overview','概况'],['models','模型目录'],['quota','额度观测']].map(([key,label])=>`<button class="tab ${drawerTab===key?'active':''}" data-action="drawer-tab" data-tab="${key}">${label}</button>`).join('')}</div><div class="drawer-body">${body}</div>`;
   }
-  function openDrawer(id) { selected=id; drawerTab='overview'; $('.app-shell').inert=true; $('#drawer-backdrop').hidden=false; $('#account-drawer').hidden=false; document.body.classList.add('modal-open'); renderDrawer(); $('#account-drawer').setAttribute('tabindex','-1'); $('#account-drawer').focus(); }
-  function closeDrawer() { selected=null; $('.app-shell').inert=!connected; $('#drawer-backdrop').hidden=true; $('#account-drawer').hidden=true; document.body.classList.remove('modal-open'); }
+  function openDrawer(id) { selected=id; drawerTab='overview'; $('.app-shell').inert=true; $('#drawer-backdrop').hidden=false; $('#account-drawer').hidden=false; document.body.classList.add('modal-open'); renderDrawer(); if(!middlewareUI.loaded){ loadMiddleware().then(()=>{ if(selected===id) renderDrawer(); }); } $('#account-drawer').setAttribute('tabindex','-1'); $('#account-drawer').focus(); }
+  let modelRename = null;
+  function openModelRename(accountID, model) {
+    const account = accounts.find(a => a.id === accountID);
+    if (!account) return;
+    modelRename = {accountID, provider: account.provider, model};
+    const current = ((middlewareUI.model_rename||{})[account.provider]||{})[model] || '';
+    $('#model-rename-desc').textContent = `账号 ${account.name||account.id}（${platformName(account.provider)}）：${model}`;
+    $('#model-rename-input').value = current || model;
+    $('#model-rename-clear').hidden = !current;
+    $('#model-rename-error').textContent = '';
+    $('#model-rename-dialog').showModal();
+    $('#model-rename-input').select();
+  }
+  async function modelRenameSave(provider, model, target) {
+    const next = JSON.parse(JSON.stringify(middlewareUI.model_rename || {}));
+    const entries = next[provider] || {};
+    if (target && target !== model) entries[model] = target; else delete entries[model];
+    if (Object.keys(entries).length) next[provider] = entries; else delete next[provider];
+    await api('/middleware/model_rename', {method:'PUT', body:{model_rename: next}});
+    await loadMiddleware();
+    if (page === 'models') render();
+  }
+  function closeDrawer() { selected=null; $('.app-shell').inert=false; $('#drawer-backdrop').hidden=true; $('#account-drawer').hidden=true; document.body.classList.remove('modal-open'); }
   // Platform catalog comes from the gateway (/admin/v1/info), so a new
   // registered provider shows up here without touching this file.
   let platforms = [];
@@ -596,7 +673,7 @@ function render() {
     $('#account-uid').value=a?.uid||''; $('#account-realm').value=a?.realm||'intl'; $('#account-product').value=a?.product||'desktop';
     $('#group-list').innerHTML=groups.map(g=>`<option value="${esc(g)}">`).join(''); $('#account-group').value=a?.group||''; $('#account-base').value=a?.base_url||platformOf(prov).base_url||''; $('#account-concurrency').value=a?.max_in_flight||4; $('#account-models').value=a?.models_allowlist?.join('\n')||''; $('#account-key').required=!a; $('#account-key').type='password'; $('#account-dialog .advanced').open=!!a; $('#account-dialog').showModal();
   }
-  async function loadAccounts() { const credential=token;const result=await api('/accounts');if(credential!==token||!credential)return; accounts=result.data||[]; groups=[...new Set(accounts.map(a=>a.group||'default'))].sort(); if(info.config_default_group)defaultGroup=info.config_default_group; if(page==='sessions')renderMetrics();else render(); $('#last-update').textContent='上次同步 '+new Date().toLocaleTimeString('zh-CN',{hour12:false}); $('#error-banner').hidden=true; $('#connection-status').className='connection connected'; $('#connection-status').innerHTML='<i></i>'+esc(info.instance_name||'网关已连接'); }
+  async function loadAccounts() { const result=await api('/accounts'); accounts=result.data||[]; groups=[...new Set(accounts.map(a=>a.group||'default'))].sort(); if(info.config_default_group)defaultGroup=info.config_default_group; if(page==='sessions')$('#nav-count').textContent=accounts.length;else render(); $('#last-update').textContent='上次同步 '+new Date().toLocaleTimeString('zh-CN',{hour12:false}); $('#error-banner').hidden=true; $('#connection-status').className='connection connected'; $('#connection-status').innerHTML='<i></i>'+esc(info.instance_name||'网关已连接'); }
 
   // ---- WorkBuddy browser OAuth login ----
   function wbOAuthStop() {
@@ -658,13 +735,24 @@ function render() {
     catch(error) { toast(error.message,true); }
     finally { button.disabled=false; button.innerHTML=icon('refresh')+'刷新状态'; }
   }
-  function logout() { ++sessionEpoch; sessionsUI={rows:[],total:0,offset:0,query:'',archived:false,loaded:false,busy:false,detail:null,request:null,error:'',requestOffset:0}; clearClientKey(); token=''; connected=false; accounts=[]; closeDrawer(); document.querySelectorAll('dialog[open]').forEach(d=>d.close()); $('#admin-key').value=''; $('#login-overlay').hidden=false; $('#connection-status').className='connection'; $('#connection-status').innerHTML='<i></i> 等待连接'; render(); }
-  $('#login-form').addEventListener('submit',async event=>{
-    event.preventDefault(); const button=$('#login-submit'); button.disabled=true; $('#login-error').textContent=''; token=$('#admin-key').value.trim();
-    try { info=await api('/info'); platforms=Array.isArray(info.platforms)&&info.platforms.length?info.platforms:platforms; await loadAccounts(); connected=true; $('.app-shell').inert=false; $('#admin-key').value=''; $('#login-overlay').hidden=true; }
-    catch(error) { token=''; $('#login-error').textContent=error.message; }
-    finally { button.disabled=false; }
-  });
+  // No login step: GET /admin/ already set the HttpOnly session cookie, so the
+  // console boots straight into the dashboard.
+  async function connect() {
+    try {
+      info=await api('/info');
+      platforms=Array.isArray(info.platforms)&&info.platforms.length?info.platforms:platforms;
+      connected=true;
+      await loadAccounts();
+      if (page==='overview') { await Promise.all([loadGroupStats(), loadMiddleware()]); if (page==='overview') render(); }
+    } catch(error) {
+      connected=false;
+      $('#error-banner').textContent='连接管理台失败：'+error.message;
+      $('#error-banner').hidden=false;
+      $('#connection-status').className='connection offline';
+      $('#connection-status').innerHTML='<i></i> 连接中断';
+    }
+  }
+  connect();
   $('#platform-picker').addEventListener('click',event=>{
     const card = event.target.closest('.platform-card');
     if (!card || card.disabled || editing) return;
@@ -750,7 +838,7 @@ function render() {
     await loadMiddleware(); if (page==='models') render();
   }
 document.addEventListener('click',async event=>{
-    const nav=event.target.closest('[data-page]'); if(nav){if(page!==nav.dataset.page)clearClientKey(); if(page!==nav.dataset.page)++sessionEpoch; page=nav.dataset.page; render();if(page==='sessions')await loadSessions();else if(page==='redaction'){await loadRedaction();if(redaction?.enabled)await loadRedactionSpans();}else if(page==='agents')await loadAgents();else if(page==='routing'){await loadRouting();await loadMiddleware();}else if(page==='usage')await loadUsage();else if(page==='groups'){await loadGroupStats();await loadMiddleware();}else if(page==='models')await loadMiddleware();}
+    const nav=event.target.closest('[data-page]'); if(nav){if(page!==nav.dataset.page)clearClientKey(); if(page!==nav.dataset.page)++sessionEpoch; page=nav.dataset.page; render();if(page==='sessions')await loadSessions();else if(page==='redaction'){await loadRedaction();if(redaction?.enabled)await loadRedactionSpans();}else if(page==='agents')await loadAgents();else if(page==='routing'){await loadRouting();await loadMiddleware();}else if(page==='usage')await loadUsage();else if(page==='overview'){await Promise.all([loadGroupStats(), loadMiddleware()]); if(page==='overview')render();}else if(page==='models')await loadMiddleware();}
     const reveal=event.target.closest('.reveal'); if(reveal){const input=$('#'+reveal.dataset.target); input.type=input.type==='password'?'text':'password';}
     const close=event.target.closest('.close-dialog'); if(close)close.closest('dialog').close();
     const action=event.target.closest('[data-action]'); if(!action)return; const id=action.dataset.id;
@@ -761,6 +849,15 @@ document.addEventListener('click',async event=>{
       case 'details': openDrawer(id); break;
       case 'close-drawer': closeDrawer(); break;
       case 'drawer-tab': drawerTab=action.dataset.tab; renderDrawer(); break;
+      case 'model-rename': openModelRename(action.dataset.id, action.dataset.model); break;
+      case 'model-rename-reset': {
+        if (!modelRename) break;
+        const button = $('#model-rename-clear'); button.disabled = true;
+        try { await modelRenameSave(modelRename.provider, modelRename.model, ''); $('#model-rename-dialog').close(); renderDrawer(); toast('已还原模型名'); }
+        catch (error) { $('#model-rename-error').textContent = error.message; }
+        finally { button.disabled = false; }
+        break;
+      }
       case 'filter': filter=action.dataset.filter; render(); break;
       case 'clear-filter': filter='all'; search=''; render(); break;
       case 'toggle': {const a=accounts.find(a=>a.id===id); action.disabled=true; await api(`/accounts/${encodeURIComponent(id)}/enabled`,{method:'PUT',body:{enabled:!a.enabled}}); await loadAccounts(); toast(a.enabled?'账号已停用':'账号已启用');break;}
@@ -777,7 +874,6 @@ document.addEventListener('click',async event=>{
         finally { cwTaskBusy=false; if(selected) renderDrawer(); }
         break;
       }
-      case 'quota-help': toast('在账号详情的“额度观测”中上报已核实余额。自动同步可通过配置 quota_feed_url 接入。'); break;
       case 'agents-refresh': await loadAgents(); break;
       case 'agents-mode': agentsUI.mode=action.dataset.mode; await api('/agents',{method:'PUT',body:{write_mode:action.dataset.mode}}); await loadAgents(); toast(`默认写入模式：${action.dataset.mode==='auto'?'自动写入':'仅生成片段'}`); break;
       case 'agents-bind': openAgentDialog(id); break;
@@ -821,7 +917,19 @@ document.addEventListener('click',async event=>{
       case 'copy-code': await useClientKey(async key=>{await navigator.clipboard.writeText(connectionCode(key)); toast('调用示例已复制，已包含代理访问 Key');}); break;
       case 'group-jump': groupFilter = action.dataset.group; render(); break;
       case 'routing-group': routingGroupFilter = action.dataset.group; render(); break;
-      case 'group-default': { await api('/groups/default', {method:'PUT', body:{name: action.dataset.group}}); defaultGroup = action.dataset.group; await Promise.all([loadAccounts(), loadGroupStats()]); if (page==='groups') render(); toast('默认分组已改为：'+action.dataset.group); break; }
+      case 'group-default': { await api('/groups/default', {method:'PUT', body:{name: action.dataset.group}}); defaultGroup = action.dataset.group; await Promise.all([loadAccounts(), loadGroupStats()]); if (page==='overview') render(); toast('默认分组已改为：'+action.dataset.group); break; }
+      case 'group-strategy': {
+        const g=action.dataset.group;
+        const cur=groupStat(g).routing_override || middlewareUI.routing || 'round_robin';
+        const next=cur==='smart'?'round_robin':'smart';
+        try {
+          await api('/groups/'+encodeURIComponent(g)+'/routing',{method:'PUT',body:{strategy:next}});
+          await Promise.all([loadGroupStats(), loadMiddleware()]);
+          if(page==='overview')render();
+          toast(`分组 ${g} 调度策略已改为${next==='smart'?'智能':'轮询'}`);
+        } catch(error){ toast(error.message,true); }
+        break;
+      }
       case 'group-rename': openRenameGroup(action.dataset.group); break;
       case 'group-delete': openDeleteGroup(action.dataset.group); break;
       case 'group-accounts': groupFilter = action.dataset.group; page = 'accounts'; render(); break;
@@ -839,10 +947,10 @@ document.addEventListener('click',async event=>{
     }}catch(error){toast(error.message,true);}
   });
   document.addEventListener('input',event=>{if(event.target.id==='account-search'){const position=event.target.selectionStart; search=event.target.value; $('#page-content').innerHTML=accountsView(); const field=$('#account-search'); field.focus(); field.setSelectionRange(position,position);}});
-  $('#refresh-all').addEventListener('click',refreshAll); $('#add-account').addEventListener('click',()=>openAccount()); $('#logout').addEventListener('click',logout); $('#drawer-backdrop').addEventListener('click',closeDrawer);
+  $('#refresh-all').addEventListener('click',refreshAll); $('#add-account').addEventListener('click',()=>openAccount()); $('#drawer-backdrop').addEventListener('click',closeDrawer);
   $('#oauth-start').addEventListener('click',wbOAuthStart); $('#oauth-cancel').addEventListener('click',()=>{wbOAuthReset(); const s=$('#oauth-status'); if(s)s.textContent='已取消授权';});
   document.querySelectorAll('dialog').forEach(dialog=>dialog.addEventListener('close',()=>{if(dialog.id==='account-dialog'){$('#account-key').value='';$('#account-key').type='password';wbOAuthReset(true);}}));
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!document.querySelector('dialog[open]'))closeDrawer();});
-  setInterval(async()=>{if(!connected||document.hidden||polling||document.querySelector('dialog[open]'))return; polling=true; try{if(page==='groups')await loadGroupStats(); await loadAccounts();}catch(error){$('#error-banner').textContent='同步失败：'+error.message;$('#error-banner').hidden=false;$('#connection-status').className='connection offline';$('#connection-status').innerHTML='<i></i> 同步中断';}finally{polling=false;}},10000);
+  setInterval(async()=>{if(!connected||document.hidden||polling||document.querySelector('dialog[open]'))return; polling=true; try{if(page==='overview')await loadGroupStats(); await loadAccounts();}catch(error){$('#error-banner').textContent='同步失败：'+error.message;$('#error-banner').hidden=false;$('#connection-status').className='connection offline';$('#connection-status').innerHTML='<i></i> 同步中断';}finally{polling=false;}},10000);
   render();
 })();

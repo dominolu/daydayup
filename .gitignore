@@ -2,6 +2,9 @@
 /config.docker.json
 /data/
 /bin/
+dist/
+logs/
+secrets.json
 /.tools/
 /.gocache/
 /internal/gateway/data/
@@ -9,3 +12,6 @@
 *.test
 coverage.out
 __pycache__/
+.DS_Store
+/.swift-cache/
+/tmp/

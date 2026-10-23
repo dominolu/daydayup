@@ -5,8 +5,9 @@ package gateway
 //   - PUT    /admin/v1/groups/default             set the default routing group (config write-back)
 //   - PUT    /admin/v1/groups/{name}              rename a group {rename}
 //   - DELETE /admin/v1/groups/{name}              dissolve a group, moving accounts to {move_to|default}
-//   - GET    /admin/v1/middleware                 model_map aliases + routing strategy
+//   - GET    /admin/v1/middleware                 model_map aliases + model_rename + routing strategy
 //   - PUT    /admin/v1/middleware/model_map       hot-reload model aliases
+//   - PUT    /admin/v1/middleware/model_rename    hot-reload per-platform model renames
 //   - PUT    /admin/v1/routing                    switch round_robin / smart
 //
 // Everything related to the running pool applies in memory first (the gate
@@ -104,6 +105,44 @@ func (s *Server) groupsAdmin(w http.ResponseWriter, r *http.Request) bool {
 		apiError(w, 400, "default_group_locked", "不能删除默认分组：请先把另一个分组设为默认，或直接重命名本组")
 		return true
 	}
+	// Per-group routing strategy: PUT /admin/v1/groups/{name}/routing
+	// {"strategy":"round_robin|smart"} pins one group to its own mode; groups
+	// without an override keep following the global "routing" field.
+	if strings.HasSuffix(path, "/routing") && r.Method == http.MethodPut {
+		base := strings.TrimSuffix(path, "/routing")
+		name := strings.TrimPrefix(base, "/admin/v1/groups/")
+		if name == "" {
+			return false
+		}
+		group, err := config.NormalizeGroup(name)
+		if err != nil {
+			apiError(w, 400, "invalid_group", err.Error())
+			return true
+		}
+		var body struct {
+			Strategy string `json:"strategy"`
+		}
+		if !decodeJSON(w, r, &body) {
+			return true
+		}
+		if body.Strategy != pool.RoutingRoundRobin && body.Strategy != pool.RoutingSmart {
+			apiError(w, 400, "invalid_routing", "routing strategy must be round_robin or smart")
+			return true
+		}
+		next := map[string]string{}
+		for k, v := range s.Config.GroupRouting {
+			next[k] = v
+		}
+		next[group] = body.Strategy
+		if err := s.writeConfigField("group_routing", next); err != nil {
+			apiError(w, 500, "config_save_failed", "调度策略未能保存；运行中的策略保留")
+			return true
+		}
+		s.Config.GroupRouting = next
+		s.Pool.SetGroupRoutingMap(next)
+		writeJSON(w, 200, map[string]any{"ok": true, "group": group, "routing": body.Strategy})
+		return true
+	}
 	if !strings.HasPrefix(path, "/admin/v1/groups/") || path == "/admin/v1/groups/default" {
 		return false
 	}
@@ -155,6 +194,21 @@ func (s *Server) groupsAdmin(w http.ResponseWriter, r *http.Request) bool {
 			s.Config.DefaultGroup = next
 			defaultMoved = true
 		}
+		// Carry the per-group routing override to the new name.
+		if v, ok := s.Config.GroupRouting[group]; ok {
+			nextMap := map[string]string{}
+			for k, val := range s.Config.GroupRouting {
+				nextMap[k] = val
+			}
+			delete(nextMap, group)
+			nextMap[next] = v
+			if err := s.writeConfigField("group_routing", nextMap); err != nil {
+				apiError(w, 500, "config_save_failed", "分组已重命名，但分组调度策略写入失败")
+				return true
+			}
+			s.Config.GroupRouting = nextMap
+			s.Pool.SetGroupRoutingMap(nextMap)
+		}
 		writeJSON(w, 200, map[string]any{"ok": true, "renamed": group, "to": next, "default_group": defaultMoved})
 		return true
 	case http.MethodDelete: // dissolve: accounts move to move_to (default "default")
@@ -185,6 +239,21 @@ func (s *Server) groupsAdmin(w http.ResponseWriter, r *http.Request) bool {
 			apiError(w, 500, "checkpoint_failed", "分组已解散，但统计状态保存失败")
 			return true
 		}
+		// A dissolved group loses its per-group routing override.
+		if _, ok := s.Config.GroupRouting[group]; ok {
+			nextMap := map[string]string{}
+			for k, val := range s.Config.GroupRouting {
+				if k != group {
+					nextMap[k] = val
+				}
+			}
+			if err := s.writeConfigField("group_routing", nextMap); err != nil {
+				apiError(w, 500, "config_save_failed", "分组已解散，但分组调度策略配置未能清理")
+				return true
+			}
+			s.Config.GroupRouting = nextMap
+			s.Pool.ClearGroupRouting(group)
+		}
 		writeJSON(w, 200, map[string]any{"ok": true, "deleted": group, "moved_to": target})
 		return true
 	}
@@ -195,8 +264,9 @@ func (s *Server) middlewareAdmin(w http.ResponseWriter, r *http.Request) bool {
 	path := r.URL.Path
 	if path == "/admin/v1/middleware" && r.Method == http.MethodGet {
 		writeJSON(w, 200, map[string]any{
-			"model_map": s.Config.Middleware.ModelMap,
-			"routing":   s.Config.Routing,
+			"model_map":    s.Config.Middleware.ModelMap,
+			"model_rename": s.Config.ModelRename,
+			"routing":      s.Config.Routing,
 		})
 		return true
 	}
@@ -221,12 +291,37 @@ func (s *Server) middlewareAdmin(w http.ResponseWriter, r *http.Request) bool {
 			apiError(w, 400, "invalid_model_map", "模型别名不能为空")
 			return true
 		}
+		s.Config.Middleware.ModelMap = next
 		if err := s.writeConfigField("middleware", s.Config.Middleware); err != nil {
 			apiError(w, 500, "config_save_failed", "模型别名未能保存；运行中的别名保留")
 			return true
 		}
-		s.Config.Middleware.ModelMap = next
 		writeJSON(w, 200, map[string]any{"ok": true, "model_map": next})
+		return true
+	}
+	if path == "/admin/v1/middleware/model_rename" && r.Method == http.MethodPut {
+		var body struct {
+			ModelRename map[string]map[string]string `json:"model_rename"`
+		}
+		if !decodeJSON(w, r, &body) {
+			return true
+		}
+		next, err := config.NormalizeModelRename(body.ModelRename)
+		if err != nil {
+			apiError(w, 400, "invalid_model_rename", err.Error())
+			return true
+		}
+		if len(next) == 0 && len(body.ModelRename) != 0 {
+			apiError(w, 400, "invalid_model_rename", "模型改名不能全部为空")
+			return true
+		}
+		s.Config.ModelRename = next
+		if err := s.writeConfigField("model_rename", next); err != nil {
+			apiError(w, 500, "config_save_failed", "模型改名未能保存；运行中的配置保留")
+			return true
+		}
+		s.Pool.SetModelRename(next)
+		writeJSON(w, 200, map[string]any{"ok": true, "model_rename": next})
 		return true
 	}
 	if path == "/admin/v1/routing" && r.Method == http.MethodPut {

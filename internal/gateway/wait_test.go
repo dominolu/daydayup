@@ -260,3 +260,43 @@ func TestRateLimitWaitBeforeSSEDoesNotCommitErrorResponse(t *testing.T) {
 		t.Fatalf("SSE polluted by intermediate rejection: %d %q %v", resp.StatusCode, got, err)
 	}
 }
+
+// Rate-limit waiting must not eat the whole generation window: once the
+// dedicated budget is spent the request fails fast with a distinct reason the
+// client can act on, instead of being cancelled mid-stream later.
+func TestPoolWaitBudgetStopsRateLimitWaiting(t *testing.T) {
+	var count atomic.Int32
+	s, _ := newTestGateway(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		count.Add(1)
+		w.Header().Set("Retry-After", "5")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusTooManyRequests)
+		io.WriteString(w, `{"error":{"type":"rate_limit_error","message":"limit"}}`)
+	}), 1)
+	s.Config.MaxAttempts = 1
+	s.Config.PoolWaitTimeoutSeconds = 1
+	// Activating the response middleware wraps the writer (model rename keeps
+	// the canonical name in responses), which used to hide gateway errors from
+	// the archived failure record.
+	s.Config.Middleware.ModelMap = map[string]string{"alias": "m"}
+	enableSessions(t, s)
+	started := time.Now()
+	w := sessionCall(s, "wait-budget", "/v1/chat/completions", `{"model":"m"}`)
+	elapsed := time.Since(started)
+	if w.Code != http.StatusServiceUnavailable || !strings.Contains(w.Body.String(), "pool_wait_budget_exhausted") {
+		t.Fatalf("status=%d body=%s", w.Code, w.Body)
+	}
+	if elapsed < 900*time.Millisecond || elapsed > 5*time.Second {
+		t.Fatalf("budget did not bound the wait: %s", elapsed)
+	}
+	if count.Load() != 1 {
+		t.Fatalf("kept retrying after the budget exit: %d calls", count.Load())
+	}
+	if s.Pool.Snapshot()[0].InFlight != 0 || len(s.waitSlots) != 0 {
+		t.Fatal("budget exit leaked a waiting slot")
+	}
+	_, rows, _, err := s.Sessions.Detail("wait-budget", 0, 30)
+	if err != nil || len(rows) != 1 || rows[0].Failure.Reason != "pool_wait_budget_exhausted" || rows[0].Failure.Layer != "pool" || rows[0].PoolWaits != 1 || rows[0].PoolWaitMS == 0 {
+		t.Fatalf("wait budget exit not archived: %+v %v", rows, err)
+	}
+}

@@ -91,20 +91,25 @@ const (
 )
 
 type Pool struct {
-	mu      sync.Mutex
-	saveMu  sync.Mutex
-	entries []*entry
-	cursor  map[string]int
-	guards  config.Guards
-	routing string
-	changed chan struct{}
+	mu           sync.Mutex
+	saveMu       sync.Mutex
+	entries      []*entry
+	cursor       map[string]int
+	guards       config.Guards
+	routing      string
+	groupRouting map[string]string // per-group override of routing
+	// modelRename is the per-platform upstream→canonical rename table shared
+	// with the gateway config: routing and /v1/models use canonical ids while
+	// each account still receives the id its platform advertises.
+	modelRename map[string]map[string]string
+	changed      chan struct{}
 	// persistDB is the lazily opened shared database used by Save/Load.
 	persistMu sync.Mutex
 	persistDB *store.DB
 }
 
 func New(accounts []config.Account) *Pool {
-	p := &Pool{cursor: map[string]int{}, changed: make(chan struct{}), routing: RoutingRoundRobin}
+	p := &Pool{cursor: map[string]int{}, changed: make(chan struct{}), routing: RoutingRoundRobin, groupRouting: map[string]string{}}
 	for _, a := range accounts {
 		p.entries = append(p.entries, newEntry(a))
 	}
@@ -117,6 +122,14 @@ func (p *Pool) SetGuards(g config.Guards) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.guards = g
+}
+
+// SetModelRename installs the per-platform upstream→canonical rename table.
+// Called once at gateway construction and again after an admin update.
+func (p *Pool) SetModelRename(m map[string]map[string]string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.modelRename = m
 }
 
 // SetRouting installs the account selection order ("round_robin" or "smart").
@@ -134,6 +147,60 @@ func (p *Pool) SetRouting(mode string) {
 func (p *Pool) Routing() string {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+	return p.routing
+}
+
+// SetGroupRoutingMap installs per-group routing overrides. Values are
+// normalized; a group absent from the map falls back to the global Routing.
+func (p *Pool) SetGroupRoutingMap(m map[string]string) {
+	next := map[string]string{}
+	for group, mode := range m {
+		if mode != RoutingSmart {
+			mode = RoutingRoundRobin
+		}
+		next[group] = mode
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.groupRouting = next
+}
+
+// SetGroupRouting pins one group to an explicit selection mode.
+func (p *Pool) SetGroupRouting(group, mode string) {
+	if mode != RoutingSmart {
+		mode = RoutingRoundRobin
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.groupRouting == nil {
+		p.groupRouting = map[string]string{}
+	}
+	p.groupRouting[group] = mode
+}
+
+// ClearGroupRouting removes a per-group override so the group falls back to
+// the global mode again.
+func (p *Pool) ClearGroupRouting(group string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.groupRouting != nil {
+		delete(p.groupRouting, group)
+	}
+}
+
+// RoutingFor returns the effective selection mode of a group: its explicit
+// override, or the global default.
+func (p *Pool) RoutingFor(group string) string {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.routingFor(group)
+}
+
+// routingFor is RoutingFor without locking; callers must hold p.mu.
+func (p *Pool) routingFor(group string) string {
+	if mode, ok := p.groupRouting[group]; ok {
+		return mode
+	}
 	return p.routing
 }
 

@@ -295,6 +295,49 @@ func TestSmartRoutingTieBreakByLessRemaining(t *testing.T) {
 	p.Finish(a.ID, 200, Usage{Total: 1, Known: true}, false, 0, "m")
 }
 
+func TestPerGroupRoutingStrategy(t *testing.T) {
+	// Scheduling mode is per routing group: g1 pins smart, g2 pins
+	// round_robin, and a group without an override follows the global mode.
+	p := New([]config.Account{
+		{ID: "a1", Provider: "sensenova", Group: "g1", MaxInFlight: 2},
+		{ID: "a2", Provider: "sensenova", Group: "g1", MaxInFlight: 2},
+		{ID: "b1", Provider: "sensenova", Group: "g2", MaxInFlight: 2},
+		{ID: "b2", Provider: "sensenova", Group: "g2", MaxInFlight: 2},
+	})
+	p.SetRouting(RoutingRoundRobin)
+	p.SetGroupRoutingMap(map[string]string{"g1": RoutingSmart, "g2": RoutingRoundRobin})
+	for _, tc := range [][2]string{{"g1", RoutingSmart}, {"g2", RoutingRoundRobin}, {"missing", RoutingRoundRobin}} {
+		if got := p.RoutingFor(tc[0]); got != tc[1] {
+			t.Fatalf("RoutingFor(%s)=%s want %s", tc[0], got, tc[1])
+		}
+	}
+	// g1 is smart: the account whose quota window renews soonest must win.
+	now := time.Now()
+	_ = p.SetQuota("a1", &provider.Quota{Source: "t", ObservedAt: now, ValidUntil: now.Add(time.Hour), Buckets: []provider.Bucket{{Name: "w", Pool: "g", Unit: "credits", Remaining: 100, Limit: 1000, ResetsAt: dur(t, 30*time.Minute)}}})
+	_ = p.SetQuota("a2", &provider.Quota{Source: "t", ObservedAt: now, ValidUntil: now.Add(time.Hour), Buckets: []provider.Bucket{{Name: "w", Pool: "g", Unit: "credits", Remaining: 100, Limit: 1000, ResetsAt: dur(t, 1*time.Minute)}}})
+	a, err := p.AcquireGroup("sensenova", "", "g1", "m", nil, "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a.ID != "a2" {
+		t.Fatalf("g1 smart should pick the soonest reset (a2), got %s", a.ID)
+	}
+	p.Finish(a.ID, 200, Usage{Total: 1, Known: true}, false, 0, "m")
+	// g2 is round_robin without quota windows: it must alternate its accounts.
+	seen := map[string]bool{}
+	for i := 0; i < 2; i++ {
+		acc, err := p.AcquireGroup("sensenova", "", "g2", "m", nil, "", false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		seen[acc.ID] = true
+		p.Finish(acc.ID, 200, Usage{Total: 1, Known: true}, false, 0, "m")
+	}
+	if !seen["b1"] || !seen["b2"] {
+		t.Fatalf("g2 round-robin should alternate b1/b2: %v", seen)
+	}
+}
+
 func TestGlobalAcquirePicksAcrossPlatforms(t *testing.T) {
 	p := New([]config.Account{
 		{ID: "sense-1", Provider: "sensenova", Models: []string{"m"}, MaxInFlight: 4},

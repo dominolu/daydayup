@@ -7,20 +7,43 @@ import (
 	"daydayup/internal/config"
 )
 
-func (e *entry) supports(model string) bool {
+// supports reports whether the account can serve the requested model. The
+// request may name either the client-facing canonical id or the platform's own
+// upstream id: both resolve to the same candidate set. An account serves a
+// canonical name when it discovered the canonical id itself or a raw id that
+// model_rename maps to it.
+func (e *entry) supports(model string, rename map[string]map[string]string) bool {
 	if model == "" {
 		return true
 	}
-	if time.Now().Before(e.deniedModels[model]) {
-		return false
+	canonical := config.CanonicalModel(rename, model)
+	candidates := []string{canonical}
+	if upstream := config.UpstreamModel(rename, e.config.Provider, canonical); upstream != canonical {
+		candidates = append(candidates, upstream)
 	}
-	if len(e.config.Models) > 0 && !contains(e.config.Models, model) {
-		return false
+	for _, id := range candidates {
+		if time.Now().Before(e.deniedModels[id]) {
+			return false
+		}
+	}
+	if len(e.config.Models) > 0 {
+		allowed := false
+		for _, id := range candidates {
+			if contains(e.config.Models, id) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			return false
+		}
 	}
 	if e.state.ModelsCheckedAt != nil {
-		for _, m := range e.state.Models {
-			if m["id"] == model {
-				return true
+		for _, id := range candidates {
+			for _, m := range e.state.Models {
+				if m["id"] == id {
+					return true
+				}
 			}
 		}
 		return false
@@ -173,7 +196,7 @@ func (p *Pool) acquire(prov, realm, group, model string, excluded map[string]boo
 			reason = "invalid_upstream_credential"
 		case now.Before(e.deniedModels[model]):
 			reason = ReasonModelDenied
-		case !e.supports(model):
+		case !e.supports(model, p.modelRename):
 			reason = "model_not_supported"
 		case e.state.QuotaExhaustedUntil != nil && now.Before(*e.state.QuotaExhaustedUntil):
 			reason = "quota_exhausted"
@@ -206,7 +229,7 @@ func (p *Pool) acquire(prov, realm, group, model string, excluded map[string]boo
 	}
 	// Pass 2: choose the reservation target.
 	j := eligible[0]
-	if p.routing == RoutingSmart && len(eligible) > 1 {
+	if p.routingFor(group) == RoutingSmart && len(eligible) > 1 {
 		// Smart reordering must respect the hard constraints that precede it:
 		// a session-pinned account (preferred) always stays the target, and the
 		// choice never leaves the preferred realm's pass.

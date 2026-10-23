@@ -65,3 +65,27 @@ func modelFrom(r *http.Request, b []byte) string {
 	}
 	return model
 }
+
+// rewriteModelField returns body with its top-level "model" field set to
+// model. It is used by model_rename to hand each platform the id it actually
+// advertises. Non-JSON bodies and bodies without a JSON object are returned
+// unchanged (multipart /v1/images/edits keeps its original model field).
+func rewriteModelField(body []byte, model string) []byte {
+	if len(body) == 0 || model == "" {
+		return body
+	}
+	var root map[string]json.RawMessage
+	if err := json.Unmarshal(body, &root); err != nil || root == nil {
+		return body
+	}
+	raw, err := json.Marshal(model)
+	if err != nil {
+		return body
+	}
+	root["model"] = raw
+	out, err := json.Marshal(root)
+	if err != nil {
+		return body
+	}
+	return out
+}

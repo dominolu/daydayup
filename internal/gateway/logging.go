@@ -43,6 +43,9 @@ type requestTrace struct {
 	BridgeKind                                 bridgeKind
 	BridgeStream                               bool
 	ID, Provider, Model, AccountID, UpstreamID string
+	// UpstreamModel is the id the answering account was actually sent when
+	// model_rename rewrites it; empty means it equals Model.
+	UpstreamModel string
 	Group                                      string
 	Realm                                      string
 	Started                                    time.Time
@@ -99,12 +102,25 @@ func (w *logResponseWriter) Write(b []byte) (int, error) {
 }
 
 func markGatewayError(w http.ResponseWriter, status int, code, message string) {
-	if w, ok := w.(*logResponseWriter); ok {
-		layer := "gateway"
-		if status == http.StatusUnauthorized {
-			layer = "gateway_auth"
+	layer := "gateway"
+	if status == http.StatusUnauthorized {
+		layer = "gateway_auth"
+	}
+	failure := diagnostic{Layer: layer, Reason: code, Code: code, Message: message}
+	// Error responses travel through layered writers (protocol bridge, model
+	// rename / think_tags rewrite), so the trace holder may not be the outer
+	// writer. Walk the chain before giving up, otherwise the archived failure
+	// keeps the last upstream attempt's label.
+	for i := 0; i < 8 && w != nil; i++ {
+		if lw, ok := w.(*logResponseWriter); ok {
+			lw.trace.Failure = failure
+			return
 		}
-		w.trace.Failure = diagnostic{Layer: layer, Reason: code, Code: code, Message: message}
+		unwrapper, ok := w.(interface{ Unwrap() http.ResponseWriter })
+		if !ok {
+			return
+		}
+		w = unwrapper.Unwrap()
 	}
 }
 
@@ -170,6 +186,9 @@ func (s *Server) logRecord(r *http.Request, event string, status int, elapsed ti
 	}
 	clean := s.logSanitizer(t.credentials...)
 	attrs := []any{"event", event, "request_id", t.ID, "method", r.Method, "path", clean(r.URL.Path), "provider", clean(t.Provider), "group", clean(t.Group), "model", clean(t.Model), "account_id", clean(t.AccountID), "attempts", t.Attempts, "status", status, "duration_ms", elapsed.Milliseconds()}
+	if t.UpstreamModel != "" && t.UpstreamModel != t.Model {
+		attrs = append(attrs, "upstream_model", clean(t.UpstreamModel))
+	}
 	if t.PoolWaits > 0 {
 		attrs = append(attrs, "pool_wait_ms", t.PoolWaitMS, "pool_waits", t.PoolWaits)
 	}
