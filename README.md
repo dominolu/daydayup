@@ -9,7 +9,8 @@ Go 标准库实现的单实例代理。已接入 SenseNova、WorkBuddy / CodeBud
 ## 已实现
 
 - `/v1/*` HTTP 透传：Chat Completions、Responses、Anthropic Messages、图片生成、JSON 图片编辑以及其他上游路径。未知字段、multipart、二进制正文、查询参数和 SSE 原样保留，不转换上游协议；`GET /v1/models` 返回各账号发现模型的去重并集。
-- 按账号轮询，跳过停用、401 无效凭证、冷却、并发已满、模型不匹配、已知额度耗尽的账号；冷却或并发占满时进入有界等待队列，恢复后继续处理。
+- 账号选择支持 `round_robin` 与 `smart`（额度窗口优先）两种策略，可按路由分组分别覆盖；跳过停用、401 无效凭证、冷却、并发已满、模型不匹配、已知额度耗尽的账号；冷却或并发占满时进入有界等待队列（`max_waiting_requests`），恢复后继续处理，排队时间另有独立预算，不会吃掉生成本身的时间窗口。
+- `model_rename` 把不同平台的原生模型 id 归一成同一个客户端规范名：路由、`GET /v1/models` 与响应中的 `model` 都用规范名，发给各平台的请求体再改写回它自己的 id，因此同一模型可以在多个平台之间聚合、轮询与故障转移。
 - 429 按 `Retry-After` 冷却；明确的模型 TPM/RPM 限流仅冷却该号的对应模型，其他额度限制冷却整个账号。5xx 短暂冷却。明确拒绝的生成请求可切换账号，已开始的流式响应和结果不确定的 POST 不重放。
 - 从非流式 JSON 和 SSE 的 `usage` 统计每号实际输入、输出、缓存、总 Token，兼容三种协议；没有 `usage` 时记录未知，不假设消耗为零。
 - 内置 `/admin/` Web 管理台，支持添加、编辑、移除、启停、单号检查、搜索筛选、模型目录、用量及额度观测。
@@ -22,7 +23,7 @@ Go 标准库实现的单实例代理。已接入 SenseNova、WorkBuddy / CodeBud
 
 ## 本地启动
 
-需要 Go 1.23 或更新版本；网关二进制不需要 Node 或前端构建步骤。macOS 桌面壳见后文「macOS 桌面 App」。
+需要 Go 1.23 或更新版本；网关二进制不需要 Node 或前端构建步骤。macOS 桌面壳是独立的 Go module（`desktop/go.mod`，工具链要求更高，见后文「macOS 桌面 App」）。
 
 ```bash
 cp config.example.json config.json
@@ -35,6 +36,20 @@ go run ./cmd/gateway -config config.json
 
 只有一个账号时，删除示例配置中的第二个账号。每条 `accounts` 应对应一个真实额度主体，不要把同一账号的多个 Key 当成多份独立余额。`base_url` 默认为 `https://token.sensenova.cn`，只填源站，不带 `/v1`。可用 `models` 数组设置账号模型白名单，省略则使用动态发现结果。`max_in_flight` 控制每号最大并发，修改凭证环境变量或账号清单后重启服务。
 
+改完代码或配置后，用 `make restart` 一步完成「备份旧产物 → 编译 → SIGTERM 优雅停机（落盘）→ 加载 `.env` 启动新进程 → 健康检查」；`bin/gateway.before-*` 是回滚用的旧快照。注意：重启会中断此刻正在进行的流式请求，客户端需要自行重试。
+
+### 关键配置项
+
+| 字段 | 默认 | 说明 |
+| --- | --- | --- |
+| `request_timeout_seconds` | `300`（示例与桌面默认 `600`） | 单个请求的总预算，覆盖排队与所有重试；应大于客户端自身的读超时／空闲超时 |
+| `pool_wait_timeout_seconds` | `120` | 限流排队的独立预算，`-1` 关闭；耗尽返回 `503 pool_wait_budget_exhausted` + `Retry-After` |
+| `max_waiting_requests` | `128` | 等待队列长度（1–10000），满则 `503 pool_queue_full` |
+| `max_attempts` | `3` | 非 429 的换号重试上限；429 安全重试只受截止时间约束 |
+| `routing` / `group_routing` | `round_robin` | 账号选择策略：`round_robin` 或 `smart`；可按分组覆盖 |
+| `model_rename` | 空 | 按平台把上游模型 id 映射为客户端规范名，实现跨平台聚合 |
+| `sessions.retention_days` / `max_body_mb` | `0` / `0`（不裁剪） | 会话正文的保留天数与容量上限；示例配置与桌面端为 `30` / `2048` |
+| `max_request_bytes` | `33554432` | 请求体内存缓存上限，超限返回 `413` |
 
 ## 脱敏与还原
 
@@ -184,6 +199,8 @@ curl -X POST http://127.0.0.1:8080/admin/v1/accounts/wb-intl/tasks/daily-chat -H
 - **限流**：生成 50 RPM、决策 200 RPM、2,000,000 TPM，按**用户**共享（多把 Key 不叠加）。429 的 `rate_limit_exceeded` 可重试、`quota_exceeded` 不可重试，因此网关统一按 `Retry-After` 冷却整号，而不是单个模型。
 - **模型无权限**：`model_not_available` 返回 **404** 而非 403；403 一族（`api_key_disabled`、`user_disabled`、`whitelist_required`）是账号级，不对应单个模型。
 - **额度边界**：墨点余额只在登录态控制台可见，API Key 调不到余额接口，故 `quota_status=unsupported`。与 SenseNova 相同，可手动上报快照或配置可信额度 Feed。
+
+**实测的容量特征（2026-10-22 复测）**：除文档口径的 RPM／TPM 之外，平台还会返回 **`429 Channel rate limit reached for model`**——这是**模型通道级**限制，实测同一账号同一模型基本只放行一个长生成，紧随其后的请求立即被拒（不是排队）；被接纳的长流吞吐在 **11–84 tok/s** 之间大幅波动（高峰时段掉到 11–14 tok/s，TTFT 长尾可达 39–70 秒），过载时在途流可能被上游提前断开，表现为会话记录里的 `stream / response_incomplete`。因此建议：给该模型配置可承接的备用账号（或 `model_rename` 映射到其他平台），把 `request_timeout_seconds` 设得大于客户端超时，并让 `pool_wait_timeout_seconds` 控制排队上限。证据、复现步骤与提交给上游的报障信息见 [上游流式中断分析报告](docs/upstream-stream-truncation-2026-10-22.md)。
 
 ```json
 {
@@ -700,12 +717,13 @@ docker compose up -d --build
 ## 验证与运行边界
 
 ```bash
-go test -race ./...
-go vet ./...
-go build -trimpath -o bin/gateway ./cmd/gateway
+make test      # go test -race ./...
+make vet       # go vet ./...
+make build     # go build -trimpath -o bin/gateway ./cmd/gateway
+./scripts/test-desktop.sh   # 桌面壳（独立 module）的构建与冒烟检查
 ```
 
-集成测试用模拟上游验证轮询、失败切换、SSE 及时刷新、三种协议的用量、multipart、模型发现、鉴权隔离、额度 Feed、状态持久化和并发约束。真实账号验证需要你在本地填入 Key；当前项目没有内置可用凭证。
+集成测试用模拟上游验证轮询与 smart 路由、失败切换、SSE 及时刷新、三种协议的用量、multipart、模型发现、鉴权隔离、额度 Feed、状态持久化和并发约束；流式失败归类（客户端取消／网关超时／上游断流）、池等待预算、`model_rename` 跨平台聚合，以及「账号池重建后仍保留 guards / routing / model_rename」均有回归用例。真实账号验证需要你在本地填入 Key；当前项目没有内置可用凭证。
 
 会话功能已通过普通 Chat 与 SSE 的真实联调：同一会话两次请求使用同一账号，输入 198、输出 31、合计 229 Token，归档下载与传输字节数一致。报告见 [session-live-test-2026-10-18.json](docs/session-live-test-2026-10-18.json)。模拟测试另外覆盖多账号固定、限流切换、状态续接隔离、并发、存储重启、加密校验、正文下载鉴权与分页。
 
@@ -713,9 +731,11 @@ go build -trimpath -o bin/gateway ./cmd/gateway
 
 真实联调可使用 `python3 scripts/live_test.py`，通过隐藏提示输入 Key，或由 `SENSENOVA_LIVE_KEY` 环境变量提供。加 `--images` 会实际生成和编辑图片并消耗相应用量。脚本启动临时本机网关，验证发现、各文本模型、三种协议、SSE、工具调用、图片理解、鉴权和记账，最后自动关闭进程。报告保存到 `docs/live-test-2026-10-17.json`，不保存凭证或下载生成图片。只有一个真实账号时，不将模拟多号测试表述为真实多号验证。
 
-状态默认每 5 秒保存，正常退出时再保存一次；异常断电可能丢失最后一个周期。单状态文件只支持一个进程，暂未实现分布式额度／并发控制。WebSocket 升级、CONNECT 和非 `/v1/` 控制台请求不在代理范围。请求体在内存中缓存，默认最多 32 MiB；流式响应最长 300 秒。模型和 quota 探测按账号依次进行，账号多或上游慢时实际刷新周期可能变长。管理端刷新是同步操作，应按账号数量设置客户端超时。
+状态默认每 5 秒保存，正常退出时再保存一次；异常断电可能丢失最后一个周期。单状态文件只支持一个进程，暂未实现分布式额度／并发控制。WebSocket 升级、CONNECT 和非 `/v1/` 控制台请求不在代理范围。请求体在内存中缓存，默认最多 32 MiB；单个请求的总预算由 `request_timeout_seconds` 决定（默认 300 秒，示例配置与桌面端为 600 秒），长回答需要客户端自己的读超时与之匹配（网关到期会记为 `timeout / upstream_timeout`，不再冒充上游断流）。模型和 quota 探测按账号依次进行，账号多或上游慢时实际刷新周期可能变长。管理端刷新是同步操作，应按账号数量设置客户端超时。
 
-项目结构：`cmd/gateway` 负责启动，`internal/provider` 负责平台适配（`internal/provider/workbuddy` 是 WorkBuddy/CodeBuddy 适配包，含三套客户端身份、模型目录快照与 token 刷新），`internal/pool` 负责调度、额度与每日护栏，`internal/gateway` 负责协议透传、管理 API 与请求流水线编排，`internal/observe` 是独立的响应观测层（用量统计、流式 TTFT/TPS、工具调用证据、标题收集与 SSE 脱敏恢复）。
+项目结构：`cmd/gateway` 负责启动（配置加载、信号处理、优雅停机），`internal/app` 把网关装配成可运行的服务与监听器（CLI 与桌面端共用），`internal/provider` 负责平台适配（`internal/provider/workbuddy` 是 WorkBuddy/CodeBuddy 适配包，含三套客户端身份、模型目录快照与 token 刷新），`internal/pool` 负责调度、额度与每日护栏（含 `model_rename` 跨平台聚合），`internal/gateway` 负责协议透传、管理 API 与请求流水线编排，`internal/observe` 是独立的响应观测层（用量统计、流式 TTFT/TPS、工具调用证据、标题收集与 SSE 脱敏恢复）。
+
+`desktop/` 是独立的 Go module（Wails v3 桌面壳，含 `internal/bootstrap` 的默认配置与 Keychain 集成），与主模块分开管理依赖；`scripts/*-desktop.sh` 负责编译、打包与以现有配置启动。`internal/gateway/stream_diagnostic.go` 集中处理流式失败的归类（客户端取消 / 网关超时 / 上游断流）与读取错误分类。
 
 `internal/accounts` 负责加密账号存储；管理台 HTML、CSS 和 JavaScript 位于 `internal/gateway/web`，通过 `go:embed` 内置到同一个可执行文件。
 
